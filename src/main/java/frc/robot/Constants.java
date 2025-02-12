@@ -64,6 +64,17 @@ public final class Constants {
     public static final boolean kGyroReversed = false;
   }
 
+  public static final class ArmConstants {
+    public static final int kCoralExtendCanId = 10;
+    public static final int kCoralAngleExtenderCanId = 11;
+    public static final int CoralCollectorCanId = 14;
+
+    public static final int AlgaeExtenderCanId = 12;
+    public static final int AlgaeCollectorCanId = 13;
+
+    public static final int HarpoonCanId = 15;
+  }
+
   public static final class ModuleConstants {
     // The MAXSwerve module can be configured with one of three pinion gears: 12T,
     // 13T, or 14T. This changes the drive speed of the module (a pinion gear with

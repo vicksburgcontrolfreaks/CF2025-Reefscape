@@ -7,7 +7,6 @@ package frc.robot;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.PS4Controller.Button;
 import frc.robot.Constants.OIConstants;
 import frc.robot.commands.AutoAlignCommand;
@@ -21,7 +20,11 @@ import frc.robot.subsystems.VisionSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+<<<<<<< HEAD
 import edu.wpi.first.wpilibj2.command.button.POVButton;
+=======
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+>>>>>>> 512c86de502886a3ca381b0a61be8afa07fe8489
 
 public class RobotContainer {
     // The robot's subsystems
@@ -29,12 +32,11 @@ public class RobotContainer {
     private final VisionSubsystem m_visionSubsystem = new VisionSubsystem();
     private final LocalizationSubsystem m_localizationSubsystem = new LocalizationSubsystem(m_robotDrive);
 
-
     // The driver's controller
     XboxController m_driverController = new XboxController(OIConstants.kDriverControllerPort);
 
     // Create a chooser for autonomous routines.
-    private final SendableChooser<Command> autoChooser = new SendableChooser<>();
+    public final SendableChooser<Command> autoChooser = new SendableChooser<>();
 
     public RobotContainer() {
         // Configure button bindings
@@ -66,6 +68,7 @@ public class RobotContainer {
         // (Optional) Add a "Do Nothing" option.
         autoChooser.addOption("No Auto", new RunCommand(() -> m_robotDrive.drive(0, 0, 0, false), m_robotDrive));
 
+        // for choosing autonomous mode
         SmartDashboard.putData("Auto Tuning Mode", autoChooser);
     }
 
