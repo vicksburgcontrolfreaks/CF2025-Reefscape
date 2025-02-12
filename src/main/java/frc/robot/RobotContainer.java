@@ -7,7 +7,6 @@ package frc.robot;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.PS4Controller.Button;
 import frc.robot.Constants.OIConstants;
 import frc.robot.commands.AutoAlignCommand;
@@ -20,28 +19,26 @@ import frc.robot.subsystems.VisionSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import frc.robot.subsystems.TelemetrySubsystem;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class RobotContainer {
     // The robot's subsystems
     private final DriveSubsystem m_robotDrive = new DriveSubsystem();
     private final VisionSubsystem m_visionSubsystem = new VisionSubsystem();
     private final LocalizationSubsystem m_localizationSubsystem = new LocalizationSubsystem(m_robotDrive, m_visionSubsystem);
-    
-    // Create a chooser for autonomous routines.
-    public final SendableChooser<Command> autoChooser = new SendableChooser<>();
-
-    // PUT ALL SMART DASHBOARD STUFF IN THIS TO KEEP STUFF ORGANIZED
-    // NOTE: edit the arguments to pass stuff through to the subsystem DO NOT MAKE IT PUBLIC MAINTAIN MEMORY INTEGRITY
-    private final TelemetrySubsystem m_telemetrySubsystem = new TelemetrySubsystem(m_visionSubsystem, autoChooser);
 
     // The driver's controller
     XboxController m_driverController = new XboxController(OIConstants.kDriverControllerPort);
 
+    // Create a chooser for autonomous routines.
+    public final SendableChooser<Command> autoChooser = new SendableChooser<>();
 
     public RobotContainer() {
         // Configure button bindings
         configureButtonBindings();
+
+        // Publish the VisionSubsystem to SmartDashboard for monitoring.
+        SmartDashboard.putData("Vision Subsystem", m_visionSubsystem);
 
         // Configure default teleop command: drive the robot
         m_robotDrive.setDefaultCommand(
@@ -66,8 +63,8 @@ public class RobotContainer {
         // (Optional) Add a "Do Nothing" option.
         autoChooser.addOption("No Auto", new RunCommand(() -> m_robotDrive.drive(0, 0, 0, false), m_robotDrive));
 
-        // PUT ALL SMART DASHBOARD STUFF IN THIS TO KEEP STUFF ORGANIZED
-        m_telemetrySubsystem.ConfigureDashboard();
+        // for choosing autonomous mode
+        SmartDashboard.putData("Auto Tuning Mode", autoChooser);
     }
 
     private void configureButtonBindings() {
