@@ -9,69 +9,55 @@ import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.DriveConstants;
-import frc.robot.LimelightHelpers; // Ensure this is the correct import based on your setup
 
 public class LocalizationSubsystem extends SubsystemBase {
     private final DriveSubsystem driveSubsystem;
-    private final VisionSubsystem visionSubsystem;
-    
-    // Pose estimator that fuses odometry and vision.
     private final SwerveDrivePoseEstimator poseEstimator;
+    private Pose2d capturedPose = null;  // Stores the locked-in pose for trajectory planning
 
-    public LocalizationSubsystem(DriveSubsystem driveSubsystem, VisionSubsystem visionSubsystem) {
+    public LocalizationSubsystem(DriveSubsystem driveSubsystem) {
         this.driveSubsystem = driveSubsystem;
-        this.visionSubsystem = visionSubsystem;
-        
-        // Initialize the pose estimator using:
-        // - Your robot's kinematics.
-        // - The current gyro reading (converted to a Rotation2d).
-        // - The current module positions from your drive subsystem.
-        // - An initial pose (here we assume (0,0,0), but you can set this as needed).
-        // - Standard deviations for the state and vision measurement.
         poseEstimator = new SwerveDrivePoseEstimator(
             DriveConstants.kDriveKinematics,
             Rotation2d.fromDegrees(driveSubsystem.getHeading()),
             driveSubsystem.getModulePositions(),
-            new Pose2d(), // initial pose; update as necessary
-            VecBuilder.fill(0.1, 0.1, 0.1), // State standard deviations [meters, meters, radians]
-            VecBuilder.fill(0.5, 0.5, 0.5)  // Vision measurement standard deviations [meters, meters, radians]
+            new Pose2d(), // initial pose; adjust if needed
+            VecBuilder.fill(0.1, 0.1, 0.1),   // state standard deviations [meters, meters, radians]
+            VecBuilder.fill(0.5, 0.5, 0.5)    // vision measurement standard deviations [meters, meters, radians]
         );
     }
 
     @Override
     public void periodic() {
-        // Update the pose estimator with the current odometry data.
-        // This uses the current gyro heading and module positions.
+        // Update odometry using the drive subsystem's sensor values.
         poseEstimator.update(
             Rotation2d.fromDegrees(driveSubsystem.getHeading()),
             driveSubsystem.getModulePositions()
         );
-        
-        // Retrieve vision-based pose estimate from MegaTag2 via LimelightHelpers.
-        LimelightHelpers.PoseEstimate visionEstimate = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight");
-        
-        // Use the vision measurement if at least one tag is detected.
-        if (visionEstimate.tagCount > 0) {
-            // Optionally: If the robot is turning very fast, you might want to ignore the vision update.
-            // For example:
-            // if (Math.abs(driveSubsystem.getTurnRate()) < someThreshold) { ... }
-            
-            // Feed the vision measurement into the estimator.
-            poseEstimator.addVisionMeasurement(visionEstimate.pose, visionEstimate.timestampSeconds);
-        }
-        
-        // Optionally publish the estimated pose to SmartDashboard for debugging.
+
+        // NOTE: Since MegaTag2 is not available with your current Limelight version,
+        // we are not fusing vision measurements here. In the future, if you have an
+        // alternative vision pipeline that provides a relative pose to an AprilTag,
+        // you could add that measurement here.
+
+        // Publish the estimated pose for debugging purposes.
         Pose2d estimatedPose = poseEstimator.getEstimatedPosition();
         SmartDashboard.putNumber("Estimated X", estimatedPose.getTranslation().getX());
         SmartDashboard.putNumber("Estimated Y", estimatedPose.getTranslation().getY());
         SmartDashboard.putNumber("Estimated Rotation", estimatedPose.getRotation().getDegrees());
     }
-    
+
     /**
-     * Returns the current estimated pose of the robot.
-     * This pose fuses both odometry and vision data.
+     * Call this method to capture the current pose as the starting pose for trajectory planning.
+     *
+     * @param currentPose The pose to capture.
      */
-    public Pose2d getEstimatedPose() {
-        return poseEstimator.getEstimatedPosition();
+    public void captureStartPose(Pose2d currentPose) {
+        this.capturedPose = currentPose;
+        SmartDashboard.putString("Captured Pose", currentPose.toString());
+    }
+
+    public Pose2d getCapturedPose() {
+        return capturedPose;
     }
 }

@@ -14,18 +14,20 @@ import frc.robot.commands.AutoAlignCommand;
 import frc.robot.commands.AutoTuneForwardCommand;
 import frc.robot.commands.AutoTuneLateralCommand;
 import frc.robot.commands.TrajectoryAutoCommand;
+import frc.robot.commands.TrajectoryToTagCommand;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.LocalizationSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import edu.wpi.first.wpilibj2.command.button.POVButton;
 
 public class RobotContainer {
     // The robot's subsystems
     private final DriveSubsystem m_robotDrive = new DriveSubsystem();
     private final VisionSubsystem m_visionSubsystem = new VisionSubsystem();
-    private final LocalizationSubsystem m_localizationSubsystem = new LocalizationSubsystem(m_robotDrive, m_visionSubsystem);
+    private final LocalizationSubsystem m_localizationSubsystem = new LocalizationSubsystem(m_robotDrive);
 
 
     // The driver's controller
@@ -72,8 +74,10 @@ public class RobotContainer {
                 .whileTrue(new RunCommand(() -> m_robotDrive.setX(), m_robotDrive));
 
         // Auto-align left when button 1 (A button) is held.
-        new JoystickButton(m_driverController, 1) // Replace 1 with the appropriate button value.
-                .whileTrue(new AutoAlignCommand(m_robotDrive, m_visionSubsystem, true));
+        POVButton dpadLeftButton = new POVButton(m_driverController, 270);
+
+        // Now bind a command to run when the D-pad left button is pressed:
+        dpadLeftButton.onTrue(new TrajectoryToTagCommand(m_robotDrive, m_visionSubsystem));
 
         // Auto-align right when button 2 (B button) is held.
         new JoystickButton(m_driverController, 2) // Replace 2 with the appropriate button value.
