@@ -7,6 +7,7 @@ package frc.robot;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.PS4Controller.Button;
 import frc.robot.Constants.OIConstants;
 import frc.robot.commands.AutoAlignCommand;
@@ -23,19 +24,20 @@ import frc.robot.subsystems.TelemetrySubsystem;
 
 public class RobotContainer {
     // The robot's subsystems
-    public final DriveSubsystem m_robotDrive = new DriveSubsystem();
-    public final VisionSubsystem m_visionSubsystem = new VisionSubsystem();
-    public final LocalizationSubsystem m_localizationSubsystem = new LocalizationSubsystem(m_robotDrive, m_visionSubsystem);
+    private final DriveSubsystem m_robotDrive = new DriveSubsystem();
+    private final VisionSubsystem m_visionSubsystem = new VisionSubsystem();
+    private final LocalizationSubsystem m_localizationSubsystem = new LocalizationSubsystem(m_robotDrive, m_visionSubsystem);
     
+    // Create a chooser for autonomous routines.
+    public final SendableChooser<Command> autoChooser = new SendableChooser<>();
+
     // PUT ALL SMART DASHBOARD STUFF IN THIS TO KEEP STUFF ORGANIZED
-    // NOTE: make stuff you want to log public
-    public final TelemetrySubsystem m_telemetrySubsystem = new TelemetrySubsystem();
+    // NOTE: edit the arguments to pass stuff through to the subsystem DO NOT MAKE IT PUBLIC MAINTAIN MEMORY INTEGRITY
+    private final TelemetrySubsystem m_telemetrySubsystem = new TelemetrySubsystem(m_visionSubsystem, autoChooser);
 
     // The driver's controller
     XboxController m_driverController = new XboxController(OIConstants.kDriverControllerPort);
 
-    // Create a chooser for autonomous routines.
-    public final SendableChooser<Command> autoChooser = new SendableChooser<>();
 
     public RobotContainer() {
         // Configure button bindings

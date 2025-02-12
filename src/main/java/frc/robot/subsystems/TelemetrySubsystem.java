@@ -1,18 +1,25 @@
 package frc.robot.subsystems;
 
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Robot;
 
 public class TelemetrySubsystem extends SubsystemBase {
 
-    public TelemetrySubsystem() {}
+    private VisionSubsystem Vision_Subsystem;
+    private SendableChooser<Command> Auto_Chooser;
+
+    public TelemetrySubsystem(VisionSubsystem visionsubsystem, SendableChooser<Command> autoChooser) {
+        this.Vision_Subsystem = visionsubsystem;
+        this.Auto_Chooser = autoChooser;
+    }
 
     public void ConfigureDashboard() {
 
         // Publish the VisionSubsystem to SmartDashboard for monitoring.
-        SmartDashboard.putData("Vision Subsystem", Robot.m_robotContainer.m_visionSubsystem);
+        SmartDashboard.putData("Vision Subsystem", Vision_Subsystem);
         // for choosing autonomous mode
-        SmartDashboard.putData("Auto Tuning Mode", Robot.m_robotContainer.autoChooser);
+        SmartDashboard.putData("Auto Tuning Mode", Auto_Chooser);
     }
 }
