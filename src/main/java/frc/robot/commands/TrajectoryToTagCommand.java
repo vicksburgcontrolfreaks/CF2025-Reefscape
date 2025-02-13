@@ -20,68 +20,75 @@ public class TrajectoryToTagCommand extends Command {
     private final DriveSubsystem driveSubsystem;
     private final VisionSubsystem visionSubsystem;
     private SwerveControllerCommand internalCommand;
-    private boolean validMeasurement = true; // Flag to indicate if an AprilTag was detected
+    private boolean validMeasurement = true;
+    private final boolean isLeft;  // True for left offset, false for right offset
 
-    public TrajectoryToTagCommand(DriveSubsystem driveSubsystem, VisionSubsystem visionSubsystem) {
+    /**
+     * Constructor for TrajectoryToTagCommand.
+     * @param driveSubsystem The drive subsystem.
+     * @param visionSubsystem The vision subsystem.
+     * @param isLeft If true, the destination is offset to the left; if false, to the right.
+     */
+    public TrajectoryToTagCommand(DriveSubsystem driveSubsystem, VisionSubsystem visionSubsystem, boolean isLeft) {
         this.driveSubsystem = driveSubsystem;
         this.visionSubsystem = visionSubsystem;
+        this.isLeft = isLeft;
         addRequirements(driveSubsystem);
     }
-
+    
     @Override
     public void initialize() {
         // 1. Get the current robot pose from odometry.
         Pose2d currentPose = driveSubsystem.getPose();
-
+        
         // 2. Retrieve the AprilTag's relative pose from the vision subsystem.
-        //    This method should return a Pose2d representing the tag's pose relative to the robot,
-        //    or null if no tag is detected.
         Pose2d tagRelativePose = visionSubsystem.getAprilTagPoseRelative();
-
-        // If no tag is detected, mark the measurement as invalid and exit.
         if (tagRelativePose == null) {
             validMeasurement = false;
             System.out.println("No AprilTag detected. Command will not move the robot.");
             return;
         }
         validMeasurement = true;
-
+        
         // 3. Convert the relative pose into a Transform2d.
         Transform2d relativeTransform = new Transform2d(new Pose2d(), tagRelativePose);
-
-        // 4. Calculate the tag's global pose using the current odometry.
-        Pose2d targetTagPose = currentPose.transformBy(relativeTransform);
-
-        // 5. Define the desired offset relative to the tag:
-        //    15 inches forward and 7 inches to the left.
-        //    Convert inches to meters: 15 in ≈ 0.381 m, 7 in ≈ 0.1778 m.
-        double offsetX = 15 * 0.0254; // ~0.381 m
-        double offsetY = 7 * 0.0254;  // ~0.1778 m
+        
+        // 4. Compute the tag's global pose by applying the relative transform to the current pose.
+        Pose2d tagGlobalPose = currentPose.transformBy(relativeTransform);
+        
+        // 5. Define the desired offset:
+        //    1 inch forward always, and 7 inches to the left if isLeft is true, or 7 inches to the right if false.
+        double offsetX = 15 * 0.0254;   // 1 inch in meters (≈ 0.0254 m)
+        double offsetY = 7 * 0.0254;   // 7 inches in meters (≈ 0.1778 m)
+        // Adjust lateral offset based on isLeft. Positive offsetY means to the left.
+        if (!isLeft) {
+            offsetY = -offsetY;
+        }
         Pose2d offsetPose = new Pose2d(offsetX, offsetY, new Rotation2d(0));
-
-        // 6. Calculate the destination pose by applying the offset relative to the tag's global pose.
-        Pose2d destinationPose = targetTagPose.transformBy(new Transform2d(new Pose2d(), offsetPose));
-
+        
+        // 6. Compute the destination pose by applying the offset relative to the tag's global pose.
+        Pose2d destinationPose = tagGlobalPose.transformBy(new Transform2d(new Pose2d(), offsetPose));
+        
         // 7. Create a trajectory configuration.
         TrajectoryConfig config = new TrajectoryConfig(
             Constants.AutoConstants.kMaxSpeedMetersPerSecond,
             Constants.AutoConstants.kMaxAccelerationMetersPerSecondSquared)
             .setKinematics(Constants.DriveConstants.kDriveKinematics);
-
+        
         // 8. Generate a trajectory from the current pose to the destination pose.
         Trajectory trajectory = TrajectoryGenerator.generateTrajectory(
             currentPose,
-            List.of(),  // No intermediate waypoints.
+            List.of(),  // Optionally, add intermediate waypoints if needed.
             destinationPose,
             config
         );
-
+        
         // 9. Create a theta controller for rotational control.
         var thetaController = new ProfiledPIDController(
             Constants.AutoConstants.kPThetaController, 0, 0, Constants.AutoConstants.kThetaControllerConstraints);
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
-
-        // 10. Create the internal SwerveControllerCommand to follow the trajectory.
+        
+        // 10. Create the SwerveControllerCommand to follow the trajectory.
         internalCommand = new SwerveControllerCommand(
             trajectory,
             driveSubsystem::getPose,                    // Supplier for current pose.
@@ -89,42 +96,40 @@ public class TrajectoryToTagCommand extends Command {
             new PIDController(Constants.AutoConstants.kPXController, 0, 0),
             new PIDController(Constants.AutoConstants.kPYController, 0, 0),
             thetaController,
-            driveSubsystem::setModuleStates,            // Function to set the module states.
+            driveSubsystem::setModuleStates,            // Function to set module states.
             driveSubsystem
         );
-
-        // 11. Reset odometry to the starting pose.
+        
+        // 11. Reset odometry to the starting pose for accurate tracking.
         driveSubsystem.resetOdometry(currentPose);
-
-        // 12. Initialize the internal command.
+        
+        // 12. Initialize the internal trajectory-following command.
         internalCommand.initialize();
     }
-
+    
     @Override
     public void execute() {
         if (validMeasurement && internalCommand != null) {
             internalCommand.execute();
         }
     }
-
+    
     @Override
     public boolean isFinished() {
-        // If no valid measurement was obtained, finish immediately.
         if (!validMeasurement) {
             return true;
         }
         return internalCommand.isFinished();
     }
-
+    
     @Override
     public void end(boolean interrupted) {
         if (validMeasurement && internalCommand != null) {
             internalCommand.end(interrupted);
         }
-        // Ensure the drivetrain is stopped.
         driveSubsystem.drive(0, 0, 0, false);
     }
-
+    
     @Override
     public String getName() {
         return "TrajectoryToTagCommand";

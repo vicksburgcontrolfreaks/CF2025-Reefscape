@@ -17,9 +17,8 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.ADIS16470_IMU;
 import edu.wpi.first.wpilibj.ADIS16470_IMU.IMUAxis;
 import frc.robot.Constants.DriveConstants;
+import frc.robot.CurrentMonitor;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.LimelightHelpers;
-
 
 public class DriveSubsystem extends SubsystemBase {
   // Create MAXSwerveModules
@@ -43,8 +42,27 @@ public class DriveSubsystem extends SubsystemBase {
       DriveConstants.kRearRightTurningCanId,
       DriveConstants.kBackRightChassisAngularOffset);
 
+      // Field oriented flag; true = field-oriented, false = robot-oriented.
+    private boolean m_fieldOriented = true;
+
+    // Method to toggle the drive mode.
+    public void toggleFieldOriented() {
+        m_fieldOriented = !m_fieldOriented;
+        // Optionally, log the new mode.
+        System.out.println("Field Oriented mode: " + m_fieldOriented);
+    }
+
+    // Getter for the drive mode.
+    public boolean isFieldOriented() {
+        return m_fieldOriented;
+    }
+
   // The gyro sensor
   private final ADIS16470_IMU m_gyro = new ADIS16470_IMU();
+
+  // In DriveSubsystem.java
+  private final CurrentMonitor m_currentMonitor = new CurrentMonitor(m_frontLeft, m_frontRight, m_rearLeft,
+      m_rearRight);
 
   // Odometry class for tracking robot pose
   SwerveDriveOdometry m_odometry = new SwerveDriveOdometry(
@@ -74,10 +92,8 @@ public class DriveSubsystem extends SubsystemBase {
             m_rearLeft.getPosition(),
             m_rearRight.getPosition()
         });
-    // Update Limelight orientation using the current gyro heading.
-    // Assuming you have imported LimelightHelpers.
-    // getHeading() returns the current robot heading in degrees.
-    LimelightHelpers.SetRobotOrientation("limelight", getHeading(), 0, 0, 0, 0, 0);
+
+        m_currentMonitor.update();
   }
 
   /**
@@ -116,13 +132,16 @@ public class DriveSubsystem extends SubsystemBase {
    *                      field.
    */
   public void drive(double xSpeed, double ySpeed, double rot, boolean fieldRelative) {
-    // Convert the commanded speeds into the correct units for the drivetrain
+    // Here, instead of using the passed fieldRelative parameter,
+    // we use the m_fieldOriented flag.
+    boolean useFieldRelative = m_fieldOriented;
+    
     double xSpeedDelivered = xSpeed * DriveConstants.kMaxSpeedMetersPerSecond;
     double ySpeedDelivered = ySpeed * DriveConstants.kMaxSpeedMetersPerSecond;
     double rotDelivered = rot * DriveConstants.kMaxAngularSpeed;
 
     var swerveModuleStates = DriveConstants.kDriveKinematics.toSwerveModuleStates(
-        fieldRelative
+        useFieldRelative
             ? ChassisSpeeds.fromFieldRelativeSpeeds(xSpeedDelivered, ySpeedDelivered, rotDelivered,
                 Rotation2d.fromDegrees(m_gyro.getAngle(IMUAxis.kZ)))
             : new ChassisSpeeds(xSpeedDelivered, ySpeedDelivered, rotDelivered));
@@ -132,7 +151,7 @@ public class DriveSubsystem extends SubsystemBase {
     m_frontRight.setDesiredState(swerveModuleStates[1]);
     m_rearLeft.setDesiredState(swerveModuleStates[2]);
     m_rearRight.setDesiredState(swerveModuleStates[3]);
-  }
+}
 
   /**
    * Sets the wheels into an X formation to prevent movement.
@@ -196,6 +215,6 @@ public class DriveSubsystem extends SubsystemBase {
         m_rearLeft.getPosition(),
         m_rearRight.getPosition()
     };
-}
+  }
 
 }

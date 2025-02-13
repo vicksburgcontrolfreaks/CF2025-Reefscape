@@ -9,55 +9,45 @@ import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.DriveConstants;
+import frc.robot.LimelightHelpers;
 
 public class LocalizationSubsystem extends SubsystemBase {
     private final DriveSubsystem driveSubsystem;
     private final SwerveDrivePoseEstimator poseEstimator;
-    private Pose2d capturedPose = null;  // Stores the locked-in pose for trajectory planning
+    private Pose2d capturedPose = null; // Stores the locked-in pose for trajectory planning
 
     public LocalizationSubsystem(DriveSubsystem driveSubsystem) {
         this.driveSubsystem = driveSubsystem;
         poseEstimator = new SwerveDrivePoseEstimator(
-            DriveConstants.kDriveKinematics,
-            Rotation2d.fromDegrees(driveSubsystem.getHeading()),
-            driveSubsystem.getModulePositions(),
-            new Pose2d(), // initial pose; adjust if needed
-            VecBuilder.fill(0.1, 0.1, 0.1),   // state standard deviations [meters, meters, radians]
-            VecBuilder.fill(0.5, 0.5, 0.5)    // vision measurement standard deviations [meters, meters, radians]
+                DriveConstants.kDriveKinematics,
+                Rotation2d.fromDegrees(driveSubsystem.getHeading()),
+                driveSubsystem.getModulePositions(),
+                new Pose2d(), // initial pose; adjust if needed
+                VecBuilder.fill(0.1, 0.1, 0.1), // state standard deviations [meters, meters, radians]
+                VecBuilder.fill(0.5, 0.5, 0.5) // vision measurement standard deviations [meters, meters, radians]
         );
     }
 
     @Override
     public void periodic() {
+        // Set the Limelight to use its integrated IMU for MegaTag2 localization.
+        LimelightHelpers.SetIMUMode("limelight", 2);
+
         // Update odometry using the drive subsystem's sensor values.
         poseEstimator.update(
-            Rotation2d.fromDegrees(driveSubsystem.getHeading()),
-            driveSubsystem.getModulePositions()
-        );
+                Rotation2d.fromDegrees(driveSubsystem.getHeading()),
+                driveSubsystem.getModulePositions());
 
-        // NOTE: Since MegaTag2 is not available with your current Limelight version,
-        // we are not fusing vision measurements here. In the future, if you have an
-        // alternative vision pipeline that provides a relative pose to an AprilTag,
-        // you could add that measurement here.
+        // Retrieve the MegaTag2 vision estimate.
+        LimelightHelpers.PoseEstimate mt2Estimate = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight");
+        if (mt2Estimate.tagCount > 0) {
+            poseEstimator.addVisionMeasurement(mt2Estimate.pose, mt2Estimate.timestampSeconds);
+        }
 
-        // Publish the estimated pose for debugging purposes.
+        // Publish the estimated pose for debugging.
         Pose2d estimatedPose = poseEstimator.getEstimatedPosition();
         SmartDashboard.putNumber("Estimated X", estimatedPose.getTranslation().getX());
         SmartDashboard.putNumber("Estimated Y", estimatedPose.getTranslation().getY());
         SmartDashboard.putNumber("Estimated Rotation", estimatedPose.getRotation().getDegrees());
-    }
-
-    /**
-     * Call this method to capture the current pose as the starting pose for trajectory planning.
-     *
-     * @param currentPose The pose to capture.
-     */
-    public void captureStartPose(Pose2d currentPose) {
-        this.capturedPose = currentPose;
-        SmartDashboard.putString("Captured Pose", currentPose.toString());
-    }
-
-    public Pose2d getCapturedPose() {
-        return capturedPose;
     }
 }

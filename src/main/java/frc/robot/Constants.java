@@ -116,7 +116,7 @@ public final class Constants {
 
     // PID gains for forward (distance) and lateral control (tuning these is
     // necessary).
-    public static final double kPForward = 0.05; // Example value; adjust by testing
+    public static final double kPForward = 0.5; // Example value; adjust by testing
     public static final double kPLateral = 0.05; // Example value; adjust by testing
 
     // APRIL TAG: The desired target area when the robot is at the correct distance.
