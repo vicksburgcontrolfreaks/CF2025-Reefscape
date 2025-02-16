@@ -1,24 +1,23 @@
 package frc.robot.commands;
 
-//import com.pathplanner.lib.PathPlanner;
 import frc.robot.subsystems.CoralArmSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
 
 
-public class raiseCoralArm extends Command {
+public class releaseCoralCmd extends Command {
     private final CoralArmSubsystem armSubsystem;
 
-    private final int position;
+    private final double speed;
 
-    public raiseCoralArm(CoralArmSubsystem armSubsystem, int position) {
+    public releaseCoralCmd(CoralArmSubsystem armSubsystem, double speed) {
         this.armSubsystem = armSubsystem;
-        this.position = position;
+        this.speed = speed;
         addRequirements(armSubsystem); // Ensures that the arm subsystem is required for this command
     }
 
     @Override
     public void execute() {
-        armSubsystem.moveArm(position);
+        //armSubsystem.moveArm(speed);
     }
 
     @Override
