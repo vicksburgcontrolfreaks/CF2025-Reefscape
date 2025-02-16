@@ -11,12 +11,16 @@ import frc.robot.autonomous.OscillateDistanceCommand;
 import frc.robot.commands.TrajectoryAutoCommand;
 import frc.robot.commands.TrajectoryToTagCommand;
 import frc.robot.commands.raiseCoralArm;
+import frc.robot.commands.releaseCoralCmd;
+
 import frc.robot.subsystems.CoralArmSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.LocalizationSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
 import frc.robot.subsystems.AlgaeCollectorSubsystem;
 import frc.robot.subsystems.AlgaeExtenderSubsystem;
+import frc.robot.subsystems.HarpoonSubsystem;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
@@ -30,6 +34,7 @@ public class RobotContainer {
    private final DriveSubsystem m_robotDrive = new DriveSubsystem();
    private final AlgaeCollectorSubsystem m_algaeCollector = new AlgaeCollectorSubsystem();
    private final AlgaeExtenderSubsystem m_algaeExtender = new AlgaeExtenderSubsystem();
+   private final HarpoonSubsystem m_harpoon = new HarpoonSubsystem();
    private final VisionSubsystem m_visionSubsystem = new VisionSubsystem();
    private final LocalizationSubsystem m_localizationSubsystem = new LocalizationSubsystem(m_robotDrive);
    private final CoralArmSubsystem m_coralArmSubsystem = new CoralArmSubsystem();
@@ -88,40 +93,42 @@ public class RobotContainer {
       new JoystickButton(m_driverController, Button.kR1.value)
          .whileTrue(new RunCommand(() -> m_robotDrive.setX(), m_robotDrive));
 
-         POVButton dpadLeftButton = new POVButton(m_driverController, 270);
-         POVButton dpadUpButton = new POVButton(m_driverController, 0);
-         POVButton dpadRightButton = new POVButton(m_driverController, 90);
-         POVButton dpadDownButton = new POVButton(m_driverController, 180);
+      POVButton dpadLeftButton = new POVButton(m_driverController, 270);
+      POVButton dpadUpButton = new POVButton(m_driverController, 0);
+      POVButton dpadRightButton = new POVButton(m_driverController, 90);
+      POVButton dpadDownButton = new POVButton(m_driverController, 180);
 
-         // Auto-align to April tag with driver controller.
-         dpadLeftButton.onTrue(new TrajectoryToTagCommand(m_robotDrive, m_visionSubsystem, true));
-         dpadRightButton.onTrue(new TrajectoryToTagCommand(m_robotDrive, m_visionSubsystem, false));
-         dpadDownButton.onTrue(new InstantCommand(m_robotDrive::toggleFieldOriented, m_robotDrive));
+      // Auto-align to April tag with driver controller.
+      dpadLeftButton.onTrue(new TrajectoryToTagCommand(m_robotDrive, m_visionSubsystem, true));
+      dpadRightButton.onTrue(new TrajectoryToTagCommand(m_robotDrive, m_visionSubsystem, false));
+      dpadDownButton.onTrue(new InstantCommand(m_robotDrive::toggleFieldOriented, m_robotDrive));
 
-         // ********************************* Mech controller ************************************************
-         new JoystickButton(m_mechanismController, XboxController.Button.kA.value)
-            .whileTrue(new RunCommand(() -> {
-               m_algaeCollector.moveArm(0.5);}, m_algaeCollector))  // Start the collector
-               .whileFalse(new InstantCommand(() -> m_algaeCollector.stopArm(), m_algaeCollector)); // Stop when released
+      // ********************************* Mech controller ************************************************
+      new JoystickButton(m_mechanismController, XboxController.Button.kA.value)
+         .whileTrue(new RunCommand(() -> {
+            m_algaeCollector.moveArm(0.5);}, m_algaeCollector))  // Start the collector
+            .whileFalse(new InstantCommand(() -> m_algaeCollector.stopArm(), m_algaeCollector)); // Stop when released
 
-         new JoystickButton(m_mechanismController, XboxController.Button.kX.value)
-            .whileTrue(new RunCommand(() -> {
-               m_algaeExtender.moveArm(m_algaeExtender.getInitPos()+10);}, m_algaeExtender)); 
+      new JoystickButton(m_mechanismController, XboxController.Button.kX.value)
+         .whileTrue(new RunCommand(() -> {
+            m_algaeExtender.moveArm(m_algaeExtender.getInitPos()+10);}, m_algaeExtender)); 
 
-         new JoystickButton(m_mechanismController, XboxController.Button.kY.value)
-            .whileTrue(new RunCommand(() -> {
-               m_algaeExtender.moveArm(m_algaeExtender.getInitPos());}, m_algaeExtender)); 
+      new JoystickButton(m_mechanismController, XboxController.Button.kY.value)
+         .whileTrue(new RunCommand(() -> {
+            m_algaeExtender.moveArm(m_algaeExtender.getInitPos());}, m_algaeExtender)); 
 
-         POVButton mech_padLeftButton = new POVButton(m_mechanismController, 270);
-         POVButton mech_dpadUpButton = new POVButton(m_mechanismController, 0);
-         POVButton mech_dpadRightButton = new POVButton(m_mechanismController, 90);
-         POVButton mech_dpadDownButton = new POVButton(m_mechanismController, 180);
+      POVButton mech_padLeftButton   = new POVButton(m_mechanismController, 270);
+      POVButton mech_dpadUpButton    = new POVButton(m_mechanismController, 0);
+      POVButton mech_dpadRightButton = new POVButton(m_mechanismController, 90);
+      POVButton mech_dpadDownButton  = new POVButton(m_mechanismController, 180);
 
-         // Coral Arm
-         // Bind D-pad up to raise the arm. Positive speed to raise.
-         mech_dpadUpButton.whileTrue(new raiseCoralArm(m_coralArmSubsystem, 0.05));
-         // Bind D-pad down to lower the arm. Negative speed to lower.
-         mech_dpadDownButton.whileTrue(new raiseCoralArm(m_coralArmSubsystem, -0.05));
+      // Coral Arm
+      // Bind D-pad up to raise the arm. Positive speed to raise.
+      mech_dpadUpButton.whileTrue(new raiseCoralArm(m_coralArmSubsystem, 2));
+      // Bind D-pad down to lower the arm. Negative speed to lower.
+      mech_dpadDownButton.whileTrue(new raiseCoralArm(m_coralArmSubsystem, 1));
+      // Bind D-pad right to the release coral sequence
+      mech_dpadRightButton.whileTrue(new releaseCoralCmd(m_coralArmSubsystem, 0));
    }
 
    /**

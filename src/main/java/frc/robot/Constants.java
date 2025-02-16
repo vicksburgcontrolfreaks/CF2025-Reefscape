@@ -11,15 +11,12 @@ import edu.wpi.first.math.util.Units;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide
- * numerical or boolean
- * constants. This class should not be used for any other purpose. All constants
- * should be declared
- * globally (i.e. public static). Do not put anything functional in this class.
+ * numerical or boolean constants. This class should not be used for any other 
+ * purpose. All constants should be declared globally (i.e. public static). 
+ * Do not put anything functional in this class.
  *
- * <p>
  * It is advised to statically import this class (or one of its inner classes)
- * wherever the
- * constants are needed, to reduce verbosity.
+ * wherever the constants are needed, to reduce verbosity.
  */
 public final class Constants {
   public static final double TEAM_NUMBER = 8126;
@@ -73,6 +70,28 @@ public final class Constants {
     public static final int AlgaeCollectorCanId = 13;
 
     public static final int HarpoonCanId = 15;
+
+    public static final int TGT_INIT = 0; //enumeration do not change
+    public static final int TGT_LOW  = 1; //enumeration do not change
+    public static final int TGT_MID  = 2; //enumeration do not change
+    public static final int TGT_HIGH = 3; //enumeration do not change
+
+    // Coral Extender
+    public static final double lowTgtHeight  =  3.0; //target offset from init
+    public static final double midTgtHeight  =  7.0; //target offset from init
+    public static final double highTgtHeight = 10.0; //target offset from init
+
+    public static final double CE_PGain = 0.02;
+    public static final double CE_MAX   = 0.40;
+
+    // Coral Arm Angle 
+    public static final double lowTgtAngle  =  3.0; //target offset from init
+    public static final double midTgtAngle  =  7.0; //target offset from init
+    public static final double highTgtAngle = 10.0; //target offset from init
+
+    public static final double CA_PGain = 0.01;
+    public static final double CA_IGain = 0.0003;
+    public static final double CA_MAX   = 0.40;
   }
 
   public static final class ModuleConstants {

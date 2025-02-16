@@ -11,24 +11,24 @@ import frc.robot.Constants.ArmConstants;
 
 public class AlgaeCollectorSubsystem extends SubsystemBase {
 
-    private final SparkMax m_algaeCollector;
+   private final SparkMax m_algaeCollector;
 
-    public AlgaeCollectorSubsystem() {
-        m_algaeCollector = new SparkMax(ArmConstants.AlgaeCollectorCanId, MotorType.kBrushless);
-    }
+   public AlgaeCollectorSubsystem() {
+      m_algaeCollector = new SparkMax(ArmConstants.AlgaeCollectorCanId, MotorType.kBrushless);
+   }
 
-    public void moveArm(double speed) {
-        m_algaeCollector.set(speed);
-         SmartDashboard.putNumber("aC",speed);
-    }
+   public void moveArm(double speed) {
+      m_algaeCollector.set(speed);
+      SmartDashboard.putNumber("AC",speed);
+   }
 
-    public void stopArm() {
-        m_algaeCollector.stopMotor();
-    }
+   public void stopArm() {
+      m_algaeCollector.stopMotor();
+   }
 
-    @Override
-    public void periodic() {
-        // This method will be called once per scheduler run
-        // You can use it for telemetry, diagnostics, etc.
-    }
+   @Override
+   public void periodic() {
+      // This method will be called once per scheduler run
+      // You can use it for telemetry, diagnostics, etc.
+   }
 }
