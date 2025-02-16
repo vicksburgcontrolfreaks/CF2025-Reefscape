@@ -84,7 +84,7 @@ public final class Constants {
     // Calculations required for driving motor conversion factors and feed forward
     // public static final double kDrivingMotorFreeSpeedRps =
     // NeoMotorConstants.kFreeSpeedRpm / 60;
-    public static final double kDrivingMotorFreeSpeedRps = NeoVortexMotorConstants.kFreeSpeedRpm / 60; 
+    public static final double kDrivingMotorFreeSpeedRps = NeoVortexMotorConstants.kFreeSpeedRpm / 60;
 
     public static final double kWheelDiameterMeters = 0.0762; // 3in
     public static final double kWheelCircumferenceMeters = kWheelDiameterMeters * Math.PI;
@@ -98,11 +98,12 @@ public final class Constants {
   public static final class OIConstants {
     public static final int kDriverControllerPort = 0;
     public static final double kDriveDeadband = 0.05;
+    public static final int kMechanismControllerPort = 1;
   }
 
   public static final class AutoConstants {
-    public static final double kMaxSpeedMetersPerSecond = 3;
-    public static final double kMaxAccelerationMetersPerSecondSquared = 3;
+    public static final double kMaxSpeedMetersPerSecond = 1.5;
+    public static final double kMaxAccelerationMetersPerSecondSquared = 1.5;
     public static final double kMaxAngularSpeedRadiansPerSecond = Math.PI;
     public static final double kMaxAngularSpeedRadiansPerSecondSquared = Math.PI;
 

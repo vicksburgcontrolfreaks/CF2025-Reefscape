@@ -16,6 +16,8 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.ADIS16470_IMU;
 import edu.wpi.first.wpilibj.ADIS16470_IMU.IMUAxis;
+import edu.wpi.first.wpilibj.BuiltInAccelerometer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.CurrentMonitor;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -42,23 +44,48 @@ public class DriveSubsystem extends SubsystemBase {
       DriveConstants.kRearRightTurningCanId,
       DriveConstants.kBackRightChassisAngularOffset);
 
-      // Field oriented flag; true = field-oriented, false = robot-oriented.
-    private boolean m_fieldOriented = true;
+  // Field oriented flag; true = field-oriented, false = robot-oriented.
+  private boolean m_fieldOriented = true;
 
-    // Method to toggle the drive mode.
-    public void toggleFieldOriented() {
-        m_fieldOriented = !m_fieldOriented;
-        // Optionally, log the new mode.
-        System.out.println("Field Oriented mode: " + m_fieldOriented);
-    }
+  // Method to toggle the drive mode.
+  public void toggleFieldOriented() {
+    m_fieldOriented = !m_fieldOriented;
+    // Optionally, log the new mode.
+    System.out.println("Field Oriented mode: " + m_fieldOriented);
+  }
 
-    // Getter for the drive mode.
-    public boolean isFieldOriented() {
-        return m_fieldOriented;
-    }
+  // Getter for the drive mode.
+  public boolean isFieldOriented() {
+    return m_fieldOriented;
+  }
 
   // The gyro sensor
   private final ADIS16470_IMU m_gyro = new ADIS16470_IMU();
+  // Instantiate the built-in accelerometer.
+  private final BuiltInAccelerometer m_accel = new BuiltInAccelerometer();
+
+  /**
+     * Checks for a collision based on accelerometer readings.
+     * This method returns true if the acceleration in any axis exceeds the threshold (in g's).
+     */
+    public boolean isCollisionDetected() {
+        // Set a threshold in g's (for example, 3g).
+        double thresholdG = 3.0;
+        // Read accelerometer values (BuiltInAccelerometer returns values in g).
+        double accelX = m_accel.getX();
+        double accelY = m_accel.getY();
+        double accelZ = m_accel.getZ();
+        
+        // Optionally, publish these values for debugging.
+        SmartDashboard.putNumber("Accel X (g)", accelX);
+        SmartDashboard.putNumber("Accel Y (g)", accelY);
+        SmartDashboard.putNumber("Accel Z (g)", accelZ);
+
+        // If any axis exceeds the threshold, consider it a collision.
+        return (Math.abs(accelX) > thresholdG ||
+                Math.abs(accelY) > thresholdG ||
+                Math.abs(accelZ) > thresholdG);
+    }
 
   // In DriveSubsystem.java
   private final CurrentMonitor m_currentMonitor = new CurrentMonitor(m_frontLeft, m_frontRight, m_rearLeft,
@@ -93,7 +120,9 @@ public class DriveSubsystem extends SubsystemBase {
             m_rearRight.getPosition()
         });
 
-        m_currentMonitor.update();
+    m_currentMonitor.update();
+    SmartDashboard.putBoolean("Collision Detected", isCollisionDetected());
+
   }
 
   /**
@@ -135,7 +164,7 @@ public class DriveSubsystem extends SubsystemBase {
     // Here, instead of using the passed fieldRelative parameter,
     // we use the m_fieldOriented flag.
     boolean useFieldRelative = m_fieldOriented;
-    
+
     double xSpeedDelivered = xSpeed * DriveConstants.kMaxSpeedMetersPerSecond;
     double ySpeedDelivered = ySpeed * DriveConstants.kMaxSpeedMetersPerSecond;
     double rotDelivered = rot * DriveConstants.kMaxAngularSpeed;
@@ -151,7 +180,7 @@ public class DriveSubsystem extends SubsystemBase {
     m_frontRight.setDesiredState(swerveModuleStates[1]);
     m_rearLeft.setDesiredState(swerveModuleStates[2]);
     m_rearRight.setDesiredState(swerveModuleStates[3]);
-}
+  }
 
   /**
    * Sets the wheels into an X formation to prevent movement.
