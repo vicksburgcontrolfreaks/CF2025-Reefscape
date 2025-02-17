@@ -1,4 +1,5 @@
-// File: ScoreCoralDriveCommand.java
+// On command by the mech operator, this commend drives to the nearest reef scoring position based on visible
+// AprilTag. The offset position from the AprilTag is preprogrammed in the ReefscapeTargetPoses class. 
 package frc.robot.commands;
 
 import edu.wpi.first.math.controller.PIDController;

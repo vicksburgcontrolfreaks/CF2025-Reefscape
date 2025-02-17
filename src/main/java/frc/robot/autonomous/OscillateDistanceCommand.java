@@ -9,75 +9,78 @@ import frc.robot.subsystems.DriveSubsystem;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class OscillateDistanceCommand extends Command {
-    private final DriveSubsystem driveSubsystem;
-    private final PIDController pid;
-    private Pose2d initialPose;
-    private double currentSetpoint;
-    private final double oscillationDistance = 2.0; // in meters
+    private final DriveSubsystem m_driveSubsystem;
+    private final PIDController m_pid;
+    private Pose2d m_initialPose;
+    private double m_currentSetpoint;
+    private double m_tolerance = 0.05; //meters
+    private final double m_oscillationDistance = 2.0; // in meters
+    private boolean m_movingForward; // true when moving toward m_initialPose + 2.0, false when moving back
 
     /**
      * Creates a command that oscillates the robot between its starting x‑position
-     * and a point 2 meters ahead. The proportional gain (kP) is read from SmartDashboard.
+     * and a point 2 meters ahead.
      *
      * @param driveSubsystem The drive subsystem used to control the robot.
      */
     public OscillateDistanceCommand(DriveSubsystem driveSubsystem) {
-        this.driveSubsystem = driveSubsystem;
-        // Initialize the PID controller with an initial kP value.
+        m_driveSubsystem = driveSubsystem;
+        // Get the initial kP value from SmartDashboard
         double initialKp = SmartDashboard.getNumber("Test kP", 0.05);
-        pid = new PIDController(initialKp, 0, 0);
-        addRequirements(driveSubsystem);
+        m_pid = new PIDController(initialKp, 0, 0);
+        addRequirements(m_driveSubsystem);
     }
 
     @Override
     public void initialize() {
-        // Capture the initial pose when the command starts.
-        initialPose = driveSubsystem.getPose();
-        // Set the initial setpoint to be 2 meters ahead of the initial x position.
-        currentSetpoint = initialPose.getTranslation().getX() + oscillationDistance;
-        pid.reset();
-        pid.setSetpoint(currentSetpoint);
+        // Capture the starting pose.
+        m_initialPose = m_driveSubsystem.getPose();
+        // Set initial target to 2m ahead.
+        m_currentSetpoint = m_initialPose.getTranslation().getX() + m_oscillationDistance;
+        m_pid.reset();
+        m_pid.setSetpoint(m_currentSetpoint);
+        m_movingForward = true;
     }
 
     @Override
     public void execute() {
-        // Optionally update kP dynamically from SmartDashboard.
+        // Update kP dynamically from SmartDashboard.
         double kP = SmartDashboard.getNumber("Test kP", 0.05);
-        pid.setP(kP);
+        m_pid.setP(kP);
 
-        // Get the current x-coordinate from odometry.
-        double currentX = driveSubsystem.getPose().getTranslation().getX();
-        double output = pid.calculate(currentX, currentSetpoint);
+        // Get the current X position.
+        double currentX = m_driveSubsystem.getPose().getTranslation().getX();
+        double output = m_pid.calculate(currentX, m_currentSetpoint);
+        // Command the drive subsystem along the X direction.
+        m_driveSubsystem.drive(output, 0, 0, true);
 
-        // Command the drive subsystem to drive forward/backward.
-        // Here, we command only x-direction speed (y=0 and rotation=0).
-        driveSubsystem.drive(output, 0, 0, true);
-
-        // Check if the error is small enough to toggle the setpoint.
-        double error = Math.abs(currentSetpoint - currentX);
-        if (error < 0.1) { // Threshold in meters; adjust as needed.
-            // Toggle the setpoint:
-            double initialX = initialPose.getTranslation().getX();
-            if (Math.abs(currentSetpoint - (initialX + oscillationDistance)) < 0.01) {
-                // If currently set to forward (initial + 2.0 m), set target back to initial.
-                currentSetpoint = initialX;
+        // Check if the error is small enough to toggle.
+        double error = Math.abs(m_currentSetpoint - currentX);
+        if (error < m_tolerance) {
+            // Toggle direction.
+            if (m_movingForward) {
+                m_currentSetpoint = m_initialPose.getTranslation().getX();
+                m_movingForward = false;
             } else {
-                // Otherwise, set target to initial + 2.0 m.
-                currentSetpoint = initialX + oscillationDistance;
+                m_currentSetpoint = m_initialPose.getTranslation().getX() + m_oscillationDistance;
+                m_movingForward = true;
             }
-            pid.setSetpoint(currentSetpoint);
+            m_pid.setSetpoint(m_currentSetpoint);
         }
+
+        // Publish diagnostic information.
+        SmartDashboard.putNumber("Oscillate Error", error);
+        SmartDashboard.putNumber("Oscillate Setpoint", m_currentSetpoint);
     }
 
     @Override
     public boolean isFinished() {
-        // Run indefinitely until manually cancelled.
-        return false;
+        return false; // Run indefinitely until cancelled.
     }
 
     @Override
     public void end(boolean interrupted) {
         // Stop the robot when the command ends.
-        driveSubsystem.drive(0, 0, 0, false);
+        m_driveSubsystem.drive(0, 0, 0, false);
     }
 }

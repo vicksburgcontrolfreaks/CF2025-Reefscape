@@ -1,0 +1,167 @@
+/* I have these two classes for actuating a mechanism with two motors. One motor extends and retracts, 
+the other motor is attached to wheels on a shaft for engaging with a game element. I would like to write 
+a command that extends to a position (motor encoder value of 50) and starts the wheels for collection. 
+I want to run those wheels until there is a current spike, indicating that the wheels have stopped 
+because the game piece is collected. Then the wheels will stop and hold their position to retain the 
+game piece. I then want a second command that spins the wheels in the opposite direction for about 
+500ms, and then retract the mechanism to its original position (0). I will bind each of the commands 
+to mech controller buttons Y (collect) and A (deliver)
+Reasoned for 35 seconds
+Below is one way to implement your two new commands – one for collecting (extending and running the 
+collector until a current spike is detected) and one for delivering (reversing the collector for 500 ms 
+and then retracting the arm). These commands use your two subsystems:
+
+AlgaeExtenderSubsystem: Controls the extension mechanism. (We’ll assume you add a public method, for example, 
+getCurrentPosition(), that returns the encoder’s current position.)
+AlgaeCollectorSubsystem: Controls the wheels (collector motor). (We’ll assume you add a public method, for example, 
+getCurrent(), that returns the motor’s output current.)
+You can bind the collection command to the Y button and the delivery command to the A button on your 
+mechanism controller.
+
+1. CollectCoralCommand
+This command will:
+
+Extend the mechanism:
+Continuously call moveArm(50) until the extension encoder is within a small tolerance of 50.
+Stop the extender:
+Once extended, it stops the extender.
+Run the collector wheels:
+Start the collector wheels (using a positive speed, e.g. 0.5) until the current drawn exceeds a set threshold 
+(indicating the game piece has been collected).
+Stop the collector wheels:
+Then stop the collector so that it “holds” the game piece.
+java
+*/
+// File: CollectCoralCommand.java
+package frc.robot.commands;
+
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import frc.robot.subsystems.AlgaeExtenderSubsystem;
+import frc.robot.subsystems.AlgaeCollectorSubsystem;
+
+public class CollectCoralCommand extends SequentialCommandGroup {
+    // Adjust this threshold based on your testing (in Amps)
+    private static final double COLLECTOR_CURRENT_THRESHOLD = 10.0;
+    // Tolerance for extension position (encoder units)
+    private static final double EXTENSION_TOLERANCE = 1.0;
+
+    /**
+     * Constructs a command that extends the arm to an encoder position of 50 and
+     * runs the collector wheels until a current spike is detected.
+     *
+     * @param extenderSubsystem  The subsystem controlling the arm extension.
+     * @param collectorSubsystem The subsystem controlling the collector wheels.
+     */
+    public CollectCoralCommand(AlgaeExtenderSubsystem extenderSubsystem, AlgaeCollectorSubsystem collectorSubsystem) {
+        addCommands(
+            // Step 1: Extend the mechanism to target position 50.
+            new RunCommand(() -> extenderSubsystem.moveArm(50), extenderSubsystem)
+                .until(() -> Math.abs(extenderSubsystem.getCurrentPosition() - 50) < EXTENSION_TOLERANCE),
+            // Step 2: Stop the extender.
+            new InstantCommand(extenderSubsystem::stopArm, extenderSubsystem),
+            // Step 3: Run the collector wheels (positive speed) until a current spike is detected.
+            new RunCommand(() -> collectorSubsystem.moveArm(0.5), collectorSubsystem)
+                .until(() -> collectorSubsystem.getCurrent() > COLLECTOR_CURRENT_THRESHOLD),
+            // Step 4: Stop the collector wheels.
+            new InstantCommand(collectorSubsystem::stopArm, collectorSubsystem)
+        );
+    }
+}
+/*
+2. DeliverCoralCommand
+This command will:
+
+Reverse the collector wheels:
+Run the wheels in reverse (negative speed) for 500 ms.
+Stop the collector wheels:
+Then stop the collector.
+Retract the mechanism:
+Command the extender to retract until the encoder value is near 0.
+Stop the extender:
+Finally, stop the extender.
+java
+*/
+// File: DeliverCoralCommand.java
+package frc.robot.commands;
+
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
+import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import frc.robot.subsystems.AlgaeExtenderSubsystem;
+import frc.robot.subsystems.AlgaeCollectorSubsystem;
+
+public class DeliverCoralCommand extends SequentialCommandGroup {
+    private static final double EXTENSION_TOLERANCE = 1.0;
+    
+    /**
+     * Constructs a command that runs the collector in reverse for 500ms and then retracts the arm.
+     *
+     * @param extenderSubsystem  The subsystem controlling the arm extension.
+     * @param collectorSubsystem The subsystem controlling the collector wheels.
+     */
+    public DeliverCoralCommand(AlgaeExtenderSubsystem extenderSubsystem, AlgaeCollectorSubsystem collectorSubsystem) {
+        addCommands(
+            // Step 1: Run the collector wheels in reverse (to eject the game piece) for 0.5 seconds.
+            new RunCommand(() -> collectorSubsystem.moveArm(-0.5), collectorSubsystem)
+                .withTimeout(0.5),
+            // Step 2: Stop the collector wheels.
+            new InstantCommand(collectorSubsystem::stopArm, collectorSubsystem),
+            // Step 3: Retract the mechanism until the extension is near 0.
+            new RunCommand(() -> extenderSubsystem.moveArm(0), extenderSubsystem)
+                .until(() -> Math.abs(extenderSubsystem.getCurrentPosition() - 0) < EXTENSION_TOLERANCE),
+            // Step 4: Stop the extender.
+            new InstantCommand(extenderSubsystem::stopArm, extenderSubsystem)
+        );
+    }
+}
+/*
+Assumptions & Adjustments
+AlgaeExtenderSubsystem:
+You need to add a public method to get the current extension position. For example, in your AlgaeExtenderSubsystem add:
+java
+Copy
+public double getCurrentPosition() {
+    return e_algaeExtender.getPosition();
+}
+AlgaeCollectorSubsystem:
+Similarly, you need a method to read the collector motor current. For example:
+java
+Copy
+public double getCurrent() {
+    return m_algaeCollector.getOutputCurrent();
+}
+(Make sure your SparkMax API is set up correctly.)
+Tuning:
+The values for the target extension (50), the current threshold, and timeout are example numbers. You’ll need to 
+adjust these based on your actual mechanism and testing.
+Binding the Commands
+In your RobotContainer, bind these commands to the appropriate buttons on your mechanism controller. For example:
+
+java
+*/
+// In RobotContainer.configureButtonBindings():
+new JoystickButton(m_mechanismController, Button.kY.value)
+    .whenPressed(new CollectCoralCommand(m_algaeExtenderSubsystem, m_algaeCollectorSubsystem));
+
+new JoystickButton(m_mechanismController, Button.kA.value)
+    .whenPressed(new DeliverCoralCommand(m_algaeExtenderSubsystem, m_algaeCollectorSubsystem));
+/*
+Make sure to import and instantiate your subsystems accordingly (here, I used m_algaeExtenderSubsystem 
+and m_algaeCollectorSubsystem).
+
+Summary
+CollectCoralCommand: Extends the mechanism to a target encoder value (50), runs the collector wheels 
+until a current spike indicates the game piece is collected, and then stops the wheels.
+DeliverCoralCommand: Runs the collector wheels in reverse for 500 ms, stops the wheels, then retracts 
+the mechanism to 0.
+Binding:
+Bind each command to a controller button so that the operator can trigger collection (Y button) and 
+delivery (A button).
+This should provide a good starting point for your mechanism’s autonomous actions. Adjust and tune the 
+thresholds, speeds, and timings based on testing. Let me know if you have any further questions or need 
+modifications!
+*/

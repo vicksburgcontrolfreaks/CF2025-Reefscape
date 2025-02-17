@@ -110,6 +110,7 @@ public class RobotContainer {
       dpadDownButton.onTrue(new InstantCommand(m_robotDrive::toggleFieldOriented, m_robotDrive));
 
       // ********************************* Mech controller ************************************************
+      
       new JoystickButton(m_mechanismController, XboxController.Button.kA.value)
          .whileTrue(new RunCommand(() -> {
             m_algaeCollector.moveArm(0.5);}, m_algaeCollector))  // Start the collector
@@ -123,10 +124,10 @@ public class RobotContainer {
          .whileTrue(new RunCommand(() -> {
             m_algaeExtender.moveArm(m_algaeExtender.getInitPos());}, m_algaeExtender)); 
 
-      POVButton mech_padLeftButton   = new POVButton(m_mechanismController, 270);
       POVButton mech_dpadUpButton    = new POVButton(m_mechanismController, 0);
       POVButton mech_dpadRightButton = new POVButton(m_mechanismController, 90);
       POVButton mech_dpadDownButton  = new POVButton(m_mechanismController, 180);
+      POVButton mech_padLeftButton   = new POVButton(m_mechanismController, 270);
 
       // Coral Arm
       // Bind D-pad up to raise the arm. Positive speed to raise.
