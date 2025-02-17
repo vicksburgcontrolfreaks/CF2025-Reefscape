@@ -3,13 +3,15 @@
 package frc.robot;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.PS4Controller.Button;
 import frc.robot.Constants.OIConstants;
+import frc.robot.ReefscapeTargetPoses;
 import frc.robot.autonomous.OscillateDistanceCommand;
-import frc.robot.commands.TrajectoryAutoCommand;
-import frc.robot.commands.TrajectoryToTagCommand;
+import frc.robot.autonomous.TrajectoryAutoCommand;
+import frc.robot.commands.ScoreCoral;
 import frc.robot.commands.raiseCoralArm;
 import frc.robot.commands.releaseCoralCmd;
 
@@ -46,6 +48,9 @@ public class RobotContainer {
 
    // Create a chooser for autonomous routines.
    public final SendableChooser<Command> autoChooser = new SendableChooser<>();
+
+   //Create a variable for the currently selected auton target (can be used in auton or teleop)
+   private Pose2d m_currentTargetPose = ReefscapeTargetPoses.BlueProcessor; // default target
 
    public RobotContainer() {
       //Determine alliance assignment
@@ -86,6 +91,7 @@ public class RobotContainer {
 
       // Publish the autonomous chooser to SmartDashboard.
       SmartDashboard.putData("Auto Tuning Mode", autoChooser);
+
    }
 
    private void configureButtonBindings() {
@@ -99,8 +105,8 @@ public class RobotContainer {
       POVButton dpadDownButton = new POVButton(m_driverController, 180);
 
       // Auto-align to April tag with driver controller.
-      dpadLeftButton.onTrue(new TrajectoryToTagCommand(m_robotDrive, m_visionSubsystem, true));
-      dpadRightButton.onTrue(new TrajectoryToTagCommand(m_robotDrive, m_visionSubsystem, false));
+      dpadLeftButton.onTrue(new ScoreCoral(m_robotDrive, m_visionSubsystem, true));
+      dpadRightButton.onTrue(new ScoreCoral(m_robotDrive, m_visionSubsystem, false));
       dpadDownButton.onTrue(new InstantCommand(m_robotDrive::toggleFieldOriented, m_robotDrive));
 
       // ********************************* Mech controller ************************************************

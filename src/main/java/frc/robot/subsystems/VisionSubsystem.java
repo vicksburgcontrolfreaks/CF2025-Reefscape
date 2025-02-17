@@ -81,4 +81,10 @@ public class VisionSubsystem extends SubsystemBase {
         // with no lateral offset or rotation.
         return new Pose2d(1.0, 0.0, new Rotation2d(0));
     }
+
+    public int getDetectedTagIDFromNT() {
+        // Read the tag ID from NetworkTables. Replace "tid" with the correct key.
+        double idDouble = limelightTable.getEntry("tid").getDouble(0);
+        return (int) idDouble;
+    }
 }

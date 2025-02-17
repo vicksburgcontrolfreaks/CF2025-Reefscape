@@ -1,4 +1,5 @@
-// File: TrajectoryToTagCommand.java
+//Initiates a drive and scoring sequence based on preselected left or right reef position
+//Navigates to a predetermined offset from the reef using any visible reef AprilTag 
 package frc.robot.commands;
 
 import edu.wpi.first.math.controller.PIDController;
@@ -16,7 +17,7 @@ import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
 import java.util.List;
 
-public class TrajectoryToTagCommand extends Command {
+public class ScoreCoral extends Command {
     private final DriveSubsystem driveSubsystem;
     private final VisionSubsystem visionSubsystem;
     private SwerveControllerCommand internalCommand;
@@ -29,7 +30,7 @@ public class TrajectoryToTagCommand extends Command {
      * @param visionSubsystem The vision subsystem.
      * @param isLeft If true, the destination is offset to the left; if false, to the right.
      */
-    public TrajectoryToTagCommand(DriveSubsystem driveSubsystem, VisionSubsystem visionSubsystem, boolean isLeft) {
+    public ScoreCoral(DriveSubsystem driveSubsystem, VisionSubsystem visionSubsystem, boolean isLeft) {
         this.driveSubsystem = driveSubsystem;
         this.visionSubsystem = visionSubsystem;
         this.isLeft = isLeft;
