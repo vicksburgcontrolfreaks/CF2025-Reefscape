@@ -6,12 +6,12 @@ import frc.robot.subsystems.CoralArmSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
 
 
-public class raiseCoralArm extends Command {
+public class RaiseCoralArm extends Command {
     private final CoralArmSubsystem armSubsystem;
 
     private final int position;
 
-    public raiseCoralArm(CoralArmSubsystem armSubsystem, int position) {
+    public RaiseCoralArm(CoralArmSubsystem armSubsystem, int position) {
         this.armSubsystem = armSubsystem;
         this.position = position;
         addRequirements(armSubsystem); // Ensures that the arm subsystem is required for this command

@@ -84,7 +84,7 @@ public final class Constants {
     public static final double CE_PGain = 0.02;
     public static final double CE_MAX   = 0.40;
 
-    // Coral Arm Angle 
+    // Coral Arm Angle  
     public static final double lowTgtAngle  =  3.0; //target offset from init
     public static final double midTgtAngle  =  7.0; //target offset from init
     public static final double highTgtAngle = 10.0; //target offset from init
@@ -139,16 +139,6 @@ public final class Constants {
     public static final double kPForward = 0.5; // Example value; adjust by testing
     public static final double kPLateral = 0.05; // Example value; adjust by testing
 
-    // APRIL TAG: The desired target area when the robot is at the correct distance.
-    public static final double kTargetArea = 5.0; // Example value (percentage of image); calibrate this value
-
-    // APRIL TAG: The desired tx offset for lateral alignment.
-    // For a left alignment, you might want the target to appear, for example, 5
-    // degrees to the right (if that means the robot is left of the target).
-    public static final double kLeftAlignTX = 5.0; // Example value in degrees
-    // For a right alignment, you might want the target to appear 5 degrees to the
-    // left.
-    public static final double kRightAlignTX = -5.0; // Example value in degrees
 
     // APRIL TAG: Tolerances to determine when alignment is good enough.
     public static final double kForwardTolerance = 0.2; // Acceptable error in target area (ta)
