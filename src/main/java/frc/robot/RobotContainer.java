@@ -37,17 +37,21 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.DriverStation;
 
 public class RobotContainer {
+   // Determine alliance assignment
+   DriverStation.Alliance alliance = DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue);
+
    // The robot's subsystems
    private final DriveSubsystem m_robotDrive = new DriveSubsystem();
    private final AlgaeCollectorSubsystem m_algaeCollector = new AlgaeCollectorSubsystem();
    private final AlgaeExtenderSubsystem m_algaeExtender = new AlgaeExtenderSubsystem();
    private final HarpoonSubsystem m_harpoon = new HarpoonSubsystem();
    private final VisionSubsystem m_visionSubsystem = new VisionSubsystem();
-   private final LocalizationSubsystem m_localizationSubsystem = new LocalizationSubsystem(m_robotDrive);
+   // private final LocalizationSubsystem m_localizationSubsystem = new
+   // LocalizationSubsystem(m_robotDrive);
    private final CoralArmSubsystem m_coralArmSubsystem = new CoralArmSubsystem();
 
    // Variable to tracking the scoring position (INIT, LOW, LED, HIGH)
-   private int m_scoringPosition = ArmConstants.TGT_HIGH; // Default scoring position: High
+   private int m_scoringPosition = ArmConstants.TGT_INIT; // Default scoring position: Init (home)
    // Variable to track scoring side (true = left, false = right); default left.
    private boolean m_scoringSideLeft = true;
 
@@ -71,8 +75,7 @@ public class RobotContainer {
    public final SendableChooser<Command> autoChooser = new SendableChooser<>();
 
    public RobotContainer() {
-      // Determine alliance assignment
-      DriverStation.Alliance alliance = DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue);
+      // Auton Settings
       if (alliance == DriverStation.Alliance.Blue) {
          // Set up autonomous command for blue alliance.
       } else if (alliance == DriverStation.Alliance.Red) {
@@ -80,13 +83,20 @@ public class RobotContainer {
       } else {
          // This branch will likely never be reached since only Red and Blue exist.
       }
+      // Set up and autonomous chooser for auton options.
+      autoChooser.setDefaultOption("Competition Ready Auton", new OscillateDistanceCommand(m_robotDrive));
+      autoChooser.addOption("Trajectory Auto", new TrajectoryAutoCommand(m_robotDrive));
+      autoChooser.addOption("Forward Tune", new OscillateDistanceCommand(m_robotDrive));
+      // (Optional) Add a "Do Nothing" option.
+      autoChooser.addOption("No Auto",
+            new RunCommand(() -> m_robotDrive.drive(0, 0, 0, false), m_robotDrive));
 
       // Configure button bindings
       configureButtonBindings();
-      // Publish the VisionSubsystem to SmartDashboard for monitoring.
-      SmartDashboard.putData("Vision Subsystem", m_visionSubsystem);
 
-      // Configure default teleop command: drive the robot.
+      // Configure default driver command: drive the robot.
+      // The default controls for the driver are manual so they can
+      // override auton functions
       m_robotDrive.setDefaultCommand(
             new RunCommand(
                   () -> m_robotDrive.drive(
@@ -99,17 +109,7 @@ public class RobotContainer {
                         true),
                   m_robotDrive));
 
-      // Set up autonomous tuning options.
-      autoChooser.setDefaultOption("Competition Ready Auton", new OscillateDistanceCommand(m_robotDrive));
-      autoChooser.addOption("Trajectory Auto", new TrajectoryAutoCommand(m_robotDrive));
-      autoChooser.addOption("Forward Tune", new OscillateDistanceCommand(m_robotDrive));
-      // (Optional) Add a "Do Nothing" option.
-      autoChooser.addOption("No Auto",
-            new RunCommand(() -> m_robotDrive.drive(0, 0, 0, false), m_robotDrive));
-
-      // Publish the autonomous chooser to SmartDashboard.
-      SmartDashboard.putData("Auto Tuning Mode", autoChooser);
-
+      // Configure default mech command: control the arm.
       // The default controls for the arm angle and extension are manual so they can
       // override auton functions
       m_coralArmSubsystem
@@ -153,12 +153,11 @@ public class RobotContainer {
             }, m_algaeExtender));
 
       // Coral Arm
-      // D-pad up increments scoring position if not already at high.
+      // D-pad up increments scoring position
       mech_dpadUpButton.onTrue(
             new InstantCommand(() -> {
                if (m_scoringPosition < Constants.ArmConstants.TGT_HIGH) {
                   m_scoringPosition++;
-                  System.out.println("Scoring position increased to: " + m_scoringPosition);
                }
             }, m_coralArmSubsystem)
                   .andThen(new SetCoralArmPositionCommand(
@@ -166,12 +165,11 @@ public class RobotContainer {
                         getTargetAngle(m_scoringPosition),
                         getTargetExtension(m_scoringPosition))));
 
-      // D-pad down decrements scoring position if not already stowed.
+      // D-pad down decrements scoring position
       mech_dpadDownButton.onTrue(
             new InstantCommand(() -> {
                if (m_scoringPosition > Constants.ArmConstants.TGT_INIT) {
                   m_scoringPosition--;
-                  System.out.println("Scoring position decreased to: " + m_scoringPosition);
                }
             }, m_coralArmSubsystem)
                   .andThen(new SetCoralArmPositionCommand(
@@ -182,16 +180,14 @@ public class RobotContainer {
       // D-pad right/left to toggle scoring side.
       mech_dpadRightButton.onTrue(new InstantCommand(() -> {
          m_scoringSideLeft = false;
-         System.out.println("Scoring side set to RIGHT");
       }));
       mech_dpadLeftButton.onTrue(new InstantCommand(() -> {
          m_scoringSideLeft = true;
-         System.out.println("Scoring side set to LEFT");
       }));
 
       // Left Stick Y controls manual angle of arm
       // Right Stick Y controls manual extension of arm
-      // Control speed here: commands.ManualCoralArmAdjustCommand.java
+      // Speed is controlled in commands.ManualCoralArmAdjustCommand.java
 
    }
 
@@ -230,6 +226,16 @@ public class RobotContainer {
          default: // HOME or invalid, default to 0
             return 0.0;
       }
+   }
+
+   public int getScoringPosition() {
+      return m_scoringPosition;
+   }
+
+   public void periodic() {
+
+      SmartDashboard.putData("Auto Tuning Mode", autoChooser);
+      SmartDashboard.putNumber("Scoring Position", m_scoringPosition);
    }
 
 }

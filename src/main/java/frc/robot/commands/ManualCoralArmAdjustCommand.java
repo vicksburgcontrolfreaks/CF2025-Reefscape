@@ -11,8 +11,8 @@ public class ManualCoralArmAdjustCommand extends Command {
     // Define a deadband for joystick inputs.
     private static final double DEADBAND = 0.1;
     // Optionally define scaling factors.
-    private static final double ANGLE_SCALING = 0.05;
-    private static final double EXTENSION_SCALING = 0.05;
+    private static final double ANGLE_SCALING = 0.10;
+    private static final double EXTENSION_SCALING = 0.50;
 
     /**
      * Constructs a command for manual coral arm adjustment.

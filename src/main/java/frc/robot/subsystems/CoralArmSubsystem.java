@@ -40,7 +40,7 @@ public class CoralArmSubsystem extends SubsystemBase {
       ca_errorPrev = 0.0;
    }
 
-   public void setArmAngle(int position) {
+   public void setArmAngle(double position) {
       double ca_cmd;
       double ca_error;
       double angleTgt = 0;
@@ -76,7 +76,7 @@ public class CoralArmSubsystem extends SubsystemBase {
       ca_errorPrev = ca_error;
    }
 
-   public void moveArm(int position) {
+   public void moveArm(double position) {
       double ce_cmd;
       double ce_error;
       // 0 - initial retracted position
@@ -119,6 +119,7 @@ public class CoralArmSubsystem extends SubsystemBase {
       // Publish current arm angle and extension positions to SmartDashboard.
       SmartDashboard.putNumber("Coral Arm Angle", e_armAngle.getPosition());
       SmartDashboard.putNumber("Coral Arm Extension", e_armExtend.getPosition());
+      
    }
 
    /*
@@ -153,4 +154,65 @@ public double getExtendCurrent() {
 public double getCurrentExtension() {
    return e_armExtend.getPosition();
 }
+
+/**
+ * Sets the arm angle and extension to the specified target positions using closed-loop control.
+ *
+ * @param targetAngle     The desired arm angle (in encoder units or your chosen unit).
+ * @param targetExtension The desired arm extension (in encoder units).
+ * @param speedFactor     A scaling factor (0.0 to 1.0) to adjust the motor outputs.
+ */
+public void setArmPosition(double targetAngle, double targetExtension, double speedFactor) {
+   // --- Angle Control (using PI control) ---
+   double currentAngle = e_armAngle.getPosition();
+   double errorAngle = targetAngle - currentAngle;
+   
+   // Update integral (using the current error)
+   ca_integral += errorAngle;
+   
+   // Compute the command for the angle motor using PI control
+   double angleCmd = errorAngle * ArmConstants.CA_PGain + ca_integral * ArmConstants.CA_IGain;
+   
+   // Scale the command by the speed factor
+   angleCmd *= speedFactor;
+   
+   // Saturate the command to ensure it doesn't exceed the maximum output
+   if (angleCmd > ArmConstants.CA_MAX) {
+       angleCmd = ArmConstants.CA_MAX;
+   } else if (angleCmd < -ArmConstants.CA_MAX) {
+       angleCmd = -ArmConstants.CA_MAX;
+   }
+   
+   // Set the angle motor output
+   m_armAngle.set(angleCmd);
+   
+   // Save the current error for any additional integration logic (if needed)
+   ca_errorPrev = errorAngle;
+   
+   // --- Extension Control (using P control) ---
+   double currentExtension = e_armExtend.getPosition();
+   double errorExtension = targetExtension - currentExtension;
+   
+   // Compute the command for the extension motor using P control
+   double extendCmd = errorExtension * ArmConstants.CE_PGain;
+   
+   // Scale the command by the speed factor
+   extendCmd *= speedFactor;
+   
+   // Saturate the command to ensure it doesn't exceed the maximum output
+   if (extendCmd > ArmConstants.CE_MAX) {
+       extendCmd = ArmConstants.CE_MAX;
+   } else if (extendCmd < -ArmConstants.CE_MAX) {
+       extendCmd = -ArmConstants.CE_MAX;
+   }
+   
+   // Set the extension motor output
+   m_armExtend.set(extendCmd);
+}
+
+public double getArmAngle() {
+   return e_armAngle.getPosition();
+}
+
+
 }

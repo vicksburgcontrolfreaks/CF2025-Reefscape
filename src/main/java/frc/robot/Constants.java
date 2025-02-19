@@ -77,21 +77,21 @@ public final class Constants {
     public static final int TGT_HIGH = 3; //enumeration do not change
 
     // Coral Extender
-    public static final double lowTgtHeight  =  3.0; //target offset from init
-    public static final double midTgtHeight  =  7.0; //target offset from init
-    public static final double highTgtHeight = 10.0; //target offset from init
+    public static final double lowTgtHeight  =  -40.28; //target offset from init
+    public static final double midTgtHeight  =  -62.31; //target offset from init
+    public static final double highTgtHeight = -103.72; //target offset from init
 
     public static final double CE_PGain = 0.02;
-    public static final double CE_MAX   = 0.40;
+    public static final double CE_MAX   = 0.10;
 
     // Coral Arm Angle  
-    public static final double lowTgtAngle  =  3.0; //target offset from init
-    public static final double midTgtAngle  =  7.0; //target offset from init
-    public static final double highTgtAngle = 10.0; //target offset from init
+    public static final double lowTgtAngle  =  39.28; //target offset from init
+    public static final double midTgtAngle  =  25.93; //target offset from init
+    public static final double highTgtAngle =  10.93; //target offset from init
 
     public static final double CA_PGain = 0.01;
     public static final double CA_IGain = 0.0003;
-    public static final double CA_MAX   = 0.40;
+    public static final double CA_MAX   = 0.10;
   }
 
   public static final class ModuleConstants {
@@ -141,6 +141,7 @@ public final class Constants {
 
 
     // APRIL TAG: Tolerances to determine when alignment is good enough.
+
     public static final double kForwardTolerance = 0.2; // Acceptable error in target area (ta)
     public static final double kLateralTolerance = 1.0; // Acceptable error in tx (in degrees)
   }
