@@ -16,11 +16,12 @@ import frc.robot.commands.HomeCoralArmCommand;
 import frc.robot.commands.ManualCoralArmAdjustCommand;
 import frc.robot.commands.ScoreCoral;
 import frc.robot.commands.ScoreCoralParallelCommand;
+import frc.robot.commands.SetArmPositionCommand;
 import frc.robot.commands.SetCoralArmPositionCommand;
 import frc.robot.commands.RaiseCoralArm;
 import frc.robot.commands.ReleaseCoralCmd;
 
-import frc.robot.subsystems.CoralArmSubsystem;
+import frc.robot.subsystems.NewCoralArmSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.LocalizationSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
@@ -48,10 +49,15 @@ public class RobotContainer {
    private final VisionSubsystem m_visionSubsystem = new VisionSubsystem();
    // private final LocalizationSubsystem m_localizationSubsystem = new
    // LocalizationSubsystem(m_robotDrive);
-   private final CoralArmSubsystem m_coralArmSubsystem = new CoralArmSubsystem();
+   private final NewCoralArmSubsystem m_coralArmSubsystem = new NewCoralArmSubsystem();
 
-   // Variable to tracking the scoring position (INIT, LOW, LED, HIGH)
-   private int m_scoringPosition = ArmConstants.TGT_INIT; // Default scoring position: Init (home)
+   // Use the enum for arm positions.
+   public enum ArmPosition {
+      INIT, LOW, MID, HIGH;
+   }
+
+   private ArmPosition currentArmPosition = ArmPosition.INIT;
+
    // Variable to track scoring side (true = left, false = right); default left.
    private boolean m_scoringSideLeft = true;
 
@@ -125,9 +131,11 @@ public class RobotContainer {
 
       // Use ScoreCoralParallelCommand with the scoring side flag: true = left, false
       // = right.
-      dpadLeftButton.onTrue(new ScoreCoralParallelCommand(m_robotDrive, m_visionSubsystem, m_coralArmSubsystem, true));
-      dpadRightButton
-            .onTrue(new ScoreCoralParallelCommand(m_robotDrive, m_visionSubsystem, m_coralArmSubsystem, false));
+      // dpadLeftButton.onTrue(new ScoreCoralParallelCommand(m_robotDrive,
+      // m_visionSubsystem, m_coralArmSubsystem, true));
+      // dpadRightButton
+      // .onTrue(new ScoreCoralParallelCommand(m_robotDrive, m_visionSubsystem,
+      // m_coralArmSubsystem, false));
 
       // toggle between robot and field oriented
       dpadDownButton.onTrue(new InstantCommand(m_robotDrive::toggleFieldOriented, m_robotDrive));
@@ -153,43 +161,103 @@ public class RobotContainer {
             }, m_algaeExtender));
 
       // Coral Arm
-      // D-pad up increments scoring position
+      // When the operator presses D-pad Up, move to the next higher position.
       mech_dpadUpButton.onTrue(
             new InstantCommand(() -> {
-               if (m_scoringPosition < Constants.ArmConstants.TGT_HIGH) {
-                  m_scoringPosition++;
+               switch (currentArmPosition) {
+                  case INIT:
+                     currentArmPosition = ArmPosition.LOW;
+                     break;
+                  case LOW:
+                     currentArmPosition = ArmPosition.MID;
+                     break;
+                  case MID:
+                     currentArmPosition = ArmPosition.HIGH;
+                     break;
+                  case HIGH:
+                     // Already at highest; do nothing or wrap around.
+                     break;
                }
-            }, m_coralArmSubsystem)
-                  .andThen(new SetCoralArmPositionCommand(
-                        m_coralArmSubsystem,
-                        getTargetAngle(m_scoringPosition),
-                        getTargetExtension(m_scoringPosition))));
+               SmartDashboard.putString("Arm Position", currentArmPosition.toString());
+            }).andThen(new SetArmPositionCommand(
+                  m_coralArmSubsystem,
+                  getTargetAngle(currentArmPosition),
+                  getTargetExtension(currentArmPosition))));
 
-      // D-pad down decrements scoring position
+      // When the operator presses D-pad Down, move to the next lower position.
       mech_dpadDownButton.onTrue(
             new InstantCommand(() -> {
-               if (m_scoringPosition > Constants.ArmConstants.TGT_INIT) {
-                  m_scoringPosition--;
+               // Update currentArmPosition based on your switch logic.
+               switch (currentArmPosition) {
+                  case HIGH:
+                     currentArmPosition = ArmPosition.MID;
+                     break;
+                  case MID:
+                     currentArmPosition = ArmPosition.LOW;
+                     break;
+                  case LOW:
+                     currentArmPosition = ArmPosition.INIT;
+                     break;
+                  case INIT:
+                     // Already at home, no change.
+                     break;
                }
-            }, m_coralArmSubsystem)
-                  .andThen(new SetCoralArmPositionCommand(
+               SmartDashboard.putString("Arm Position", currentArmPosition.toString());
+
+               // Schedule the proper command depending on the new position.
+               if (currentArmPosition == ArmPosition.INIT) {
+                  new HomeCoralArmCommand(m_coralArmSubsystem).schedule();
+               } else {
+                  new SetArmPositionCommand(
                         m_coralArmSubsystem,
-                        getTargetAngle(m_scoringPosition),
-                        getTargetExtension(m_scoringPosition))));
-
-      // D-pad right/left to toggle scoring side.
-      mech_dpadRightButton.onTrue(new InstantCommand(() -> {
-         m_scoringSideLeft = false;
-      }));
-      mech_dpadLeftButton.onTrue(new InstantCommand(() -> {
-         m_scoringSideLeft = true;
-      }));
-
-      // Left Stick Y controls manual angle of arm
-      // Right Stick Y controls manual extension of arm
-      // Speed is controlled in commands.ManualCoralArmAdjustCommand.java
-
+                        getTargetAngle(currentArmPosition),
+                        getTargetExtension(currentArmPosition)).schedule();
+               }
+            }, m_coralArmSubsystem));
    }
+
+   private double getTargetAngle(ArmPosition pos) {
+      switch (pos) {
+         case INIT:
+            return 0.0;
+         case LOW:
+            return ArmConstants.lowTgtAngle;
+         case MID:
+            return ArmConstants.midTgtAngle;
+         case HIGH:
+            return ArmConstants.highTgtAngle;
+         default:
+            return 0.0;
+      }
+   }
+
+   private double getTargetExtension(ArmPosition pos) {
+      switch (pos) {
+         case INIT:
+            return 0.0;
+         case LOW:
+            return ArmConstants.lowTgtHeight;
+         case MID:
+            return ArmConstants.midTgtHeight;
+         case HIGH:
+            return ArmConstants.highTgtHeight;
+         default:
+            return 0.0;
+      }
+   }
+   // // D-pad right/left to toggle scoring side.
+   // mech_dpadRightButton.onTrue(new InstantCommand(()->
+
+   // {
+   // m_scoringSideLeft = false;
+   // }));mech_dpadLeftButton.onTrue(new InstantCommand(()->
+   // {
+   // m_scoringSideLeft = true;
+   // }));
+
+   // Left Stick Y controls manual angle of arm
+   // Right Stick Y controls manual extension of arm
+   // Speed is controlled in commands.ManualCoralArmAdjustCommand.java
 
    /**
     * This method is called by the main Robot class to get the command to run in
@@ -200,42 +268,9 @@ public class RobotContainer {
       return autoChooser.getSelected();
    }
 
-   // These two methods convert the enumerated target position into an angle and
-   // extension value
-   private double getTargetAngle(int scoringPosition) {
-      switch (scoringPosition) {
-         case Constants.ArmConstants.TGT_LOW:
-            return Constants.ArmConstants.lowTgtAngle;
-         case Constants.ArmConstants.TGT_MID:
-            return Constants.ArmConstants.midTgtAngle;
-         case Constants.ArmConstants.TGT_HIGH:
-            return Constants.ArmConstants.highTgtAngle;
-         default: // HOME or invalid, default to 0
-            return 0.0;
-      }
-   }
-
-   private double getTargetExtension(int scoringPosition) {
-      switch (scoringPosition) {
-         case Constants.ArmConstants.TGT_LOW:
-            return Constants.ArmConstants.lowTgtHeight;
-         case Constants.ArmConstants.TGT_MID:
-            return Constants.ArmConstants.midTgtHeight;
-         case Constants.ArmConstants.TGT_HIGH:
-            return Constants.ArmConstants.highTgtHeight;
-         default: // HOME or invalid, default to 0
-            return 0.0;
-      }
-   }
-
-   public int getScoringPosition() {
-      return m_scoringPosition;
-   }
-
    public void periodic() {
 
       SmartDashboard.putData("Auto Tuning Mode", autoChooser);
-      SmartDashboard.putNumber("Scoring Position", m_scoringPosition);
    }
 
 }

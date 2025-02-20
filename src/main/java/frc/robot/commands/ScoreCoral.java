@@ -21,7 +21,7 @@ public class ScoreCoral extends SequentialCommandGroup {
         addCommands(
             // Phase 1: Extend and set arm angle concurrently to scoring position.
             new ParallelCommandGroup(
-                new SetCoralArmPositionCommand(coralArmSubsystem, ArmConstants.TGT_HIGH, ArmConstants.highTgtHeight)
+                new SetCoralArmPositionCommand(coralArmSubsystem, ArmConstants.TGT_HIGH)
             ),
             // Phase 2: Wait until the drive has reached the target location.
             // (Replace the wait command with an appropriate sensor-based condition if available.)
@@ -29,10 +29,10 @@ public class ScoreCoral extends SequentialCommandGroup {
             // Phase 3: Adjust the arm angle slightly while retracting concurrently.
             // Here we subtract a small offset (e.g. 0.5) from the scoring angle and extension.
             new ParallelCommandGroup(
-                new SetCoralArmPositionCommand(coralArmSubsystem, ArmConstants.TGT_MID - 0.5, ArmConstants.midTgtHeight - 0.5)
+                new SetCoralArmPositionCommand(coralArmSubsystem, ArmConstants.TGT_MID)
             ),
             // Phase 4: Return the arm to its home position (fully retracted and initial angle).
-            new SetCoralArmPositionCommand(coralArmSubsystem, ArmConstants.TGT_INIT, 0.0)
+            new SetCoralArmPositionCommand(coralArmSubsystem, ArmConstants.TGT_INIT)
         );
     }
 }

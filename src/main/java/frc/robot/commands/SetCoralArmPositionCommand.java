@@ -2,19 +2,20 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.CoralArmSubsystem;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
 
 public class SetCoralArmPositionCommand extends Command {
     private final CoralArmSubsystem m_armSubsystem;
-    private final double m_targetAngle;
-    private final double m_targetExtension;
+    private final int m_scoringPosition;
     // Define tolerances so we know when the arm is "close enough."
     private static final double ANGLE_TOLERANCE = 0.1;
     private static final double EXTENSION_TOLERANCE = 0.1;
+    private int increment = 0;
 
-    public SetCoralArmPositionCommand(CoralArmSubsystem armSubsystem, double targetAngle, double targetExtension) {
+    public SetCoralArmPositionCommand(CoralArmSubsystem armSubsystem, int scoringPosition) {
         m_armSubsystem = armSubsystem;
-        m_targetAngle = targetAngle;
-        m_targetExtension = targetExtension;
+        m_scoringPosition = scoringPosition;
         addRequirements(armSubsystem);
     }
 
@@ -25,8 +26,11 @@ public class SetCoralArmPositionCommand extends Command {
 
     @Override
     public void execute() {
-        // If using the combined control method:
-        m_armSubsystem.setArmPosition(m_targetAngle, m_targetExtension, 0.5);
+        increment ++;
+        m_armSubsystem.setArmAngle(m_scoringPosition);  //.setArmPosition(m_scoringPosition);
+        m_armSubsystem.moveArm(m_scoringPosition);
+        SmartDashboard.putNumber("SetCoralArmCmd Increment", increment);
+        //m_armSubsystem.set
         // Alternatively, if you prefer separate commands:
         // m_armSubsystem.setArmAngle(m_targetAngle);
         // m_armSubsystem.moveArm(m_targetExtension);
@@ -36,12 +40,14 @@ public class SetCoralArmPositionCommand extends Command {
     public boolean isFinished() {
         double currentAngle = m_armSubsystem.getArmAngle();
         double currentExtension = m_armSubsystem.getCurrentExtension();
-        return (Math.abs(currentAngle - m_targetAngle) < ANGLE_TOLERANCE) &&
-               (Math.abs(currentExtension - m_targetExtension) < EXTENSION_TOLERANCE);
+        //return (Math.abs(currentAngle - m_targetAngle) < ANGLE_TOLERANCE) &&
+        //       (Math.abs(currentExtension - m_targetExtension) < EXTENSION_TOLERANCE);
+        return false;
     }
 
     @Override
     public void end(boolean interrupted) {
         m_armSubsystem.stopArm();
     }
+
 }

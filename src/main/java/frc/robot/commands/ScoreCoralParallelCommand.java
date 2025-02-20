@@ -24,7 +24,7 @@ public class ScoreCoralParallelCommand extends ParallelDeadlineGroup {
             new ScoreCoralDriveCommand(driveSubsystem, visionSubsystem, scoringSideLeft),
             // Parallel mechanism commands: raise the arm, wait briefly, then release coral.
             new SequentialCommandGroup(
-                new SetCoralArmPositionCommand(coralArmSubsystem, 1, 1.0),  // Example: target angle = 1 and extension = 1.0 (adjust as needed)
+                new SetCoralArmPositionCommand(coralArmSubsystem, 1),  // Example: target angle = 1 and extension = 1.0 (adjust as needed)
                 new WaitCommand(0.5),
                 new ReleaseCoralCmd(coralArmSubsystem, 0.5)      // Example release speed = 0.5 (adjust as needed)
             )
