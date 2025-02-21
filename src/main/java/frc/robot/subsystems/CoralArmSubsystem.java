@@ -13,6 +13,7 @@ public class CoralArmSubsystem extends SubsystemBase {
 
     public CoralArmSubsystem() {
         m_armExtend = new SparkMax(ArmConstants.kCoralExtendCanId, MotorType.kBrushless);
+
     }
 
     public void moveArm(double speed) {
