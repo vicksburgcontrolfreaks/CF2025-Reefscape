@@ -141,6 +141,10 @@ public class RobotContainer {
       dpadDownButton.onTrue(new InstantCommand(m_robotDrive::toggleFieldOriented, m_robotDrive));
 
       // ************ Mech controller
+      // Right Bumper zeros arm encoders
+      new JoystickButton(m_mechanismController, Button.kR1.value)
+            .whileTrue(new RunCommand(() -> m_coralArmSubsystem.zeroEncoders(), m_coralArmSubsystem));
+
       // A button deploys algae arm and starts collector while held
       new JoystickButton(m_mechanismController, XboxController.Button.kA.value)
             .whileTrue(new RunCommand(() -> {
@@ -164,6 +168,7 @@ public class RobotContainer {
       // When the operator presses D-pad Up, move to the next higher position.
       mech_dpadUpButton.onTrue(
             new InstantCommand(() -> {
+               // Update the arm position based on the current state.
                switch (currentArmPosition) {
                   case INIT:
                      currentArmPosition = ArmPosition.LOW;
@@ -175,19 +180,21 @@ public class RobotContainer {
                      currentArmPosition = ArmPosition.HIGH;
                      break;
                   case HIGH:
-                     // Already at highest; do nothing or wrap around.
+                     // Already at highest; optionally wrap around or do nothing.
                      break;
                }
                SmartDashboard.putString("Arm Position", currentArmPosition.toString());
-            }).andThen(new SetArmPositionCommand(
-                  m_coralArmSubsystem,
-                  getTargetAngle(currentArmPosition),
-                  getTargetExtension(currentArmPosition))));
+               // Schedule the command using the updated target values.
+               new SetArmPositionCommand(
+                     m_coralArmSubsystem,
+                     getTargetAngle(currentArmPosition),
+                     getTargetExtension(currentArmPosition)).schedule();
+            }, m_coralArmSubsystem));
 
       // When the operator presses D-pad Down, move to the next lower position.
       mech_dpadDownButton.onTrue(
             new InstantCommand(() -> {
-               // Update currentArmPosition based on your switch logic.
+               // Update the arm position based on the current state.
                switch (currentArmPosition) {
                   case HIGH:
                      currentArmPosition = ArmPosition.MID;
@@ -199,12 +206,12 @@ public class RobotContainer {
                      currentArmPosition = ArmPosition.INIT;
                      break;
                   case INIT:
-                     // Already at home, no change.
+                     // Already at home; no change.
                      break;
                }
                SmartDashboard.putString("Arm Position", currentArmPosition.toString());
-
-               // Schedule the proper command depending on the new position.
+               // If the new position is INIT, schedule the homing command;
+               // otherwise, schedule the regular SetArmPositionCommand.
                if (currentArmPosition == ArmPosition.INIT) {
                   new HomeCoralArmCommand(m_coralArmSubsystem).schedule();
                } else {
@@ -214,6 +221,7 @@ public class RobotContainer {
                         getTargetExtension(currentArmPosition)).schedule();
                }
             }, m_coralArmSubsystem));
+
    }
 
    private double getTargetAngle(ArmPosition pos) {
@@ -245,15 +253,7 @@ public class RobotContainer {
             return 0.0;
       }
    }
-   // // D-pad right/left to toggle scoring side.
-   // mech_dpadRightButton.onTrue(new InstantCommand(()->
-
-   // {
-   // m_scoringSideLeft = false;
-   // }));mech_dpadLeftButton.onTrue(new InstantCommand(()->
-   // {
-   // m_scoringSideLeft = true;
-   // }));
+   // D-pad right/left to toggle scoring side.
 
    // Left Stick Y controls manual angle of arm
    // Right Stick Y controls manual extension of arm

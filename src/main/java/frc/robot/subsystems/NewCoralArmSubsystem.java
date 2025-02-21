@@ -79,17 +79,20 @@ public class NewCoralArmSubsystem extends SubsystemBase {
  */
 public void manualAdjustArmAngle(double speed) {
     double currentAngle = e_armAngle.getPosition();
-    double currentExtension = e_armExtend.getPosition();
-    
-    // Predict a new angle based on current angle and the commanded speed.
-    // (This is an open-loop prediction; in a real system you might consider a time delta.)
+    double homeAngle = 0.0; // Define your home angle here (assumed 0)
     double newAngle = currentAngle + speed;
-    
-    // Compute the maximum allowed (i.e. most negative) extension for the predicted new angle.
+
+    // Check if the movement is toward home.
+    // If the absolute difference from home is reduced, then allow the movement.
+    if (Math.abs(newAngle - homeAngle) < Math.abs(currentAngle - homeAngle)) {
+        m_armAngle.set(speed);
+        return;
+    }
+    // Otherwise, enforce the soft-stop constraint based on extension.
+    double currentExtension = e_armExtend.getPosition();
     double maxAllowedForNewAngle = getMaxAllowedExtension(newAngle);
     
-    // If lowering the arm (speed < 0) would leave the arm extended more than allowed,
-    // then cancel further lowering.
+    // For lowering the arm (speed < 0), if the current extension is more extended than allowed, block the command.
     if (speed < 0 && currentExtension < maxAllowedForNewAngle) {
         m_armAngle.set(0);
     } else {
@@ -106,21 +109,21 @@ public void manualAdjustArmExtension(double speed) {
     double currentExtension = e_armExtend.getPosition();
     double currentAngle = e_armAngle.getPosition();
     
-    // Compute the maximum allowed extension at this angle.
-    // Note: Since the encoder decreases from zero when extended, the safe limit is a negative number.
+    // Compute the maximum allowed extension (a negative number) for the current angle.
     double maxAllowed = getMaxAllowedExtension(currentAngle);
     
-    // For extending further: speed < 0 makes the encoder more negative.
-    // If already at or beyond (i.e. less than or equal to) the safe limit, stop extension.
-    if (speed < 0 && currentExtension <= maxAllowed) {
-        m_armExtend.set(0);
-    }
-    // For retracting: speed > 0 brings the encoder toward zero.
-    // If already at or above zero, stop retraction.
-    else if (speed > 0 && currentExtension >= 0) {
-        m_armExtend.set(0);
-    } else {
+    if (speed < 0) { // Operator is extending further.
+        if (currentExtension <= maxAllowed) {
+            // Already at (or beyond) the safe limit; block further extension.
+            m_armExtend.set(0);
+        } else {
+            m_armExtend.set(speed);
+        }
+    } else if (speed > 0) { // Operator is retracting (moving toward 0, the home).
+        // Allow retraction regardless of the soft-stop limit.
         m_armExtend.set(speed);
+    } else {
+        m_armExtend.set(0);
     }
 }
 

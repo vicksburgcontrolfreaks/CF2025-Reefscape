@@ -7,7 +7,7 @@ public class SetArmPositionCommand extends Command {
     private final NewCoralArmSubsystem armSubsystem;
     private final double targetAngle;
     private final double targetExtension;
-    private static final double TOLERANCE = 0.1; // Tune as needed
+    private static final double TOLERANCE = 1.0; // Tune as needed
     
     public SetArmPositionCommand(NewCoralArmSubsystem armSubsystem, double targetAngle, double targetExtension) {
         this.armSubsystem = armSubsystem;
