@@ -16,9 +16,6 @@ public class VisionSubsystem extends SubsystemBase {
     // Limelight network table reference
     private final NetworkTable limelightTable;
 
-    // USB camera for the rear webcam stream
-    private final UsbCamera rearWebCam;
-
     public static final boolean USE_LIMELIGHT = false;
 
     public VisionSubsystem() {
@@ -28,19 +25,6 @@ public class VisionSubsystem extends SubsystemBase {
         } else {
             limelightTable = null; // or assign a dummy table if needed
         }
-
-        // Start automatic capture for a USB camera (device number 1).
-        rearWebCam = CameraServer.startAutomaticCapture("rearWebCam", 1);
-        rearWebCam.setResolution(640, 480);
-
-        // Obtain the camera's registered name.
-        String cameraName = rearWebCam.getName();
-
-        // Construct the camera URL using your team number from Constants.
-        String cameraUrl = "http://roborio-" + Constants.TEAM_NUMBER + "-FRC.local:1181/?action=stream";
-
-        // Add the camera stream to the Shuffleboard "Vision" tab.
-        Shuffleboard.getTab("Vision").addCamera("Rear Webcam", cameraName, cameraUrl);
     }
 
     @Override
@@ -96,6 +80,7 @@ public class VisionSubsystem extends SubsystemBase {
         // with no lateral offset or rotation.
         return new Pose2d(1.0, 0.0, new Rotation2d(0));
     }
+
 
     public int getDetectedTagIDFromNT() {
         // Read the tag ID from NetworkTables. Replace "tid" with the correct key.

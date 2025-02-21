@@ -3,37 +3,30 @@
 package frc.robot;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.PS4Controller.Button;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.OIConstants;
-import frc.robot.ReefscapeTargetPoses;
 import frc.robot.autonomous.OscillateDistanceCommand;
 import frc.robot.autonomous.TrajectoryAutoCommand;
 import frc.robot.commands.HomeCoralArmCommand;
 import frc.robot.commands.ManualCoralArmAdjustCommand;
-import frc.robot.commands.ScoreCoral;
-import frc.robot.commands.ScoreCoralParallelCommand;
 import frc.robot.commands.SetArmPositionCommand;
-import frc.robot.commands.SetCoralArmPositionCommand;
-import frc.robot.commands.RaiseCoralArm;
-import frc.robot.commands.ReleaseCoralCmd;
-
 import frc.robot.subsystems.NewCoralArmSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
-import frc.robot.subsystems.LocalizationSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
 import frc.robot.subsystems.AlgaeCollectorSubsystem;
 import frc.robot.subsystems.AlgaeExtenderSubsystem;
 import frc.robot.subsystems.HarpoonSubsystem;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.DriverStation;
 
@@ -47,8 +40,6 @@ public class RobotContainer {
    private final AlgaeExtenderSubsystem m_algaeExtender = new AlgaeExtenderSubsystem();
    private final HarpoonSubsystem m_harpoon = new HarpoonSubsystem();
    private final VisionSubsystem m_visionSubsystem = new VisionSubsystem();
-   // private final LocalizationSubsystem m_localizationSubsystem = new
-   // LocalizationSubsystem(m_robotDrive);
    private final NewCoralArmSubsystem m_coralArmSubsystem = new NewCoralArmSubsystem();
 
    // Use the enum for arm positions.
@@ -63,7 +54,6 @@ public class RobotContainer {
 
    // The driver's controller (for driving)
    private final XboxController m_driverController = new XboxController(OIConstants.kDriverControllerPort);
-
    POVButton dpadUpButton = new POVButton(m_driverController, 0);
    POVButton dpadRightButton = new POVButton(m_driverController, 90);
    POVButton dpadDownButton = new POVButton(m_driverController, 180);
@@ -71,7 +61,6 @@ public class RobotContainer {
 
    // The mechanism controller (for robot mechanisms)
    private final XboxController m_mechanismController = new XboxController(OIConstants.kMechanismControllerPort);
-
    POVButton mech_dpadUpButton = new POVButton(m_mechanismController, 0);
    POVButton mech_dpadRightButton = new POVButton(m_mechanismController, 90);
    POVButton mech_dpadDownButton = new POVButton(m_mechanismController, 180);
@@ -79,6 +68,8 @@ public class RobotContainer {
 
    // Create a chooser for autonomous routines.
    public final SendableChooser<Command> autoChooser = new SendableChooser<>();
+   // Field to store the currently scheduled arm command.
+   private Command m_currentArmCommand = null;
 
    public RobotContainer() {
       // Auton Settings
@@ -87,9 +78,9 @@ public class RobotContainer {
       } else if (alliance == DriverStation.Alliance.Red) {
          // Set up autonomous command for red alliance.
       } else {
-         // This branch will likely never be reached since only Red and Blue exist.
+         // This branch will likely never be reached.
       }
-      // Set up and autonomous chooser for auton options.
+      // Set up an autonomous chooser for auton options.
       autoChooser.setDefaultOption("Competition Ready Auton", new OscillateDistanceCommand(m_robotDrive));
       autoChooser.addOption("Trajectory Auto", new TrajectoryAutoCommand(m_robotDrive));
       autoChooser.addOption("Forward Tune", new OscillateDistanceCommand(m_robotDrive));
@@ -97,131 +88,128 @@ public class RobotContainer {
       autoChooser.addOption("No Auto",
             new RunCommand(() -> m_robotDrive.drive(0, 0, 0, false), m_robotDrive));
 
-      // Configure button bindings
+      // Configure button bindings.
       configureButtonBindings();
 
       // Configure default driver command: drive the robot.
-      // The default controls for the driver are manual so they can
-      // override auton functions
+      // The default controls for the driver are manual so they can override auton functions.
       m_robotDrive.setDefaultCommand(
             new RunCommand(
                   () -> m_robotDrive.drive(
-                        -MathUtil.applyDeadband(m_driverController.getLeftY() * 0.5,
-                              OIConstants.kDriveDeadband),
-                        -MathUtil.applyDeadband(m_driverController.getLeftX() * 0.5,
-                              OIConstants.kDriveDeadband),
-                        -MathUtil.applyDeadband(m_driverController.getRightX() * 0.5,
-                              OIConstants.kDriveDeadband),
+                        -MathUtil.applyDeadband(m_driverController.getLeftY() * 0.5, OIConstants.kDriveDeadband),
+                        -MathUtil.applyDeadband(m_driverController.getLeftX() * 0.5, OIConstants.kDriveDeadband),
+                        -MathUtil.applyDeadband(m_driverController.getRightX() * 0.5, OIConstants.kDriveDeadband),
                         true),
                   m_robotDrive));
 
       // Configure default mech command: control the arm.
-      // The default controls for the arm angle and extension are manual so they can
-      // override auton functions
-      m_coralArmSubsystem
-            .setDefaultCommand(new ManualCoralArmAdjustCommand(m_coralArmSubsystem, m_mechanismController));
-
+      // The default controls for the arm angle and extension are manual so they can override auton functions.
+      m_coralArmSubsystem.setDefaultCommand(new ManualCoralArmAdjustCommand(m_coralArmSubsystem, m_mechanismController));
    }
 
    private void configureButtonBindings() {
-      // ************ Driver controller
-      // Right bumper, defensive X-formation
+      // ************ Driver Controller
+
+      // Create a trigger to cancel any drive commands when joystick inputs exceed a deadband.
+      new Trigger(() ->
+            Math.abs(m_driverController.getLeftY()) > 0.2 ||
+            Math.abs(m_driverController.getLeftX()) > 0.2 ||
+            Math.abs(m_driverController.getRightX()) > 0.2)
+         .onTrue(new InstantCommand(() -> {
+             // Cancel any commands that require the drive subsystem.
+             // (If getScheduledCommands() is not available, consider using cancelAll() if acceptable.)
+             CommandScheduler.getInstance().cancelAll(); 
+         }, m_robotDrive));
+
+      // Right bumper, defensive X-formation.
       new JoystickButton(m_driverController, Button.kR1.value)
-            .whileTrue(new RunCommand(() -> m_robotDrive.setX(), m_robotDrive));
+         .whileTrue(new RunCommand(() -> m_robotDrive.setX(), m_robotDrive));
 
-      // Use ScoreCoralParallelCommand with the scoring side flag: true = left, false
-      // = right.
-      // dpadLeftButton.onTrue(new ScoreCoralParallelCommand(m_robotDrive,
-      // m_visionSubsystem, m_coralArmSubsystem, true));
-      // dpadRightButton
-      // .onTrue(new ScoreCoralParallelCommand(m_robotDrive, m_visionSubsystem,
-      // m_coralArmSubsystem, false));
-
-      // toggle between robot and field oriented
+      // Toggle between robot and field oriented.
       dpadDownButton.onTrue(new InstantCommand(m_robotDrive::toggleFieldOriented, m_robotDrive));
 
-      // ************ Mech controller
-      // Right Bumper zeros arm encoders
+      // ************ Mechanism Controller
+
+      // Right bumper zeros arm encoders.
       new JoystickButton(m_mechanismController, Button.kR1.value)
-            .whileTrue(new RunCommand(() -> m_coralArmSubsystem.zeroEncoders(), m_coralArmSubsystem));
+         .whileTrue(new RunCommand(() -> m_coralArmSubsystem.zeroEncoders(), m_coralArmSubsystem));
 
-      // A button deploys algae arm and starts collector while held
+      // A button deploys algae arm and starts collector while held.
       new JoystickButton(m_mechanismController, XboxController.Button.kA.value)
-            .whileTrue(new RunCommand(() -> {
-               m_algaeCollector.moveArm(0.5);
-            }, m_algaeCollector)) // Start the collector
-            .whileFalse(new InstantCommand(() -> m_algaeCollector.stopArm(), m_algaeCollector)); // Stop when released
+         .whileTrue(new RunCommand(() -> m_algaeCollector.moveArm(0.5), m_algaeCollector))
+         .whileFalse(new InstantCommand(() -> m_algaeCollector.stopArm(), m_algaeCollector));
 
-      // X button
+      // X button – algae extender movement.
       new JoystickButton(m_mechanismController, XboxController.Button.kX.value)
-            .whileTrue(new RunCommand(() -> {
-               m_algaeExtender.moveArm(m_algaeExtender.getInitPos() + 10);
-            }, m_algaeExtender));
+         .whileTrue(new RunCommand(() -> m_algaeExtender.moveArm(m_algaeExtender.getInitPos() + 10), m_algaeExtender));
 
-      // Y button
+      // Y button – algae extender movement.
       new JoystickButton(m_mechanismController, XboxController.Button.kY.value)
-            .whileTrue(new RunCommand(() -> {
-               m_algaeExtender.moveArm(m_algaeExtender.getInitPos());
-            }, m_algaeExtender));
+         .whileTrue(new RunCommand(() -> m_algaeExtender.moveArm(m_algaeExtender.getInitPos()), m_algaeExtender));
 
-      // Coral Arm
-      // When the operator presses D-pad Up, move to the next higher position.
-      mech_dpadUpButton.onTrue(
-            new InstantCommand(() -> {
-               // Update the arm position based on the current state.
-               switch (currentArmPosition) {
-                  case INIT:
-                     currentArmPosition = ArmPosition.LOW;
-                     break;
-                  case LOW:
-                     currentArmPosition = ArmPosition.MID;
-                     break;
-                  case MID:
-                     currentArmPosition = ArmPosition.HIGH;
-                     break;
-                  case HIGH:
-                     // Already at highest; optionally wrap around or do nothing.
-                     break;
-               }
-               SmartDashboard.putString("Arm Position", currentArmPosition.toString());
-               // Schedule the command using the updated target values.
-               new SetArmPositionCommand(
-                     m_coralArmSubsystem,
-                     getTargetAngle(currentArmPosition),
-                     getTargetExtension(currentArmPosition)).schedule();
-            }, m_coralArmSubsystem));
+      // Create a trigger to cancel any commands that require the arm subsystem
+      // if the mechanism controller's joysticks move outside a deadband.
+      new Trigger(() ->
+            Math.abs(m_mechanismController.getLeftY()) > 0.2 ||
+            Math.abs(m_mechanismController.getRightY()) > 0.2)
+         .onTrue(new InstantCommand(() -> {
+             if (m_currentArmCommand != null && m_currentArmCommand.isScheduled()) {
+                m_currentArmCommand.cancel();
+                m_currentArmCommand = null;
+             }
+         }, m_coralArmSubsystem));
 
-      // When the operator presses D-pad Down, move to the next lower position.
-      mech_dpadDownButton.onTrue(
-            new InstantCommand(() -> {
-               // Update the arm position based on the current state.
-               switch (currentArmPosition) {
-                  case HIGH:
-                     currentArmPosition = ArmPosition.MID;
-                     break;
-                  case MID:
-                     currentArmPosition = ArmPosition.LOW;
-                     break;
-                  case LOW:
-                     currentArmPosition = ArmPosition.INIT;
-                     break;
-                  case INIT:
-                     // Already at home; no change.
-                     break;
-               }
-               SmartDashboard.putString("Arm Position", currentArmPosition.toString());
-               // If the new position is INIT, schedule the homing command;
-               // otherwise, schedule the regular SetArmPositionCommand.
-               if (currentArmPosition == ArmPosition.INIT) {
-                  new HomeCoralArmCommand(m_coralArmSubsystem).schedule();
-               } else {
-                  new SetArmPositionCommand(
-                        m_coralArmSubsystem,
-                        getTargetAngle(currentArmPosition),
-                        getTargetExtension(currentArmPosition)).schedule();
-               }
-            }, m_coralArmSubsystem));
+      // When the operator presses D-pad Up, move to the next higher arm position.
+      mech_dpadUpButton.onTrue(new InstantCommand(() -> {
+         switch (currentArmPosition) {
+            case INIT:
+               currentArmPosition = ArmPosition.LOW;
+               break;
+            case LOW:
+               currentArmPosition = ArmPosition.MID;
+               break;
+            case MID:
+               currentArmPosition = ArmPosition.HIGH;
+               break;
+            case HIGH:
+               // Already at highest; optionally wrap around or do nothing.
+               break;
+         }
+         SmartDashboard.putString("Arm Position", currentArmPosition.toString());
+         m_currentArmCommand = new SetArmPositionCommand(
+               m_coralArmSubsystem,
+               getTargetAngle(currentArmPosition),
+               getTargetExtension(currentArmPosition));
+         m_currentArmCommand.schedule();
+      }, m_coralArmSubsystem));
 
+      // When the operator presses D-pad Down, move to the next lower arm position.
+      mech_dpadDownButton.onTrue(new InstantCommand(() -> {
+         switch (currentArmPosition) {
+            case HIGH:
+               currentArmPosition = ArmPosition.MID;
+               break;
+            case MID:
+               currentArmPosition = ArmPosition.LOW;
+               break;
+            case LOW:
+               currentArmPosition = ArmPosition.INIT;
+               break;
+            case INIT:
+               // Already at home; no change.
+               break;
+         }
+         SmartDashboard.putString("Arm Position", currentArmPosition.toString());
+         if (currentArmPosition == ArmPosition.INIT) {
+            m_currentArmCommand = new HomeCoralArmCommand(m_coralArmSubsystem);
+         } else {
+            m_currentArmCommand = new SetArmPositionCommand(
+                  m_coralArmSubsystem,
+                  getTargetAngle(currentArmPosition),
+                  getTargetExtension(currentArmPosition));
+         }
+         m_currentArmCommand.schedule();
+      }, m_coralArmSubsystem));
    }
 
    private double getTargetAngle(ArmPosition pos) {
@@ -253,15 +241,9 @@ public class RobotContainer {
             return 0.0;
       }
    }
-   // D-pad right/left to toggle scoring side.
-
-   // Left Stick Y controls manual angle of arm
-   // Right Stick Y controls manual extension of arm
-   // Speed is controlled in commands.ManualCoralArmAdjustCommand.java
 
    /**
-    * This method is called by the main Robot class to get the command to run in
-    * autonomous.
+    * This method is called by the main Robot class to get the command to run in autonomous.
     */
    public Command getAutonomousCommand() {
       // Return the autonomous command selected from the chooser.
@@ -269,8 +251,6 @@ public class RobotContainer {
    }
 
    public void periodic() {
-
       SmartDashboard.putData("Auto Tuning Mode", autoChooser);
    }
-
 }
