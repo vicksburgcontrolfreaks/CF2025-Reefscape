@@ -48,6 +48,7 @@ public class RobotContainer {
    }
 
    private ArmPosition currentArmPosition = ArmPosition.INIT;
+   private ArmPosition targetArmPosition = ArmPosition.INIT;
 
    // Variable to track scoring side (true = left, false = right); default left.
    private boolean m_scoringSideLeft = true;
@@ -130,6 +131,9 @@ public class RobotContainer {
 
       // ************ Mechanism Controller
 
+      SmartDashboard.putString("Target Arm Position", targetArmPosition.toString());
+      SmartDashboard.putString("Current Arm Position", currentArmPosition.toString());
+
       // Right bumper zeros arm encoders.
       new JoystickButton(m_mechanismController, Button.kR1.value)
          .whileTrue(new RunCommand(() -> m_coralArmSubsystem.zeroEncoders(), m_coralArmSubsystem));
@@ -139,13 +143,9 @@ public class RobotContainer {
          .whileTrue(new RunCommand(() -> m_algaeCollector.moveArm(0.5), m_algaeCollector))
          .whileFalse(new InstantCommand(() -> m_algaeCollector.stopArm(), m_algaeCollector));
 
-      // X button – algae extender movement.
-      new JoystickButton(m_mechanismController, XboxController.Button.kX.value)
-         .whileTrue(new RunCommand(() -> m_algaeExtender.moveArm(m_algaeExtender.getInitPos() + 10), m_algaeExtender));
-
       // Y button – algae extender movement.
       new JoystickButton(m_mechanismController, XboxController.Button.kY.value)
-         .whileTrue(new RunCommand(() -> m_algaeExtender.moveArm(m_algaeExtender.getInitPos()), m_algaeExtender));
+         .whileTrue(new RunCommand(() -> m_algaeExtender.moveArm(m_algaeExtender.getInitPos() + 10), m_algaeExtender));
 
       // Create a trigger to cancel any commands that require the arm subsystem
       // if the mechanism controller's joysticks move outside a deadband.
@@ -161,55 +161,58 @@ public class RobotContainer {
 
       // When the operator presses D-pad Up, move to the next higher arm position.
       mech_dpadUpButton.onTrue(new InstantCommand(() -> {
-         switch (currentArmPosition) {
+         switch (targetArmPosition) {
             case INIT:
-               currentArmPosition = ArmPosition.LOW;
+               targetArmPosition = ArmPosition.LOW;
                break;
             case LOW:
-               currentArmPosition = ArmPosition.MID;
+               targetArmPosition = ArmPosition.MID;
                break;
             case MID:
-               currentArmPosition = ArmPosition.HIGH;
+               targetArmPosition = ArmPosition.HIGH;
                break;
             case HIGH:
                // Already at highest; optionally wrap around or do nothing.
                break;
          }
-         SmartDashboard.putString("Arm Position", currentArmPosition.toString());
-         m_currentArmCommand = new SetArmPositionCommand(
-               m_coralArmSubsystem,
-               getTargetAngle(currentArmPosition),
-               getTargetExtension(currentArmPosition));
-         m_currentArmCommand.schedule();
+         SmartDashboard.putString("Target Arm Position", targetArmPosition.toString());
+         SmartDashboard.putString("Current Arm Position", currentArmPosition.toString());
       }, m_coralArmSubsystem));
 
       // When the operator presses D-pad Down, move to the next lower arm position.
       mech_dpadDownButton.onTrue(new InstantCommand(() -> {
-         switch (currentArmPosition) {
+         switch (targetArmPosition) {
             case HIGH:
-               currentArmPosition = ArmPosition.MID;
+               targetArmPosition = ArmPosition.MID;
                break;
             case MID:
-               currentArmPosition = ArmPosition.LOW;
+               targetArmPosition = ArmPosition.LOW;
                break;
             case LOW:
-               currentArmPosition = ArmPosition.INIT;
+               targetArmPosition = ArmPosition.INIT;
                break;
             case INIT:
                // Already at home; no change.
                break;
          }
-         SmartDashboard.putString("Arm Position", currentArmPosition.toString());
-         if (currentArmPosition == ArmPosition.INIT) {
-            m_currentArmCommand = new HomeCoralArmCommand(m_coralArmSubsystem);
-         } else {
-            m_currentArmCommand = new SetArmPositionCommand(
-                  m_coralArmSubsystem,
-                  getTargetAngle(currentArmPosition),
-                  getTargetExtension(currentArmPosition));
-         }
-         m_currentArmCommand.schedule();
+         SmartDashboard.putString("Target Arm Position", targetArmPosition.toString());
+         SmartDashboard.putString("Current Arm Position", currentArmPosition.toString());
       }, m_coralArmSubsystem));
+
+      new JoystickButton(m_mechanismController, XboxController.Button.kX.value)
+      .onTrue(new InstantCommand(() -> {
+         if (currentArmPosition != targetArmPosition) {
+            currentArmPosition = targetArmPosition;
+            if (currentArmPosition == ArmPosition.INIT) {
+               m_currentArmCommand = new HomeCoralArmCommand(m_coralArmSubsystem);
+            } else {
+               m_currentArmCommand = new SetArmPositionCommand(
+               m_coralArmSubsystem,
+               getTargetAngle(currentArmPosition),
+               getTargetExtension(currentArmPosition));
+         }}
+         m_currentArmCommand.schedule();
+      }));
    }
 
    private double getTargetAngle(ArmPosition pos) {

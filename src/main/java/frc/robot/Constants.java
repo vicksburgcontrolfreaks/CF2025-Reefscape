@@ -91,7 +91,7 @@ public final class Constants {
 
     public static final double CA_PGain = 0.01;
     public static final double CA_IGain = 0.0003;
-    public static final double CA_MAX   = 0.10;
+    public static final double CA_MAX   = 0.40;
   }
 
   public static final class ModuleConstants {
