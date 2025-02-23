@@ -82,7 +82,7 @@ public final class Constants {
     public static final double highTgtHeight = -103.72; //target offset from init
 
     public static final double CE_PGain = 0.02;
-    public static final double CE_MAX   = 0.10;
+    public static final double CE_MAX   = 0.40;
 
     // Coral Arm Angle  
     public static final double lowTgtAngle  =  39.28; //target offset from init
@@ -91,7 +91,7 @@ public final class Constants {
 
     public static final double CA_PGain = 0.01;
     public static final double CA_IGain = 0.0003;
-    public static final double CA_MAX   = 0.10;
+    public static final double CA_MAX   = 0.40;
   }
 
   public static final class ModuleConstants {
