@@ -156,8 +156,7 @@ public class RobotContainer {
       // Create a trigger to cancel any commands that require the arm subsystem
       // if the mechanism controller's joysticks move outside a deadband.
       new Trigger(() ->
-            Math.abs(m_mechanismController.getLeftY()) > 0.2 ||
-            Math.abs(m_mechanismController.getRightY()) > 0.2)
+            m_mechanismController.getRightTriggerAxis() > 0.2)
          .onTrue(new InstantCommand(() -> {
              if (m_currentArmCommand != null && m_currentArmCommand.isScheduled()) {
                 m_currentArmCommand.cancel();

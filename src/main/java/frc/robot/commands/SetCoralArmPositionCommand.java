@@ -28,7 +28,10 @@ public class SetCoralArmPositionCommand extends Command {
     public void execute() {
         increment ++;
         m_armSubsystem.setArmAngle(m_scoringPosition);  //.setArmPosition(m_scoringPosition);
-        m_armSubsystem.moveArm(m_scoringPosition);
+        //if (m_armSubsystem.getArmAngle() > m_armSubsystem.getInitArmAngle() + 6) {
+            m_armSubsystem.moveArm(m_scoringPosition);
+        //}
+        
         SmartDashboard.putNumber("SetCoralArmCmd Increment", increment);
         //m_armSubsystem.set
         // Alternatively, if you prefer separate commands:

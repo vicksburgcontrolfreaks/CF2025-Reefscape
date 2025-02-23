@@ -29,8 +29,14 @@ public class HomeCoralArmCommand extends Command {
     @Override
     public void execute() {
         // Command the arm to move to home (0 position).
-        m_armSubsystem.setArmAngle(ArmConstants.TGT_INIT);
+        
         m_armSubsystem.moveArm(ArmConstants.TGT_INIT);
+
+        // make sure the extension is back before angling into home
+        // to avoid contact with intake
+        if (m_armSubsystem.getCurrentExtension() > -2.0) {
+            m_armSubsystem.setArmAngle(ArmConstants.TGT_INIT);
+        }
 
         // Publish current measurements for debugging.
         double angleCurrent = m_armSubsystem.getAngleCurrent();
@@ -41,11 +47,13 @@ public class HomeCoralArmCommand extends Command {
 
     @Override
     public boolean isFinished() {
-        boolean hardStop = (m_armSubsystem.getAngleCurrent() > CURRENT_THRESHOLD ||
-                              m_armSubsystem.getExtendCurrent() > CURRENT_THRESHOLD);
+        //boolean hardStop = (m_armSubsystem.getAngleCurrent() > CURRENT_THRESHOLD ||
+        //                      m_armSubsystem.getExtendCurrent() > CURRENT_THRESHOLD);
         double currentExtension = m_armSubsystem.getCurrentExtension();
-        boolean nearHome = (Math.abs(currentExtension - ArmConstants.TGT_INIT) < POSITION_TOLERANCE);
-        return hardStop && nearHome;
+        double currentAngle = m_armSubsystem.getArmAngle();
+        boolean nearHome = (Math.abs(currentExtension - m_armSubsystem.getInitArmExtend()) < POSITION_TOLERANCE);
+        boolean angleNearHome = (Math.abs(currentAngle - m_armSubsystem.getInitArmAngle()) < POSITION_TOLERANCE);
+        return angleNearHome && nearHome;
     }
 
     @Override
