@@ -2,6 +2,8 @@
 
 package frc.robot;
 
+import java.util.List;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -11,9 +13,12 @@ import frc.robot.Constants.OIConstants;
 import frc.robot.autonomous.OscillateDistanceCommand;
 import frc.robot.autonomous.TrajectoryAutoCommand;
 import frc.robot.commands.DriveToTagCommand;
+import frc.robot.commands.SwerveTrajectoryCommand;
 import frc.robot.commands.HomeCoralArmCommand;
 import frc.robot.commands.ManualCoralArmAdjustCommand;
+import frc.robot.commands.ScoreCoralDriveCommand;
 import frc.robot.commands.SetArmPositionCommand;
+import frc.robot.commands.SwerveTrajectoryCommand;
 import frc.robot.subsystems.NewCoralArmSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
@@ -87,7 +92,15 @@ public class RobotContainer {
       }
       // Set up an autonomous chooser for auton options.
       autoChooser.setDefaultOption("Competition Ready Auton", new OscillateDistanceCommand(m_robotDrive));
-      autoChooser.addOption("Drive to Tag 11", new DriveToTagCommand(m_robotDrive, ReefscapeTargetPoses.RED_TAG11_RIGHT));
+      autoChooser.addOption("DriveToTagCommand 10",
+            new DriveToTagCommand(m_robotDrive, ReefscapeTargetPoses.RED_TAG10_RIGHT));
+      autoChooser.addOption("SwerveTrajectoryCommand 10",
+            new SwerveTrajectoryCommand(
+                  m_robotDrive,
+                  m_localizationSubsystem.getEstimatedPose(), // Starting pose from your localization subsystem.
+                  List.of(), // Empty list: a direct path.
+                  ReefscapeTargetPoses.RED_TAG10_RIGHT // Target pose for tag #10.
+            ));
       autoChooser.addOption("Trajectory Auto", new TrajectoryAutoCommand(m_robotDrive));
       autoChooser.addOption("Forward Tune", new OscillateDistanceCommand(m_robotDrive));
       // (Optional) Add a "Do Nothing" option.
@@ -98,7 +111,8 @@ public class RobotContainer {
       configureButtonBindings();
 
       // Configure default driver command: drive the robot.
-      // The default controls for the driver are manual so they can override auton functions.
+      // The default controls for the driver are manual so they can override auton
+      // functions.
       m_robotDrive.setDefaultCommand(
             new RunCommand(
                   () -> m_robotDrive.drive(
@@ -109,60 +123,71 @@ public class RobotContainer {
                   m_robotDrive));
 
       // Configure default mech command: control the arm.
-      // The default controls for the arm angle and extension are manual so they can override auton functions.
-      m_coralArmSubsystem.setDefaultCommand(new ManualCoralArmAdjustCommand(m_coralArmSubsystem, m_mechanismController));
+      // The default controls for the arm angle and extension are manual so they can
+      // override auton functions.
+      m_coralArmSubsystem
+            .setDefaultCommand(new ManualCoralArmAdjustCommand(m_coralArmSubsystem, m_mechanismController));
    }
 
    private void configureButtonBindings() {
       // ************ Driver Controller
 
-      // Create a trigger to cancel any drive commands when joystick inputs exceed a deadband.
-      new Trigger(() ->
-            Math.abs(m_driverController.getLeftY()) > 0.2 ||
+      // Create a trigger to cancel any drive commands when joystick inputs exceed a
+      // deadband.
+      new Trigger(() -> Math.abs(m_driverController.getLeftY()) > 0.2 ||
             Math.abs(m_driverController.getLeftX()) > 0.2 ||
             Math.abs(m_driverController.getRightX()) > 0.2)
-         .onTrue(new InstantCommand(() -> {
-             // Cancel any commands that require the drive subsystem.
-             // (If getScheduledCommands() is not available, consider using cancelAll() if acceptable.)
-             CommandScheduler.getInstance().cancelAll(); 
-         }, m_robotDrive));
+            .onTrue(new InstantCommand(() -> {
+               // Cancel any commands that require the drive subsystem.
+               // (If getScheduledCommands() is not available, consider using cancelAll() if
+               // acceptable.)
+               CommandScheduler.getInstance().cancelAll();
+            }, m_robotDrive));
 
       // Right bumper, defensive X-formation.
       new JoystickButton(m_driverController, Button.kR1.value)
-         .whileTrue(new RunCommand(() -> m_robotDrive.setX(), m_robotDrive));
+            .whileTrue(new RunCommand(() -> m_robotDrive.setX(), m_robotDrive));
 
       // Toggle between robot and field oriented.
       dpadDownButton.onTrue(new InstantCommand(m_robotDrive::toggleFieldOriented, m_robotDrive));
+
+      // DPad Right drives to right scoring position of reef section visible to the
+      // robot
+      dpadRightButton.onTrue(new ScoreCoralDriveCommand(m_robotDrive, m_visionSubsystem, false));
+
+      // DPad Left drives to right scoring position of reef section visible to the
+      // robot
+      dpadLeftButton.onTrue(new ScoreCoralDriveCommand(m_robotDrive, m_visionSubsystem, true));
 
       // ************ Mechanism Controller
 
       // Right bumper zeros arm encoders.
       new JoystickButton(m_mechanismController, Button.kR1.value)
-         .whileTrue(new RunCommand(() -> m_coralArmSubsystem.zeroEncoders(), m_coralArmSubsystem));
+            .whileTrue(new RunCommand(() -> m_coralArmSubsystem.zeroEncoders(), m_coralArmSubsystem));
 
       // A button deploys algae arm and starts collector while held.
       new JoystickButton(m_mechanismController, XboxController.Button.kA.value)
-         .whileTrue(new RunCommand(() -> m_algaeCollector.moveArm(0.5), m_algaeCollector))
-         .whileFalse(new InstantCommand(() -> m_algaeCollector.stopArm(), m_algaeCollector));
+            .whileTrue(new RunCommand(() -> m_algaeCollector.moveArm(0.5), m_algaeCollector))
+            .whileFalse(new InstantCommand(() -> m_algaeCollector.stopArm(), m_algaeCollector));
 
       // X button – algae extender movement.
       new JoystickButton(m_mechanismController, XboxController.Button.kX.value)
-         .whileTrue(new RunCommand(() -> m_algaeExtender.moveArm(m_algaeExtender.getInitPos() + 10), m_algaeExtender));
+            .whileTrue(
+                  new RunCommand(() -> m_algaeExtender.moveArm(m_algaeExtender.getInitPos() + 10), m_algaeExtender));
 
       // Y button – algae extender movement.
       new JoystickButton(m_mechanismController, XboxController.Button.kY.value)
-         .whileTrue(new RunCommand(() -> m_algaeExtender.moveArm(m_algaeExtender.getInitPos()), m_algaeExtender));
+            .whileTrue(new RunCommand(() -> m_algaeExtender.moveArm(m_algaeExtender.getInitPos()), m_algaeExtender));
 
       // Create a trigger to cancel any commands that require the arm subsystem
       // if the mechanism controller's joysticks move outside a deadband.
-      new Trigger(() ->
-            m_mechanismController.getRightTriggerAxis() > 0.2)
-         .onTrue(new InstantCommand(() -> {
-             if (m_currentArmCommand != null && m_currentArmCommand.isScheduled()) {
-                m_currentArmCommand.cancel();
-                m_currentArmCommand = null;
-             }
-         }, m_coralArmSubsystem));
+      new Trigger(() -> m_mechanismController.getRightTriggerAxis() > 0.2)
+            .onTrue(new InstantCommand(() -> {
+               if (m_currentArmCommand != null && m_currentArmCommand.isScheduled()) {
+                  m_currentArmCommand.cancel();
+                  m_currentArmCommand = null;
+               }
+            }, m_coralArmSubsystem));
 
       // When the operator presses D-pad Up, move to the next higher arm position.
       mech_dpadUpButton.onTrue(new InstantCommand(() -> {
@@ -248,7 +273,8 @@ public class RobotContainer {
    }
 
    /**
-    * This method is called by the main Robot class to get the command to run in autonomous.
+    * This method is called by the main Robot class to get the command to run in
+    * autonomous.
     */
    public Command getAutonomousCommand() {
       // Return the autonomous command selected from the chooser.
