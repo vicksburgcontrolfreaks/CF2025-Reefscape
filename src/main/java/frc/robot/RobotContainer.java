@@ -55,6 +55,7 @@ public class RobotContainer {
    }
 
    private ArmPosition currentArmPosition = ArmPosition.INIT;
+   private ArmPosition targetArmPosition = ArmPosition.INIT;
 
    // Variable to track scoring side (true = left, false = right); default left.
    private boolean m_scoringSideLeft = true;
@@ -161,6 +162,9 @@ public class RobotContainer {
 
       // ************ Mechanism Controller
 
+      SmartDashboard.putString("Target Arm Position", targetArmPosition.toString());
+      SmartDashboard.putString("Current Arm Position", currentArmPosition.toString());
+
       // Right bumper zeros arm encoders.
       new JoystickButton(m_mechanismController, Button.kR1.value)
             .whileTrue(new RunCommand(() -> m_coralArmSubsystem.zeroEncoders(), m_coralArmSubsystem));
@@ -189,57 +193,60 @@ public class RobotContainer {
                }
             }, m_coralArmSubsystem));
 
-      // When the operator presses D-pad Up, move to the next higher arm position.
+      // When the operator presses D-pad Up, move to the next higher arm position. This will also wrap around (aka pressing up one more time after high will set it to init)
       mech_dpadUpButton.onTrue(new InstantCommand(() -> {
-         switch (currentArmPosition) {
+         switch (targetArmPosition) {
             case INIT:
-               currentArmPosition = ArmPosition.LOW;
+               targetArmPosition = ArmPosition.LOW;
                break;
             case LOW:
-               currentArmPosition = ArmPosition.MID;
+               targetArmPosition = ArmPosition.MID;
                break;
             case MID:
-               currentArmPosition = ArmPosition.HIGH;
+               targetArmPosition = ArmPosition.HIGH;
                break;
             case HIGH:
-               // Already at highest; optionally wrap around or do nothing.
+               targetArmPosition = ArmPosition.INIT;
                break;
          }
-         SmartDashboard.putString("Arm Position", currentArmPosition.toString());
-         m_currentArmCommand = new SetArmPositionCommand(
+         SmartDashboard.putString("Target Arm Position", targetArmPosition.toString());
+         SmartDashboard.putString("Current Arm Position", currentArmPosition.toString());
+      }, m_coralArmSubsystem));
+
+      // When the operator presses D-pad Down, move to the next lower arm position. This will also wrap around (aka pressing down one more time after init will set it to high)
+      mech_dpadDownButton.onTrue(new InstantCommand(() -> {
+         switch (targetArmPosition) {
+            case HIGH:
+               targetArmPosition = ArmPosition.MID;
+               break;
+            case MID:
+               targetArmPosition = ArmPosition.LOW;
+               break;
+            case LOW:
+               targetArmPosition = ArmPosition.INIT;
+               break;
+            case INIT:
+               targetArmPosition = ArmPosition.HIGH;
+               break;
+         }
+         SmartDashboard.putString("Target Arm Position", targetArmPosition.toString());
+         SmartDashboard.putString("Current Arm Position", currentArmPosition.toString());
+      }, m_coralArmSubsystem));
+
+      new JoystickButton(m_mechanismController, XboxController.Button.kX.value)
+      .onTrue(new InstantCommand(() -> {
+         if (currentArmPosition != targetArmPosition) {
+            currentArmPosition = targetArmPosition;
+            if (currentArmPosition == ArmPosition.INIT) {
+               m_currentArmCommand = new HomeCoralArmCommand(m_coralArmSubsystem);
+            } else {
+               m_currentArmCommand = new SetArmPositionCommand(
                m_coralArmSubsystem,
                getTargetAngle(currentArmPosition),
                getTargetExtension(currentArmPosition));
+         }}
          m_currentArmCommand.schedule();
-      }, m_coralArmSubsystem));
-
-      // When the operator presses D-pad Down, move to the next lower arm position.
-      mech_dpadDownButton.onTrue(new InstantCommand(() -> {
-         switch (currentArmPosition) {
-            case HIGH:
-               currentArmPosition = ArmPosition.MID;
-               break;
-            case MID:
-               currentArmPosition = ArmPosition.LOW;
-               break;
-            case LOW:
-               currentArmPosition = ArmPosition.INIT;
-               break;
-            case INIT:
-               // Already at home; no change.
-               break;
-         }
-         SmartDashboard.putString("Arm Position", currentArmPosition.toString());
-         if (currentArmPosition == ArmPosition.INIT) {
-            m_currentArmCommand = new HomeCoralArmCommand(m_coralArmSubsystem);
-         } else {
-            m_currentArmCommand = new SetArmPositionCommand(
-                  m_coralArmSubsystem,
-                  getTargetAngle(currentArmPosition),
-                  getTargetExtension(currentArmPosition));
-         }
-         m_currentArmCommand.schedule();
-      }, m_coralArmSubsystem));
+      }));
    }
 
    private double getTargetAngle(ArmPosition pos) {
