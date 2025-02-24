@@ -164,7 +164,7 @@ public class RobotContainer {
              }
          }, m_coralArmSubsystem));
 
-      // When the operator presses D-pad Up, move to the next higher arm position.
+      // When the operator presses D-pad Up, move to the next higher arm position. This will also wrap around (aka pressing up one more time after high will set it to init)
       mech_dpadUpButton.onTrue(new InstantCommand(() -> {
          switch (targetArmPosition) {
             case INIT:
@@ -177,14 +177,14 @@ public class RobotContainer {
                targetArmPosition = ArmPosition.HIGH;
                break;
             case HIGH:
-               // Already at highest; optionally wrap around or do nothing.
+               targetArmPosition = ArmPosition.INIT;
                break;
          }
          SmartDashboard.putString("Target Arm Position", targetArmPosition.toString());
          SmartDashboard.putString("Current Arm Position", currentArmPosition.toString());
       }, m_coralArmSubsystem));
 
-      // When the operator presses D-pad Down, move to the next lower arm position.
+      // When the operator presses D-pad Down, move to the next lower arm position. This will also wrap around (aka pressing down one more time after init will set it to high)
       mech_dpadDownButton.onTrue(new InstantCommand(() -> {
          switch (targetArmPosition) {
             case HIGH:
@@ -197,7 +197,7 @@ public class RobotContainer {
                targetArmPosition = ArmPosition.INIT;
                break;
             case INIT:
-               // Already at home; no change.
+               targetArmPosition = ArmPosition.HIGH;
                break;
          }
          SmartDashboard.putString("Target Arm Position", targetArmPosition.toString());
