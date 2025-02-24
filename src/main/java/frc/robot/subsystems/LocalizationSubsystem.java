@@ -9,14 +9,13 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DriveConstants;
-import frc.robot.LimelightHelpers;
+import frc.robot.LimelightHelpers; // Ensure you have the updated helper class
 
 public class LocalizationSubsystem extends SubsystemBase {
     private final DriveSubsystem driveSubsystem;
     private final SwerveDrivePoseEstimator poseEstimator;
     private final Field2d m_field = new Field2d();
-
-    private Pose2d capturedPose = null; // Stores the locked-in pose for trajectory planning
+    private Pose2d capturedPose = null; // For trajectory planning
 
     public LocalizationSubsystem(DriveSubsystem driveSubsystem) {
         this.driveSubsystem = driveSubsystem;
@@ -24,9 +23,9 @@ public class LocalizationSubsystem extends SubsystemBase {
                 DriveConstants.kDriveKinematics,
                 Rotation2d.fromDegrees(driveSubsystem.getHeading()),
                 driveSubsystem.getModulePositions(),
-                new Pose2d(), // initial pose; adjust if needed
-                VecBuilder.fill(0.1, 0.1, 0.1), // state standard deviations [meters, meters, radians]
-                VecBuilder.fill(0.5, 0.5, 0.5) // default vision measurement standard deviations
+                new Pose2d(), // Initial pose; adjust if needed.
+                VecBuilder.fill(0.1, 0.1, 0.1),  // State standard deviations: [meters, meters, radians]
+                VecBuilder.fill(0.5, 0.5, 0.5)   // Vision measurement standard deviations.
         );
         // Publish the Field2d widget to SmartDashboard.
         SmartDashboard.putData("Field", m_field);
@@ -34,31 +33,29 @@ public class LocalizationSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-        // Set the Limelight to use its integrated IMU for MegaTag2 localization.
-        LimelightHelpers.SetIMUMode("limelight", 2);
+        // Set the Limelight to use its internal IMU for MegaTag2 localization.
+        LimelightHelpers.SetIMUMode("limelight", 3);
+
+        // If you're using an external IMU, you could instead call:
+        LimelightHelpers.SetRobotOrientation("limelight", driveSubsystem.getHeading(), 0, 0, 0, 0, 0);
 
         // Update odometry using the drive subsystem's sensor values.
         poseEstimator.update(
                 Rotation2d.fromDegrees(driveSubsystem.getHeading()),
                 driveSubsystem.getModulePositions());
 
-        // Retrieve the MegaTag2 vision estimate.
+        // Retrieve the MegaTag2 vision estimate using the "wpiBlue" variant.
         LimelightHelpers.PoseEstimate mt2Estimate = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight");
         if (mt2Estimate.tagCount > 0) {
-            // If more than one tag is seen, trust vision more by reducing standard
-            // deviations.
+            // Adjust measurement uncertainty based on the number of tags seen.
             double visionStdDev = (mt2Estimate.tagCount > 1) ? 0.3 : 0.5;
             poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(visionStdDev, visionStdDev, visionStdDev));
             poseEstimator.addVisionMeasurement(mt2Estimate.pose, mt2Estimate.timestampSeconds);
         }
-      
 
-        // Publish the estimated pose for debugging.
+        // Publish the estimated pose.
         Pose2d estimatedPose = poseEstimator.getEstimatedPosition();
-          
-        // Update the Field2d with the current robot pose.
-          m_field.setRobotPose(estimatedPose);
-          
+        m_field.setRobotPose(estimatedPose);
         SmartDashboard.putNumber("Estimated X", estimatedPose.getTranslation().getX());
         SmartDashboard.putNumber("Estimated Y", estimatedPose.getTranslation().getY());
         SmartDashboard.putNumber("Estimated Rotation", estimatedPose.getRotation().getDegrees());
@@ -66,7 +63,6 @@ public class LocalizationSubsystem extends SubsystemBase {
 
     /**
      * Captures the current pose to be used later for trajectory planning.
-     *
      * @param currentPose The pose to capture.
      */
     public void captureStartPose(Pose2d currentPose) {
@@ -79,11 +75,14 @@ public class LocalizationSubsystem extends SubsystemBase {
     }
 
     /**
-     * Returns the current estimated pose of the robot.
-     *
-     * @return The fused pose estimate.
+     * Returns the current estimated robot pose.
+     * @return The estimated pose.
      */
     public Pose2d getEstimatedPose() {
         return poseEstimator.getEstimatedPosition();
+    }
+
+    public Field2d getField() {
+        return m_field;
     }
 }

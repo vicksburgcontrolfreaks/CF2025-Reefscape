@@ -1,31 +1,32 @@
 {
   "NetworkTables": {
+    "retained": {
+      "SmartDashboard": {
+        "open": true
+      }
+    },
     "transitory": {
+      "CameraPublisher": {
+        "open": true
+      },
       "LiveWindow": {
         ".status": {
-          "open": true
+          "open": false
         }
       },
       "Shuffleboard": {
         "Vision": {
           "Rear Webcam": {
-            "open": true
+            "open": false
           },
-          "open": true
+          "open": false
         }
-      },
-      "SmartDashboard": {
-        "Auto Tuning Mode": {
-          "open": true
-        },
-        "open": true
       }
     },
     "types": {
       "/FMSInfo": "FMSInfo",
       "/SmartDashboard/Auto Tuning Mode": "String Chooser",
-      "/SmartDashboard/Field": "Field2d",
-      "/SmartDashboard/Vision Subsystem": "Subsystem"
+      "/SmartDashboard/Field": "Field2d"
     },
     "windows": {
       "/SmartDashboard/Field": {
@@ -48,8 +49,5 @@
   "NetworkTables Settings": {
     "mode": "Client (NT4)",
     "serverTeam": "8126"
-  },
-  "NetworkTables View": {
-    "visible": false
   }
 }

@@ -24,7 +24,9 @@ public class SetArmPositionCommand extends Command {
     @Override
     public void execute() {
         armSubsystem.setArmAngle(targetAngle);
-        armSubsystem.moveArm(targetExtension);
+        if (armSubsystem.getArmAngle() > armSubsystem.getInitArmAngle() + 8) {
+           armSubsystem.moveArm(targetExtension);
+        }
     }
     
     @Override

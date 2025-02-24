@@ -10,6 +10,7 @@ import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.OIConstants;
 import frc.robot.autonomous.OscillateDistanceCommand;
 import frc.robot.autonomous.TrajectoryAutoCommand;
+import frc.robot.commands.DriveToTagCommand;
 import frc.robot.commands.HomeCoralArmCommand;
 import frc.robot.commands.ManualCoralArmAdjustCommand;
 import frc.robot.commands.SetArmPositionCommand;
@@ -19,7 +20,7 @@ import frc.robot.subsystems.VisionSubsystem;
 import frc.robot.subsystems.AlgaeCollectorSubsystem;
 import frc.robot.subsystems.AlgaeExtenderSubsystem;
 import frc.robot.subsystems.HarpoonSubsystem;
-
+import frc.robot.subsystems.LocalizationSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -38,9 +39,10 @@ public class RobotContainer {
    private final DriveSubsystem m_robotDrive = new DriveSubsystem();
    private final AlgaeCollectorSubsystem m_algaeCollector = new AlgaeCollectorSubsystem();
    private final AlgaeExtenderSubsystem m_algaeExtender = new AlgaeExtenderSubsystem();
+   private final NewCoralArmSubsystem m_coralArmSubsystem = new NewCoralArmSubsystem();
    private final HarpoonSubsystem m_harpoon = new HarpoonSubsystem();
    private final VisionSubsystem m_visionSubsystem = new VisionSubsystem();
-   private final NewCoralArmSubsystem m_coralArmSubsystem = new NewCoralArmSubsystem();
+   private final LocalizationSubsystem m_localizationSubsystem = new LocalizationSubsystem(m_robotDrive);
 
    // Use the enum for arm positions.
    public enum ArmPosition {
@@ -73,6 +75,9 @@ public class RobotContainer {
    private Command m_currentArmCommand = null;
 
    public RobotContainer() {
+      //
+      SmartDashboard.putData("Field", m_localizationSubsystem.getField());
+
       // Auton Settings
       if (alliance == DriverStation.Alliance.Blue) {
          // Set up autonomous command for blue alliance.
@@ -83,6 +88,7 @@ public class RobotContainer {
       }
       // Set up an autonomous chooser for auton options.
       autoChooser.setDefaultOption("Competition Ready Auton", new OscillateDistanceCommand(m_robotDrive));
+      autoChooser.addOption("Drive to Tag 11", new DriveToTagCommand(m_robotDrive, ReefscapeTargetPoses.RED_TAG11_RIGHT));
       autoChooser.addOption("Trajectory Auto", new TrajectoryAutoCommand(m_robotDrive));
       autoChooser.addOption("Forward Tune", new OscillateDistanceCommand(m_robotDrive));
       // (Optional) Add a "Do Nothing" option.
@@ -150,8 +156,7 @@ public class RobotContainer {
       // Create a trigger to cancel any commands that require the arm subsystem
       // if the mechanism controller's joysticks move outside a deadband.
       new Trigger(() ->
-            Math.abs(m_mechanismController.getLeftY()) > 0.2 ||
-            Math.abs(m_mechanismController.getRightY()) > 0.2)
+            m_mechanismController.getRightTriggerAxis() > 0.2)
          .onTrue(new InstantCommand(() -> {
              if (m_currentArmCommand != null && m_currentArmCommand.isScheduled()) {
                 m_currentArmCommand.cancel();
