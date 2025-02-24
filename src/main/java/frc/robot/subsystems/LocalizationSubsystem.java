@@ -24,8 +24,8 @@ public class LocalizationSubsystem extends SubsystemBase {
                 Rotation2d.fromDegrees(driveSubsystem.getHeading()),
                 driveSubsystem.getModulePositions(),
                 new Pose2d(), // Initial pose; adjust if needed.
-                VecBuilder.fill(0.1, 0.1, 0.1),  // State standard deviations: [meters, meters, radians]
-                VecBuilder.fill(0.5, 0.5, 0.5)   // Vision measurement standard deviations.
+                VecBuilder.fill(0.1, 0.1, 0.1), // State standard deviations: [meters, meters, radians]
+                VecBuilder.fill(0.5, 0.5, 0.5) // Vision measurement standard deviations.
         );
         // Publish the Field2d widget to SmartDashboard.
         SmartDashboard.putData("Field", m_field);
@@ -59,10 +59,12 @@ public class LocalizationSubsystem extends SubsystemBase {
         SmartDashboard.putNumber("Estimated X", estimatedPose.getTranslation().getX());
         SmartDashboard.putNumber("Estimated Y", estimatedPose.getTranslation().getY());
         SmartDashboard.putNumber("Estimated Rotation", estimatedPose.getRotation().getDegrees());
+        SmartDashboard.putString("Estimated Pose", estimatedPose.toString());
     }
 
     /**
      * Captures the current pose to be used later for trajectory planning.
+     * 
      * @param currentPose The pose to capture.
      */
     public void captureStartPose(Pose2d currentPose) {
@@ -76,6 +78,7 @@ public class LocalizationSubsystem extends SubsystemBase {
 
     /**
      * Returns the current estimated robot pose.
+     * 
      * @return The estimated pose.
      */
     public Pose2d getEstimatedPose() {
