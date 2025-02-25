@@ -5,7 +5,6 @@ package frc.robot.commands;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
@@ -18,7 +17,6 @@ import frc.robot.Constants.ReefscapeTargetPoses;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
 import java.util.List;
-import frc.robot.LimelightHelpers.RawFiducial;
 
 public class ScoreCoralDriveCommand extends Command {
     private final DriveSubsystem m_driveSubsystem;
