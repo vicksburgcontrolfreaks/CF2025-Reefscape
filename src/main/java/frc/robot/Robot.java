@@ -65,7 +65,7 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousInit() {
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
-    new SetCoralCollectorPositionCommand(m_coralCollectorSubsystem, 20).schedule();
+    new SetCoralCollectorPositionCommand(m_coralCollectorSubsystem, 40).schedule();
 
     /*
      * String autoSelected = SmartDashboard.getString("Auto Selector",
