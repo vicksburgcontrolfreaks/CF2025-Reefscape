@@ -9,7 +9,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 public class HomeCoralArmCommand extends Command {
     private final NewCoralArmSubsystem m_armSubsystem;
     private static final double POSITION_TOLERANCE = 0.2; // acceptable error
-    private static final double CURRENT_THRESHOLD = 10.0; // amperes for hard stop
 
     /**
      * Constructs a command to retract the coral arm to its home position.
