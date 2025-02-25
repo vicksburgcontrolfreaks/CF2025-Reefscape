@@ -1,4 +1,5 @@
 //  Control Freaks 2025
+//https://chatgpt.com/share/67bd090f-4c08-8005-9e26-2a43e1b26ac6
 
 package frc.robot;
 
@@ -24,6 +25,7 @@ import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
 import frc.robot.subsystems.AlgaeCollectorSubsystem;
 import frc.robot.subsystems.AlgaeExtenderSubsystem;
+import frc.robot.subsystems.CoralCollectorSubsystem;
 import frc.robot.subsystems.HarpoonSubsystem;
 import frc.robot.subsystems.LocalizationSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -178,6 +180,14 @@ public class RobotContainer {
       // Y button – algae extender movement.
       new JoystickButton(m_mechanismController, XboxController.Button.kY.value)
             .whileTrue(new RunCommand(() -> m_algaeExtender.moveArm(m_algaeExtender.getInitPos()), m_algaeExtender));
+
+      new JoystickButton(m_mechanismController, XboxController.Button.kDpadLeft.value)
+            .whileTrue(new RunCommand(() -> harpoonSubsystem.setMotor(0.5), HarpoonSubsystem))
+            .whileFalse(new InstantCommand(() -> harpoonSubsystem.stop(), HarpoonSubsystem));
+
+      new JoystickButton(m_mechanismController, XboxController.Button.kDpadRight.value)
+            .whileTrue(new RunCommand(() -> harpoonSubsystem.setMotor(-0.5), HarpoonSubsystem))
+            .whileFalse(new InstantCommand(() -> harpoonSubsystem.stop(), HarpoonSubsystem));
 
       // Create a trigger to cancel any commands that require the arm subsystem
       // if the mechanism controller's joysticks move outside a deadband.
