@@ -134,6 +134,11 @@ public class RobotContainer {
 
    private void configureButtonBindings() {
       // ************ Driver Controller
+      new JoystickButton(m_driverController, Button.kL1.value)
+    .whileTrue(new InstantCommand(() -> m_robotDrive.setSpeedMultiplier(0.1), m_robotDrive))
+    .whileFalse(new InstantCommand(() -> m_robotDrive.setSpeedMultiplier(1.0), m_robotDrive));
+
+
 
       // Create a trigger to cancel any drive commands when joystick inputs exceed a
       // deadband.
@@ -176,22 +181,22 @@ public class RobotContainer {
             .whileTrue(new RunCommand(() -> m_algaeCollector.moveArm(0.5), m_algaeCollector))
             .whileFalse(new InstantCommand(() -> m_algaeCollector.stopArm(), m_algaeCollector));
 
-      // X button – algae extender movement.
-      new JoystickButton(m_mechanismController, XboxController.Button.kX.value)
-            .whileTrue(
-                  new RunCommand(() -> m_algaeExtender.moveArm(m_algaeExtender.getInitPos() + 10), m_algaeExtender));
+      // // X button – algae extender movement.
+      // new JoystickButton(m_mechanismController, XboxController.Button.kX.value)
+      //       .whileTrue(
+      //             new RunCommand(() -> m_algaeExtender.moveArm(m_algaeExtender.getInitPos() + 10), m_algaeExtender));
 
       // Y button – algae extender movement.
       new JoystickButton(m_mechanismController, XboxController.Button.kY.value)
             .whileTrue(new RunCommand(() -> m_algaeExtender.moveArm(m_algaeExtender.getInitPos()), m_algaeExtender));
 
-      new JoystickButton(m_mechanismController, XboxController.Button.kDpadLeft.value)
-            .whileTrue(new RunCommand(() -> harpoonSubsystem.setMotor(0.5), HarpoonSubsystem))
-            .whileFalse(new InstantCommand(() -> harpoonSubsystem.stop(), HarpoonSubsystem));
+      mech_dpadRightButton
+            .whileTrue(new RunCommand(() -> m_harpoon.setMotor(0.5), m_harpoon))
+            .whileFalse(new InstantCommand(() -> m_harpoon.stop(), m_harpoon));
 
-      new JoystickButton(m_mechanismController, XboxController.Button.kDpadRight.value)
-            .whileTrue(new RunCommand(() -> harpoonSubsystem.setMotor(-0.5), HarpoonSubsystem))
-            .whileFalse(new InstantCommand(() -> harpoonSubsystem.stop(), HarpoonSubsystem));
+      mech_dpadLeftButton
+            .whileTrue(new RunCommand(() -> m_harpoon.setMotor(-0.5), m_harpoon))
+            .whileFalse(new InstantCommand(() -> m_harpoon.stop(), m_harpoon));
 
       // Create a trigger to cancel any commands that require the arm subsystem
       // if the mechanism controller's joysticks move outside a deadband.
@@ -203,7 +208,9 @@ public class RobotContainer {
                }
             }, m_coralArmSubsystem));
 
-      // When the operator presses D-pad Up, move to the next higher arm position. This will also wrap around (aka pressing up one more time after high will set it to init)
+      // When the operator presses D-pad Up, move to the next higher arm position.
+      // This will also wrap around (aka pressing up one more time after high will set
+      // it to init)
       mech_dpadUpButton.onTrue(new InstantCommand(() -> {
          switch (targetArmPosition) {
             case INIT:
@@ -216,14 +223,16 @@ public class RobotContainer {
                targetArmPosition = ArmPosition.HIGH;
                break;
             case HIGH:
-               targetArmPosition = ArmPosition.INIT;
+               // targetArmPosition = ArmPosition.INIT;
                break;
          }
          SmartDashboard.putString("Target Arm Position", targetArmPosition.toString());
          SmartDashboard.putString("Current Arm Position", currentArmPosition.toString());
       }, m_coralArmSubsystem));
 
-      // When the operator presses D-pad Down, move to the next lower arm position. This will also wrap around (aka pressing down one more time after init will set it to high)
+      // When the operator presses D-pad Down, move to the next lower arm position.
+      // This will also wrap around (aka pressing down one more time after init will
+      // set it to high)
       mech_dpadDownButton.onTrue(new InstantCommand(() -> {
          switch (targetArmPosition) {
             case HIGH:
@@ -236,7 +245,7 @@ public class RobotContainer {
                targetArmPosition = ArmPosition.INIT;
                break;
             case INIT:
-               targetArmPosition = ArmPosition.HIGH;
+               // targetArmPosition = ArmPosition.HIGH;
                break;
          }
          SmartDashboard.putString("Target Arm Position", targetArmPosition.toString());
@@ -244,19 +253,20 @@ public class RobotContainer {
       }, m_coralArmSubsystem));
 
       new JoystickButton(m_mechanismController, XboxController.Button.kX.value)
-      .onTrue(new InstantCommand(() -> {
-         if (currentArmPosition != targetArmPosition) {
-            currentArmPosition = targetArmPosition;
-            if (currentArmPosition == ArmPosition.INIT) {
-               m_currentArmCommand = new HomeCoralArmCommand(m_coralArmSubsystem);
-            } else {
-               m_currentArmCommand = new SetArmPositionCommand(
-               m_coralArmSubsystem,
-               getTargetAngle(currentArmPosition),
-               getTargetExtension(currentArmPosition));
-         }}
-         m_currentArmCommand.schedule();
-      }));
+            .onTrue(new InstantCommand(() -> {
+               if (currentArmPosition != targetArmPosition) {
+                  currentArmPosition = targetArmPosition;
+                  if (currentArmPosition == ArmPosition.INIT) {
+                     m_currentArmCommand = new HomeCoralArmCommand(m_coralArmSubsystem);
+                  } else {
+                     m_currentArmCommand = new SetArmPositionCommand(
+                           m_coralArmSubsystem,
+                           getTargetAngle(currentArmPosition),
+                           getTargetExtension(currentArmPosition));
+                  }
+               }
+               m_currentArmCommand.schedule();
+            }));
    }
 
    private double getTargetAngle(ArmPosition pos) {

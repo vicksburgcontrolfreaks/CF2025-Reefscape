@@ -6,6 +6,8 @@ package frc.robot.subsystems;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.RelativeEncoder;
+
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 //import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ArmConstants;
@@ -202,7 +204,9 @@ public class NewCoralArmSubsystem extends SubsystemBase {
    @Override
    public void periodic() {
       //SmartDashboard.putNumber("Arm error", ca_error);
-      //SmartDashboard.putNumber("Arm Extension", e_armExtend.getPosition());
+      SmartDashboard.putNumber("Arm Extension", e_armExtend.getPosition());
+      SmartDashboard.putNumber("Arm Angle", e_armAngle.getPosition());
+
       //SmartDashboard.putNumber("Ex error", ce_error);
       //SmartDashboard.putNumber("Ex Cmd", ce_cmd);
       //SmartDashboard.putNumber("Ex Pos", e_armExtend.getPosition());
