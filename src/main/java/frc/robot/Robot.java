@@ -22,7 +22,7 @@ public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
 
   private RobotContainer m_robotContainer;
-     private final CoralCollectorSubsystem m_coralCollectorSubsystem = new CoralCollectorSubsystem();
+  private final CoralCollectorSubsystem m_coralCollectorSubsystem = new CoralCollectorSubsystem();
 
 
   /**

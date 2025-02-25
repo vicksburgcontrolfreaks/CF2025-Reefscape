@@ -46,3 +46,5 @@ public class CoralCollectorSubsystem extends SubsystemBase {
     @Override
     public void periodic() {
         // Publish the current encoder position for 
+    }
+}
