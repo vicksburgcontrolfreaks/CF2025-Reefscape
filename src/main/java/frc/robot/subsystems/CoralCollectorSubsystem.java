@@ -27,7 +27,7 @@ public class CoralCollectorSubsystem extends SubsystemBase {
         double current = m_encoder.getPosition();
         double error = target - current;
         // Example proportional gain; adjust as needed.
-        double output = error * 0.1;
+        double output = error * 0.4;
         // Clamp the output to a safe range.
         output = Math.max(-1.0, Math.min(1.0, output));
         m_motor.set(output);
@@ -45,6 +45,7 @@ public class CoralCollectorSubsystem extends SubsystemBase {
     
     @Override
     public void periodic() {
-        // Publish the current encoder position for 
+        // Publish the current encoder position for debugging.
+        SmartDashboard.putNumber("CoralCollector Position", m_encoder.getPosition());
     }
 }

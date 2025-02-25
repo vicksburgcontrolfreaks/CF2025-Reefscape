@@ -165,8 +165,8 @@ public class DriveSubsystem extends SubsystemBase {
     // we use the m_fieldOriented flag.
     boolean useFieldRelative = m_fieldOriented;
 
-    double xSpeedDelivered = xSpeed * DriveConstants.kMaxSpeedMetersPerSecond;
-    double ySpeedDelivered = ySpeed * DriveConstants.kMaxSpeedMetersPerSecond;
+    double xSpeedDelivered = xSpeed * DriveConstants.kMaxSpeedMetersPerSecond * speedMultiplier;
+    double ySpeedDelivered = ySpeed * DriveConstants.kMaxSpeedMetersPerSecond * speedMultiplier;
     double rotDelivered = rot * DriveConstants.kMaxAngularSpeed;
 
     var swerveModuleStates = DriveConstants.kDriveKinematics.toSwerveModuleStates(
@@ -245,5 +245,12 @@ public class DriveSubsystem extends SubsystemBase {
         m_rearRight.getPosition()
     };
   }
+
+  private double speedMultiplier = 1.0;
+
+  public void setSpeedMultiplier(double multiplier) {
+    this.speedMultiplier = multiplier;
+    SmartDashboard.putNumber("Drive Speed Multiplier", speedMultiplier);
+}
 
 }
