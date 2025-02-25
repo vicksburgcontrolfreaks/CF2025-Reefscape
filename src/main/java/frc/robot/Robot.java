@@ -23,7 +23,7 @@ public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
 
   private RobotContainer m_robotContainer;
-     private final CoralCollectorSubsystem m_coralCollectorSubsystem = new CoralCollectorSubsystem();
+  private final CoralCollectorSubsystem m_coralCollectorSubsystem = new CoralCollectorSubsystem();
 
 
   /**
@@ -70,7 +70,6 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousInit() {
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
-    
 
     /*
      * String autoSelected = SmartDashboard.getString("Auto Selector",
