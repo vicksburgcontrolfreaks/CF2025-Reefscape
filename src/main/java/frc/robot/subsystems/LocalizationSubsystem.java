@@ -9,7 +9,8 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DriveConstants;
-import frc.robot.LimelightHelpers; // Ensure you have the updated helper class
+import frc.robot.LimelightHelpers;
+import edu.wpi.first.wpilibj.DriverStation;
 
 public class LocalizationSubsystem extends SubsystemBase {
     private final DriveSubsystem driveSubsystem;
@@ -25,7 +26,7 @@ public class LocalizationSubsystem extends SubsystemBase {
                 driveSubsystem.getModulePositions(),
                 new Pose2d(), // Initial pose; adjust if needed.
                 VecBuilder.fill(0.1, 0.1, 0.1), // State standard deviations: [meters, meters, radians]
-                VecBuilder.fill(0.5, 0.5, 0.5) // Vision measurement standard deviations.
+                VecBuilder.fill(0.5, 0.5, 0.5)  // Vision measurement standard deviations.
         );
         // Publish the Field2d widget to SmartDashboard.
         SmartDashboard.putData("Field", m_field);
@@ -36,7 +37,7 @@ public class LocalizationSubsystem extends SubsystemBase {
         // Set the Limelight to use its internal IMU for MegaTag2 localization.
         LimelightHelpers.SetIMUMode("limelight", 3);
 
-        // If you're using an external IMU, you could instead call:
+        // Optionally set robot orientation from an external IMU.
         LimelightHelpers.SetRobotOrientation("limelight", driveSubsystem.getHeading(), 0, 0, 0, 0, 0);
 
         // Update odometry using the drive subsystem's sensor values.
@@ -44,9 +45,15 @@ public class LocalizationSubsystem extends SubsystemBase {
                 Rotation2d.fromDegrees(driveSubsystem.getHeading()),
                 driveSubsystem.getModulePositions());
 
-        // Retrieve the MegaTag2 vision estimate using the "wpiBlue" variant.
-        LimelightHelpers.PoseEstimate mt2Estimate = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight");
-        if (mt2Estimate.tagCount > 0) {
+        // Choose the correct vision estimate based on alliance.
+        LimelightHelpers.PoseEstimate mt2Estimate;
+        if (DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue) == DriverStation.Alliance.Red) {
+            mt2Estimate = LimelightHelpers.getBotPoseEstimate_wpiRed_MegaTag2("limelight");
+        } else {
+            mt2Estimate = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight");
+        }
+        
+        if (mt2Estimate != null && mt2Estimate.tagCount > 0) {
             // Adjust measurement uncertainty based on the number of tags seen.
             double visionStdDev = (mt2Estimate.tagCount > 1) ? 0.3 : 0.5;
             poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(visionStdDev, visionStdDev, visionStdDev));
@@ -64,7 +71,6 @@ public class LocalizationSubsystem extends SubsystemBase {
 
     /**
      * Captures the current pose to be used later for trajectory planning.
-     * 
      * @param currentPose The pose to capture.
      */
     public void captureStartPose(Pose2d currentPose) {
@@ -78,7 +84,6 @@ public class LocalizationSubsystem extends SubsystemBase {
 
     /**
      * Returns the current estimated robot pose.
-     * 
      * @return The estimated pose.
      */
     public Pose2d getEstimatedPose() {

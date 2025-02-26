@@ -13,18 +13,19 @@ import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.OIConstants;
 import frc.robot.autonomous.OscillateDistanceCommand;
 import frc.robot.autonomous.TrajectoryAutoCommand;
+import frc.robot.commands.CollectBallCommand;
 import frc.robot.commands.DriveToTagCommand;
 import frc.robot.commands.SwerveTrajectoryCommand;
 import frc.robot.commands.HomeCoralArmCommand;
 import frc.robot.commands.ManualCoralArmAdjustCommand;
+import frc.robot.commands.ReleaseBallCommand;
 import frc.robot.commands.ScoreCoralDriveCommand;
 import frc.robot.commands.SetArmPositionCommand;
 import frc.robot.commands.SwerveTrajectoryCommand;
 import frc.robot.subsystems.NewCoralArmSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
-import frc.robot.subsystems.AlgaeCollectorSubsystem;
-import frc.robot.subsystems.AlgaeExtenderSubsystem;
+import frc.robot.subsystems.AlgaeArmSubsystem;
 import frc.robot.subsystems.CoralCollectorSubsystem;
 import frc.robot.subsystems.HarpoonSubsystem;
 import frc.robot.subsystems.LocalizationSubsystem;
@@ -44,8 +45,7 @@ public class RobotContainer {
 
    // The robot's subsystems
    private final DriveSubsystem m_robotDrive = new DriveSubsystem();
-   private final AlgaeCollectorSubsystem m_algaeCollector = new AlgaeCollectorSubsystem();
-   private final AlgaeExtenderSubsystem m_algaeExtender = new AlgaeExtenderSubsystem();
+   private final AlgaeArmSubsystem m_algaeArmSubsystem = new AlgaeArmSubsystem();
    private final NewCoralArmSubsystem m_coralArmSubsystem = new NewCoralArmSubsystem();
    private final HarpoonSubsystem m_harpoon = new HarpoonSubsystem();
    private final VisionSubsystem m_visionSubsystem = new VisionSubsystem();
@@ -61,7 +61,8 @@ public class RobotContainer {
 
    // Variable to track scoring side (true = left, false = right); default left.
    private boolean m_scoringSideLeft = true;
-
+   private boolean holding = false;
+   boolean stop = true;
    // The driver's controller (for driving)
    private final XboxController m_driverController = new XboxController(OIConstants.kDriverControllerPort);
    POVButton dpadUpButton = new POVButton(m_driverController, 0);
@@ -135,10 +136,8 @@ public class RobotContainer {
    private void configureButtonBindings() {
       // ************ Driver Controller
       new JoystickButton(m_driverController, Button.kL1.value)
-    .whileTrue(new InstantCommand(() -> m_robotDrive.setSpeedMultiplier(0.1), m_robotDrive))
-    .whileFalse(new InstantCommand(() -> m_robotDrive.setSpeedMultiplier(1.0), m_robotDrive));
-
-
+            .whileTrue(new InstantCommand(() -> m_robotDrive.setSpeedMultiplier(0.1), m_robotDrive))
+            .whileFalse(new InstantCommand(() -> m_robotDrive.setSpeedMultiplier(1.0), m_robotDrive));
 
       // Create a trigger to cancel any drive commands when joystick inputs exceed a
       // deadband.
@@ -176,19 +175,11 @@ public class RobotContainer {
       new JoystickButton(m_mechanismController, Button.kR1.value)
             .whileTrue(new RunCommand(() -> m_coralArmSubsystem.zeroEncoders(), m_coralArmSubsystem));
 
-      // A button deploys algae arm and starts collector while held.
-      new JoystickButton(m_mechanismController, XboxController.Button.kA.value)
-            .whileTrue(new RunCommand(() -> m_algaeCollector.moveArm(0.5), m_algaeCollector))
-            .whileFalse(new InstantCommand(() -> m_algaeCollector.stopArm(), m_algaeCollector));
+      new Trigger(() -> m_mechanismController.getLeftTriggerAxis() > 0.2)
+            .onTrue(new CollectBallCommand(m_algaeArmSubsystem));
 
-      // // X button – algae extender movement.
-      // new JoystickButton(m_mechanismController, XboxController.Button.kX.value)
-      //       .whileTrue(
-      //             new RunCommand(() -> m_algaeExtender.moveArm(m_algaeExtender.getInitPos() + 10), m_algaeExtender));
-
-      // Y button – algae extender movement.
-      new JoystickButton(m_mechanismController, XboxController.Button.kY.value)
-            .whileTrue(new RunCommand(() -> m_algaeExtender.moveArm(m_algaeExtender.getInitPos()), m_algaeExtender));
+      new Trigger(() -> m_mechanismController.getRightTriggerAxis() > 0.2)
+            .onTrue(new ReleaseBallCommand(m_algaeArmSubsystem));
 
       mech_dpadRightButton
             .whileTrue(new RunCommand(() -> m_harpoon.setMotor(0.5), m_harpoon))

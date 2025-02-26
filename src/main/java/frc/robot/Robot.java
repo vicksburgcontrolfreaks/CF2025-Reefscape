@@ -35,7 +35,7 @@ public class Robot extends TimedRobot {
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
     m_robotContainer = new RobotContainer();
-    new SetCoralCollectorPositionCommand(m_coralCollectorSubsystem, 20).schedule();
+    new SetCoralCollectorPositionCommand(m_coralCollectorSubsystem, 30).schedule();
     for (int port = 5800; port <= 5809; port++) {
       PortForwarder.add(port, "limelight.local", port);
   }
