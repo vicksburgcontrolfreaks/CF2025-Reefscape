@@ -13,10 +13,12 @@ import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.OIConstants;
 import frc.robot.autonomous.OscillateDistanceCommand;
 import frc.robot.autonomous.TrajectoryAutoCommand;
+import frc.robot.commands.CollectBallCommand;
 import frc.robot.commands.DriveToTagCommand;
 import frc.robot.commands.SwerveTrajectoryCommand;
 import frc.robot.commands.HomeCoralArmCommand;
 import frc.robot.commands.ManualCoralArmAdjustCommand;
+import frc.robot.commands.ReleaseBallCommand;
 import frc.robot.commands.ScoreCoralDriveCommand;
 import frc.robot.commands.SetArmPositionCommand;
 import frc.robot.subsystems.NewCoralArmSubsystem;
@@ -44,8 +46,7 @@ public class RobotContainer {
 
    // The robot's subsystems
    private final DriveSubsystem m_robotDrive = new DriveSubsystem();
-   private final AlgaeCollectorSubsystem m_algaeCollector = new AlgaeCollectorSubsystem();
-   private final AlgaeExtenderSubsystem m_algaeExtender = new AlgaeExtenderSubsystem();
+   private final AlgaeArmSubsystem m_algaeArmSubsystem = new AlgaeArmSubsystem();
    private final NewCoralArmSubsystem m_coralArmSubsystem = new NewCoralArmSubsystem();
    private final HarpoonSubsystem m_harpoon = new HarpoonSubsystem();
    private final VisionSubsystem m_visionSubsystem = new VisionSubsystem();
@@ -59,6 +60,9 @@ public class RobotContainer {
 
    private ArmPosition currentArmPosition = ArmPosition.INIT;
    private ArmPosition targetArmPosition = ArmPosition.INIT;
+
+   // Variable to track scoring side (true = left, false = right); default left.
+   private boolean m_scoringSideLeft = true;
 
    // The driver's controller (for driving)
    private final XboxController m_driverController = new XboxController(OIConstants.kDriverControllerPort);
@@ -133,10 +137,8 @@ public class RobotContainer {
    private void configureButtonBindings() {
       // ************ Driver Controller
       new JoystickButton(m_driverController, Button.kL1.value)
-    .whileTrue(new InstantCommand(() -> m_robotDrive.setSpeedMultiplier(0.1), m_robotDrive))
-    .whileFalse(new InstantCommand(() -> m_robotDrive.setSpeedMultiplier(1.0), m_robotDrive));
-
-
+            .whileTrue(new InstantCommand(() -> m_robotDrive.setSpeedMultiplier(0.1), m_robotDrive))
+            .whileFalse(new InstantCommand(() -> m_robotDrive.setSpeedMultiplier(1.0), m_robotDrive));
 
       // Create a trigger to cancel any drive commands when joystick inputs exceed a
       // deadband.

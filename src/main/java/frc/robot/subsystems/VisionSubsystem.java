@@ -56,19 +56,19 @@ public class VisionSubsystem extends SubsystemBase {
         return limelightTable.getEntry("ta").getDouble(0.0);
     }
 
-    /**
-     * Returns a placeholder AprilTag relative pose if a target is detected.
-     * In a complete implementation, you would use camera calibration data to
-     * compute this.
-     */
-    public Pose2d getAprilTagPoseRelative() {
-        double tv = limelightTable.getEntry("tv").getDouble(0.0);
-        if (tv < 1.0) {
-            return null;
-        }
-        // Placeholder: return a pose 1 meter ahead of the robot.
-        return new Pose2d(1.0, 0.0, new Rotation2d(0));
-    }
+    // /**
+    //  * Returns a placeholder AprilTag relative pose if a target is detected.
+    //  * In a complete implementation, you would use camera calibration data to
+    //  * compute this.
+    //  */
+    // public Pose2d getAprilTagPoseRelative() {
+    //     double tv = limelightTable.getEntry("tv").getDouble(0.0);
+    //     if (tv < 1.0) {
+    //         return null;
+    //     }
+    //     // Placeholder: return a pose 1 meter ahead of the robot.
+    //     return new Pose2d(1.0, 0.0, new Rotation2d(0));
+    // }
 
     public int getDetectedTagIDFromNT() {
         double idDouble = limelightTable.getEntry("tid").getDouble(0);
