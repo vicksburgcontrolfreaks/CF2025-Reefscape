@@ -21,11 +21,11 @@ import frc.robot.commands.ManualCoralArmAdjustCommand;
 import frc.robot.commands.ReleaseBallCommand;
 import frc.robot.commands.ScoreCoralDriveCommand;
 import frc.robot.commands.SetArmPositionCommand;
-import frc.robot.commands.SwerveTrajectoryCommand;
 import frc.robot.subsystems.NewCoralArmSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
-import frc.robot.subsystems.AlgaeArmSubsystem;
+import frc.robot.subsystems.AlgaeCollectorSubsystem;
+import frc.robot.subsystems.AlgaeExtenderSubsystem;
 import frc.robot.subsystems.CoralCollectorSubsystem;
 import frc.robot.subsystems.HarpoonSubsystem;
 import frc.robot.subsystems.LocalizationSubsystem;
@@ -38,6 +38,7 @@ import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.DriverStation;
+import frc.robot.Constants.ReefscapeTargetPoses;
 
 public class RobotContainer {
    // Determine alliance assignment
@@ -61,8 +62,7 @@ public class RobotContainer {
 
    // Variable to track scoring side (true = left, false = right); default left.
    private boolean m_scoringSideLeft = true;
-   private boolean holding = false;
-   boolean stop = true;
+
    // The driver's controller (for driving)
    private final XboxController m_driverController = new XboxController(OIConstants.kDriverControllerPort);
    POVButton dpadUpButton = new POVButton(m_driverController, 0);
