@@ -24,6 +24,7 @@ import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
 import frc.robot.subsystems.AlgaeCollectorSubsystem;
 import frc.robot.subsystems.AlgaeExtenderSubsystem;
+import frc.robot.subsystems.CoralCollectorSubsystem;
 import frc.robot.subsystems.HarpoonSubsystem;
 import frc.robot.subsystems.LocalizationSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -49,6 +50,7 @@ public class RobotContainer {
    private final HarpoonSubsystem m_harpoon = new HarpoonSubsystem();
    private final VisionSubsystem m_visionSubsystem = new VisionSubsystem();
    private final LocalizationSubsystem m_localizationSubsystem = new LocalizationSubsystem(m_robotDrive);
+   public final CoralCollectorSubsystem m_coralCollectorSubsystem = new CoralCollectorSubsystem();
 
    // Use the enum for arm positions.
    public enum ArmPosition {
@@ -182,9 +184,13 @@ public class RobotContainer {
       //       .whileTrue(
       //             new RunCommand(() -> m_algaeExtender.moveArm(m_algaeExtender.getInitPos() + 10), m_algaeExtender));
 
-      // Y button – algae extender movement.
+      //Y button – algae extender movement.
+      //new JoystickButton(m_mechanismController, XboxController.Button.kY.value)
+        //.whileTrue(new RunCommand(() -> m_algaeExtender.moveArm(m_algaeExtender.getInitPos()), m_algaeExtender));
+
       new JoystickButton(m_mechanismController, XboxController.Button.kY.value)
-            .whileTrue(new RunCommand(() -> m_algaeExtender.moveArm(m_algaeExtender.getInitPos()), m_algaeExtender));
+            .whileTrue(new RunCommand(() -> m_coralCollectorSubsystem.setPosition(-20), m_coralCollectorSubsystem))
+            .whileFalse(new InstantCommand(() -> m_coralCollectorSubsystem.stop(), m_coralCollectorSubsystem));
 
       mech_dpadRightButton
             .whileTrue(new RunCommand(() -> m_harpoon.setMotor(0.5), m_harpoon))
