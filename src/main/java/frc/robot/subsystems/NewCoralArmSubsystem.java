@@ -26,6 +26,11 @@ public class NewCoralArmSubsystem extends SubsystemBase {
    private double ca_initTgt;
    private double ce_initTgt;
 
+      // Limit math
+      private double lim_m;
+      private double lim_b;
+      private double maxAllowed;
+
    public NewCoralArmSubsystem() {
       m_armExtend = new SparkMax(ArmConstants.kCoralExtendCanId, MotorType.kBrushless);
       m_armAngle  = new SparkMax(ArmConstants.kCoralAngleExtenderCanId, MotorType.kBrushless);
@@ -38,6 +43,8 @@ public class NewCoralArmSubsystem extends SubsystemBase {
 
       ca_integral = 0.0;
       ce_integral = 0.0;
+      lim_m = -2.25;
+      lim_b = 140;
    }
     
    /******************************************************* 
@@ -177,21 +184,31 @@ public class NewCoralArmSubsystem extends SubsystemBase {
    * @return The maximum safe extension (a negative value).
    ******************************************************/
    public double getMaxAllowedExtension(double currentAngle) {
-      // Convert preset extension heights to limits with a 10% buffer.
-      double lowLimit  = ArmConstants.lowTgtHeight  * 1.1;
-      double midLimit  = ArmConstants.midTgtHeight  * 1.1;
-      double highLimit = ArmConstants.highTgtHeight * 1.1;
-    
-      if (currentAngle <= ArmConstants.lowTgtAngle) {
-         return lowLimit;
-      } else if (currentAngle <= ArmConstants.midTgtAngle) {
-         double t = (currentAngle - ArmConstants.lowTgtAngle) / (ArmConstants.midTgtAngle - ArmConstants.lowTgtAngle);
-         return lowLimit + t * (midLimit - lowLimit);
-      } else if (currentAngle <= ArmConstants.highTgtAngle) {
-         double t = (currentAngle - ArmConstants.midTgtAngle) / (ArmConstants.highTgtAngle - ArmConstants.midTgtAngle);
-         return midLimit + t * (highLimit - midLimit);
+      // alternate limit logic
+      boolean useLinearLimitLogic = true;
+
+      if (useLinearLimitLogic) {
+         // angle = 40 > mx+b > -90 + 140 = 50
+         // angle = 10 > mx+b > -25 + 140 = 115
+         double max = currentAngle*lim_m + lim_b;
+         return -max;
       } else {
-         return highLimit;
+         // Convert preset extension heights to limits with a 10% buffer.
+         double lowLimit  = ArmConstants.lowTgtHeight  * 1.1;
+         double midLimit  = ArmConstants.midTgtHeight  * 1.1;
+         double highLimit = ArmConstants.highTgtHeight * 1.1;
+    
+         if (currentAngle <= ArmConstants.lowTgtAngle) {
+            return lowLimit;
+         } else if (currentAngle <= ArmConstants.midTgtAngle) {
+            double t = (currentAngle - ArmConstants.lowTgtAngle) / (ArmConstants.midTgtAngle - ArmConstants.lowTgtAngle);
+            return lowLimit + t * (midLimit - lowLimit);
+         } else if (currentAngle <= ArmConstants.highTgtAngle) {
+            double t = (currentAngle - ArmConstants.midTgtAngle) / (ArmConstants.highTgtAngle - ArmConstants.midTgtAngle);
+            return midLimit + t * (highLimit - midLimit);
+         } else {
+            return highLimit;
+         }
       }
    }
 
