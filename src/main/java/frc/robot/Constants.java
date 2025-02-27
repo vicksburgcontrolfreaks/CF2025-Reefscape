@@ -77,7 +77,7 @@ public final class Constants {
     public static final int TGT_HIGH = 3; //enumeration do not change
 
     // Coral Extender
-    public static final double lowTgtHeight  =  -50; //target offset from init -40.28
+    public static final double lowTgtHeight  =  -40; //target offset from init -40.28
     public static final double midTgtHeight  =  -60; //target offset from init -72.31
     public static final double highTgtHeight = -103; //target offset from init -103.72
 
