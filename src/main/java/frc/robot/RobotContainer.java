@@ -176,7 +176,7 @@ public class RobotContainer {
             .whileTrue(new RunCommand(() -> m_coralArmSubsystem.zeroEncoders(), m_coralArmSubsystem));
       
       new JoystickButton(m_mechanismController, XboxController.Button.kB.value)
-            .onTrue(new ScoreCoralArmCommand(m_coralArmSubsystem, 0));
+            .onTrue(new ScoreCoralArmCommand(m_coralArmSubsystem));
 
       new Trigger(() -> m_mechanismController.getLeftTriggerAxis() > 0.2)
          .onTrue(new CollectBallCommand(m_algaeArmSubsystem));
