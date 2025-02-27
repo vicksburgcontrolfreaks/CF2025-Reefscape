@@ -14,17 +14,18 @@ import frc.robot.Constants.OIConstants;
 import frc.robot.autonomous.OscillateDistanceCommand;
 import frc.robot.autonomous.TrajectoryAutoCommand;
 import frc.robot.commands.CollectBallCommand;
+import frc.robot.commands.ReleaseBallCommand;
+import frc.robot.commands.ScoreCoralArmCommand;
 import frc.robot.commands.DriveToTagCommand;
 import frc.robot.commands.SwerveTrajectoryCommand;
 import frc.robot.commands.HomeCoralArmCommand;
 import frc.robot.commands.ManualCoralArmAdjustCommand;
-import frc.robot.commands.ReleaseBallCommand;
 import frc.robot.commands.ScoreCoralDriveCommand;
 import frc.robot.commands.SetArmPositionCommand;
 import frc.robot.subsystems.NewCoralArmSubsystem;
+import frc.robot.subsystems.AlgaeArmSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
-import frc.robot.subsystems.AlgaeArmSubsystem;
 import frc.robot.subsystems.CoralCollectorSubsystem;
 import frc.robot.subsystems.HarpoonSubsystem;
 import frc.robot.subsystems.LocalizationSubsystem;
@@ -82,7 +83,7 @@ public class RobotContainer {
    private Command m_currentArmCommand = null;
 
    public RobotContainer() {
-      //
+
       SmartDashboard.putData("Field", m_localizationSubsystem.getField());
 
       // Auton Settings
@@ -171,14 +172,17 @@ public class RobotContainer {
       SmartDashboard.putString("Current Arm Position", currentArmPosition.toString());
 
       // Right bumper zeros arm encoders.
-      new JoystickButton(m_mechanismController, Button.kR1.value)
+      new JoystickButton(m_mechanismController, XboxController.Button.kRightBumper.value)
             .whileTrue(new RunCommand(() -> m_coralArmSubsystem.zeroEncoders(), m_coralArmSubsystem));
+      
+      new JoystickButton(m_mechanismController, XboxController.Button.kB.value)
+            .onTrue(new ScoreCoralArmCommand(m_coralArmSubsystem, 0));
 
       new Trigger(() -> m_mechanismController.getLeftTriggerAxis() > 0.2)
-            .onTrue(new CollectBallCommand(m_algaeArmSubsystem));
+         .onTrue(new CollectBallCommand(m_algaeArmSubsystem));
 
       new Trigger(() -> m_mechanismController.getRightTriggerAxis() > 0.2)
-            .onTrue(new ReleaseBallCommand(m_algaeArmSubsystem));
+         .onTrue(new ReleaseBallCommand(m_algaeArmSubsystem));
 
       mech_dpadRightButton
             .whileTrue(new RunCommand(() -> m_harpoon.setMotor(0.5), m_harpoon))
