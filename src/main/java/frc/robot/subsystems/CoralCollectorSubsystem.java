@@ -23,17 +23,23 @@ public class CoralCollectorSubsystem extends SubsystemBase {
      * Drives the motor using a simple proportional controller toward the target position.
      * @param target The desired encoder position.
      */
+
+    public Double getPosition() {
+        return m_encoder.getPosition();
+    }
+
     public void setPosition(double target) {
         double current = m_encoder.getPosition();
         double error = target - current;
         // Example proportional gain; adjust as needed.
         double output = error * 0.4;
         // Clamp the output to a safe range.
-        output = Math.max(-1.0, Math.min(1.0, output));
+        output = Math.max(-0.1, Math.min(0.1, output));
         m_motor.set(output);
         
         SmartDashboard.putNumber("CoralCollector Error", error);
         SmartDashboard.putNumber("CoralCollector Output", output);
+        SmartDashboard.putNumber("CoralCollecter Position", getPosition());
     }
     
     /**
