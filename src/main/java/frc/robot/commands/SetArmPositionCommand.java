@@ -7,7 +7,11 @@ public class SetArmPositionCommand extends Command {
     private final NewCoralArmSubsystem armSubsystem;
     private final double targetAngle;
     private final double targetExtension;
+    private static final double BIG_TOLERANCE = 10.0;
+    private static final double TOL_INCREMENT = 0.002;
     private static final double TOLERANCE = 1.0; // Tune as needed
+    private double currentAngle;
+    private double tolerance_offset;
     
     public SetArmPositionCommand(NewCoralArmSubsystem armSubsystem, double targetAngle, double targetExtension) {
         this.armSubsystem = armSubsystem;
@@ -23,6 +27,15 @@ public class SetArmPositionCommand extends Command {
     
     @Override
     public void execute() {
+
+        currentAngle = armSubsystem.getArmAngle();
+        // if it is close to target, start increasing the small tolerance
+        if (Math.abs(currentAngle - targetAngle) < BIG_TOLERANCE) {
+            tolerance_offset = tolerance_offset + TOL_INCREMENT;
+        } else {
+            tolerance_offset = 0;
+        }
+
         armSubsystem.setArmAngle(targetAngle);
         if (armSubsystem.getArmAngle() > armSubsystem.getInitArmAngle() + 8) {
            armSubsystem.moveArm(targetExtension);
@@ -33,8 +46,8 @@ public class SetArmPositionCommand extends Command {
     public boolean isFinished() {
         double currentAngle = armSubsystem.getArmAngle();
         double currentExtension = armSubsystem.getCurrentExtension();
-        return Math.abs(currentAngle - targetAngle) < TOLERANCE &&
-               Math.abs(currentExtension - targetExtension) < TOLERANCE;
+        return Math.abs(currentAngle - targetAngle) < (TOLERANCE+tolerance_offset) &&
+               Math.abs(currentExtension - targetExtension) < (TOLERANCE+tolerance_offset);
     }
     
     @Override

@@ -8,7 +8,11 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class HomeCoralArmCommand extends Command {
     private final NewCoralArmSubsystem m_armSubsystem;
+   
+    private static final double TOL_INCREMENT = 0.002;
     private static final double POSITION_TOLERANCE = 0.2; // acceptable error
+    private double tolerance_offset;
+
 
     /**
      * Constructs a command to retract the coral arm to its home position.
@@ -23,18 +27,25 @@ public class HomeCoralArmCommand extends Command {
     @Override
     public void initialize() {
         // Optionally reset integrators here.
+        tolerance_offset = 0;
     }
 
     @Override
     public void execute() {
         // Command the arm to move to home (0 position).
-        
+  
+
         m_armSubsystem.moveArm(ArmConstants.TGT_INIT);
+
+
 
         // make sure the extension is back before angling into home
         // to avoid contact with intake
         if (m_armSubsystem.getCurrentExtension() > -2.0) {
             m_armSubsystem.setArmAngle(ArmConstants.TGT_INIT);
+            tolerance_offset = tolerance_offset + TOL_INCREMENT;
+        } else {
+            tolerance_offset = 0;
         }
 
         // Publish current measurements for debugging.
@@ -50,8 +61,8 @@ public class HomeCoralArmCommand extends Command {
         //                      m_armSubsystem.getExtendCurrent() > CURRENT_THRESHOLD);
         double currentExtension = m_armSubsystem.getCurrentExtension();
         double currentAngle = m_armSubsystem.getArmAngle();
-        boolean nearHome = (Math.abs(currentExtension - m_armSubsystem.getInitArmExtend()) < POSITION_TOLERANCE);
-        boolean angleNearHome = (Math.abs(currentAngle - m_armSubsystem.getInitArmAngle()) < POSITION_TOLERANCE);
+        boolean nearHome = (Math.abs(currentExtension - m_armSubsystem.getInitArmExtend()) < (POSITION_TOLERANCE+tolerance_offset));
+        boolean angleNearHome = (Math.abs(currentAngle - m_armSubsystem.getInitArmAngle()) < (POSITION_TOLERANCE+tolerance_offset));
         return angleNearHome && nearHome;
     }
 
