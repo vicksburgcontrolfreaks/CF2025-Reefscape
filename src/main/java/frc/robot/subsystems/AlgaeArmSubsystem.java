@@ -56,7 +56,7 @@ public class AlgaeArmSubsystem extends SubsystemBase {
       }
       
       // Run the wheel motor at full power to collect the ball.
-      wheelMotor.set(0.40);
+      wheelMotor.set(0.20);
   
       // Delay evaluating the wheel current for the first 10 cycles.
       if (wheelCounter < 10) {

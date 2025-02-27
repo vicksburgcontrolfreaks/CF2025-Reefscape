@@ -5,9 +5,7 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import frc.robot.LimelightHelpers; // Ensure you have the appropriate helper class
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
+import frc.robot.LimelightHelpers; 
 
 public class VisionSubsystem extends SubsystemBase {
     private final NetworkTable limelightTable;
@@ -44,7 +42,6 @@ public class VisionSubsystem extends SubsystemBase {
         } else {
             SmartDashboard.putString("Limelight Status", "No Target Detected");
         }
-
     }
 
     // Accessor methods for auto-align or command usage:
@@ -55,20 +52,6 @@ public class VisionSubsystem extends SubsystemBase {
     public double getTa() {
         return limelightTable.getEntry("ta").getDouble(0.0);
     }
-
-    // /**
-    //  * Returns a placeholder AprilTag relative pose if a target is detected.
-    //  * In a complete implementation, you would use camera calibration data to
-    //  * compute this.
-    //  */
-    // public Pose2d getAprilTagPoseRelative() {
-    //     double tv = limelightTable.getEntry("tv").getDouble(0.0);
-    //     if (tv < 1.0) {
-    //         return null;
-    //     }
-    //     // Placeholder: return a pose 1 meter ahead of the robot.
-    //     return new Pose2d(1.0, 0.0, new Rotation2d(0));
-    // }
 
     public int getDetectedTagIDFromNT() {
         double idDouble = limelightTable.getEntry("tid").getDouble(0);
