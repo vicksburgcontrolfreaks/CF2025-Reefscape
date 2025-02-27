@@ -15,6 +15,7 @@ import frc.robot.autonomous.OscillateDistanceCommand;
 import frc.robot.autonomous.TrajectoryAutoCommand;
 import frc.robot.commands.CollectBallCommand;
 import frc.robot.commands.ReleaseBallCommand;
+import frc.robot.commands.ScoreCoralArmCommand;
 import frc.robot.commands.DriveToTagCommand;
 import frc.robot.commands.SwerveTrajectoryCommand;
 import frc.robot.commands.HomeCoralArmCommand;
@@ -50,7 +51,6 @@ public class RobotContainer {
    private final HarpoonSubsystem m_harpoon = new HarpoonSubsystem();
    private final VisionSubsystem m_visionSubsystem = new VisionSubsystem();
    private final LocalizationSubsystem m_localizationSubsystem = new LocalizationSubsystem(m_robotDrive);
-   public final CoralCollectorSubsystem m_coralCollectorSubsystem = new CoralCollectorSubsystem();
 
    // Use the enum for arm positions.
    public enum ArmPosition {
@@ -83,7 +83,7 @@ public class RobotContainer {
    private Command m_currentArmCommand = null;
 
    public RobotContainer() {
-      //
+
       SmartDashboard.putData("Field", m_localizationSubsystem.getField());
 
       // Auton Settings
@@ -172,18 +172,17 @@ public class RobotContainer {
       SmartDashboard.putString("Current Arm Position", currentArmPosition.toString());
 
       // Right bumper zeros arm encoders.
-      new JoystickButton(m_mechanismController, Button.kR1.value)
+      new JoystickButton(m_mechanismController, XboxController.Button.kRightBumper.value)
             .whileTrue(new RunCommand(() -> m_coralArmSubsystem.zeroEncoders(), m_coralArmSubsystem));
+      
+      new JoystickButton(m_mechanismController, XboxController.Button.kB.value)
+            .onTrue(new ScoreCoralArmCommand(m_coralArmSubsystem, 0));
 
       new Trigger(() -> m_mechanismController.getLeftTriggerAxis() > 0.2)
          .onTrue(new CollectBallCommand(m_algaeArmSubsystem));
 
       new Trigger(() -> m_mechanismController.getRightTriggerAxis() > 0.2)
          .onTrue(new ReleaseBallCommand(m_algaeArmSubsystem));
-
-      new JoystickButton(m_mechanismController, XboxController.Button.kY.value)
-            .whileTrue(new RunCommand(() -> m_coralCollectorSubsystem.setPosition(-20), m_coralCollectorSubsystem))
-            .whileFalse(new InstantCommand(() -> m_coralCollectorSubsystem.stop(), m_coralCollectorSubsystem));
 
       mech_dpadRightButton
             .whileTrue(new RunCommand(() -> m_harpoon.setMotor(0.5), m_harpoon))

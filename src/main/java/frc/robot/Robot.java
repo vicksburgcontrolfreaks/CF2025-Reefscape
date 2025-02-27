@@ -8,7 +8,8 @@ import edu.wpi.first.net.PortForwarder;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.robot.commands.SetCoralCollectorPositionCommand;
+import edu.wpi.first.wpilibj2.command.RunCommand;
+import frc.robot.subsystems.CoralCollectorSubsystem;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -17,10 +18,11 @@ import frc.robot.commands.SetCoralCollectorPositionCommand;
  * project.
  */
 public class Robot extends TimedRobot {
+  private final CoralCollectorSubsystem m_coralCollectorSubsystem = new CoralCollectorSubsystem();
   private Command m_autonomousCommand;
+  private Command m_RobotCommand = new RunCommand(() -> m_coralCollectorSubsystem.setPosition(-21.6), m_coralCollectorSubsystem);
 
   private RobotContainer m_robotContainer;
-
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -31,6 +33,8 @@ public class Robot extends TimedRobot {
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
     m_robotContainer = new RobotContainer();
+
+    if (m_RobotCommand != null) m_RobotCommand.schedule();
 
     for (int port = 5800; port <= 5809; port++) {
       PortForwarder.add(port, "limelight.local", port);
