@@ -17,7 +17,6 @@ import frc.robot.autonomous.TrajectoryAutoCommand;
 import frc.robot.commands.CollectBallCommand;
 import frc.robot.commands.ReleaseBallCommand;
 import frc.robot.commands.ScoreCoralArmCommand;
-import frc.robot.commands.DriveToTagCommand;
 import frc.robot.commands.DynamicDriveToTagCommand;
 import frc.robot.commands.SwerveTrajectoryCommand;
 import frc.robot.commands.HomeCoralArmCommand;
@@ -30,11 +29,9 @@ import frc.robot.subsystems.NewCoralArmSubsystem;
 import frc.robot.subsystems.AlgaeArmSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
-import frc.robot.subsystems.CoralCollectorSubsystem;
 import frc.robot.subsystems.HarpoonSubsystem;
 import frc.robot.subsystems.LocalizationSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
@@ -65,7 +62,7 @@ public class RobotContainer {
    private ArmPosition targetArmPosition = ArmPosition.INIT;
 
    // Variable to track scoring side (true = left, false = right); default left.
-   private boolean m_scoringSideLeft = true;
+   //private boolean m_scoringSideLeft = true;
 
    // The driver's controller (for driving)
    private final XboxController m_driverController = new XboxController(OIConstants.kDriverControllerPort);

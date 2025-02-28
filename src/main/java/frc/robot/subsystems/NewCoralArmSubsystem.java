@@ -29,7 +29,7 @@ public class NewCoralArmSubsystem extends SubsystemBase {
       // Limit math
       private double lim_m;
       private double lim_b;
-      private double maxAllowed;
+      //private double maxAllowed;
 
    public NewCoralArmSubsystem() {
       m_armExtend = new SparkMax(ArmConstants.kCoralExtendCanId, MotorType.kBrushless);
