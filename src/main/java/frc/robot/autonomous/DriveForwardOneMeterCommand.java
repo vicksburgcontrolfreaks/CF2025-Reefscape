@@ -35,8 +35,11 @@ public class DriveForwardOneMeterCommand extends Command {
         double targetX = startPose.getTranslation().getX() + Math.cos(theta) * 1.0;
         double targetY = startPose.getTranslation().getY() + Math.sin(theta) * 1.0;
         
-        // Keep the target pose's heading the same.
+        // Keep the target pose's heading the same for now.
         Pose2d targetPose = new Pose2d(targetX, targetY, startPose.getRotation());
+    
+        // Reset odometry immediately
+        driveSubsystem.resetOdometry(startPose);
     
         // Configure trajectory settings.
         TrajectoryConfig config = new TrajectoryConfig(
@@ -62,6 +65,7 @@ public class DriveForwardOneMeterCommand extends Command {
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
     
         // Set the final heading goal (rotate 180 degrees).
+        thetaController.reset(startPose.getRotation().getRadians()); // Ensure reset
         thetaController.setGoal(startPose.getRotation().getRadians() + Math.PI);
     
         // Create the SwerveControllerCommand.
@@ -78,10 +82,9 @@ public class DriveForwardOneMeterCommand extends Command {
             driveSubsystem                                // Required subsystem.
         );
         
-        // Reset the odometry to the starting pose.
-        driveSubsystem.resetOdometry(startPose);
-        internalCommand.initialize();
+        internalCommand.initialize(); // Initialize the internal command
     }
+    
     
 
     @Override
@@ -95,7 +98,7 @@ public class DriveForwardOneMeterCommand extends Command {
     public boolean isFinished() {
         return internalCommand != null && internalCommand.isFinished();
     }
-
+    
     @Override
     public void end(boolean interrupted) {
         if (internalCommand != null) {
