@@ -20,14 +20,26 @@ public class LocalizationSubsystem extends SubsystemBase {
 
     public LocalizationSubsystem(DriveSubsystem driveSubsystem) {
         this.driveSubsystem = driveSubsystem;
+        
+        // Set an initial pose based on alliance.
+        // For red alliance: x=10, y=4, 0° heading.
+        // For blue alliance: x=7.3, y=4, -180° heading.
+        Pose2d initialPose;
+        if (DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue) == DriverStation.Alliance.Red) {
+            initialPose = new Pose2d(10, 4, new Rotation2d(0));  // 0° in radians
+        } else {
+            initialPose = new Pose2d(7.3, 4, new Rotation2d(Math.toRadians(0)));  // -180° in radians (-π)
+        }
+        
         poseEstimator = new SwerveDrivePoseEstimator(
-                DriveConstants.kDriveKinematics,
-                Rotation2d.fromDegrees(driveSubsystem.getHeading()),
-                driveSubsystem.getModulePositions(),
-                new Pose2d(), // Initial pose; adjust if needed.
-                VecBuilder.fill(0.1, 0.1, 0.1), // State standard deviations: [meters, meters, radians]
-                VecBuilder.fill(0.5, 0.5, 0.5)  // Vision measurement standard deviations.
+            DriveConstants.kDriveKinematics,
+            Rotation2d.fromDegrees(driveSubsystem.getHeading()),
+            driveSubsystem.getModulePositions(),
+            initialPose,  // Use our known starting pose
+            VecBuilder.fill(0.1, 0.1, 0.1), // State standard deviations: [meters, meters, radians]
+            VecBuilder.fill(0.5, 0.5, 0.5)  // Vision measurement standard deviations.
         );
+        
         // Publish the Field2d widget to SmartDashboard.
         SmartDashboard.putData("Field", m_field);
     }
@@ -35,26 +47,20 @@ public class LocalizationSubsystem extends SubsystemBase {
     @Override
     public void periodic() {
         // Set the Limelight to use its internal IMU for MegaTag2 localization.
-        LimelightHelpers.SetIMUMode("limelight", 3);
+        LimelightHelpers.SetIMUMode("limelight", 1);
 
-        // Optionally set robot orientation from an external IMU.
+        // Optionally, if using an external IMU, update robot orientation.
         LimelightHelpers.SetRobotOrientation("limelight", driveSubsystem.getHeading(), 0, 0, 0, 0, 0);
 
-        // Update odometry using the drive subsystem's sensor values.
+        // Update odometry using sensor values from the drive subsystem.
         poseEstimator.update(
-                Rotation2d.fromDegrees(driveSubsystem.getHeading()),
-                driveSubsystem.getModulePositions());
+            Rotation2d.fromDegrees(driveSubsystem.getHeading()),
+            driveSubsystem.getModulePositions()
+        );
 
-        // Choose the correct vision estimate based on alliance.
-        LimelightHelpers.PoseEstimate mt2Estimate;
-        if (DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue) == DriverStation.Alliance.Red) {
-            mt2Estimate = LimelightHelpers.getBotPoseEstimate_wpiRed_MegaTag2("limelight");
-        } else {
-            mt2Estimate = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight");
-        }
-        
+        // Retrieve the vision estimate (using the blue alliance key, for example).
+        LimelightHelpers.PoseEstimate mt2Estimate = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight");
         if (mt2Estimate != null && mt2Estimate.tagCount > 0) {
-            // Adjust measurement uncertainty based on the number of tags seen.
             double visionStdDev = (mt2Estimate.tagCount > 1) ? 0.3 : 0.5;
             poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(visionStdDev, visionStdDev, visionStdDev));
             poseEstimator.addVisionMeasurement(mt2Estimate.pose, mt2Estimate.timestampSeconds);

@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.cscore.UsbCamera;
 import edu.wpi.first.net.PortForwarder;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -22,6 +24,8 @@ public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
   private Command m_RobotCommand = new RunCommand(() -> m_coralCollectorSubsystem.setPosition(-21.6), m_coralCollectorSubsystem);
 
+  UsbCamera camera1;
+
   private RobotContainer m_robotContainer;
 
   /**
@@ -39,6 +43,8 @@ public class Robot extends TimedRobot {
     for (int port = 5800; port <= 5809; port++) {
       PortForwarder.add(port, "limelight.local", port);
     }
+
+    camera1 = CameraServer.startAutomaticCapture(0);
   }
 
   /**

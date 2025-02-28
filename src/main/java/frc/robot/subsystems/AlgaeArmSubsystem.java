@@ -16,6 +16,7 @@ public class AlgaeArmSubsystem extends SubsystemBase {
 
     // Encoder for the arm.
     private final RelativeEncoder armEncoder = armMotor.getEncoder();
+    private final RelativeEncoder wheelEncoder = wheelMotor.getEncoder();
 
     // State variables.
     private double wheelCounter;
@@ -35,6 +36,11 @@ public class AlgaeArmSubsystem extends SubsystemBase {
         resetState();
         SmartDashboard.putNumber("AlgaeArm Encoder", armEncoder.getPosition());
     }
+
+    public void zeroEncoders() {
+      armEncoder.setPosition(0.0);
+
+   }
 
     /** Resets state variables for a new collection cycle. */
     public void resetState() {
@@ -59,7 +65,7 @@ public class AlgaeArmSubsystem extends SubsystemBase {
             if (armEncoder.getPosition() < armExtendTarget) {
                 armMotor.set(0.5); // Extend at 50% power.
             } else {
-                armMotor.set(0);
+                armMotor.set(0.0);
             }
             
             // Run the collector wheels.
@@ -73,18 +79,17 @@ public class AlgaeArmSubsystem extends SubsystemBase {
                 if (wheelMotor.getOutputCurrent() >= wheelStopSoftCap) {
                     collectionComplete = true;
                     // Capture current arm position to hold.
-                    holdPosition = armEncoder.getPosition();
                 }
             }
         } else {
             // Ball is collected; hold the arm at the captured position.
-            double error = holdPosition - armEncoder.getPosition();
-            double output = error * kHoldP;
-            // Clamp the output if necessary.
-            output = Math.max(-1.0, Math.min(1.0, output));
-            armMotor.set(output);
+            // double error = holdPosition - wheelEncoder.getPosition();
+            // double output = error * kHoldP;
+            // // Clamp the output if necessary.
+            // output = Math.max(-1.0, Math.min(1.0, output));
+            // wheelMotor.set(output);
             // Ensure wheels are stopped.
-            wheelMotor.set(0);
+            wheelMotor.set(0.1);
         }
         return collectionComplete;
     }
@@ -97,7 +102,7 @@ public class AlgaeArmSubsystem extends SubsystemBase {
      */
     public boolean algaeArmShoot() {
         // For simplicity, run the wheel motor in reverse for 10 iterations then stop.
-        if (wheelCounter < 10) {
+        if (wheelCounter < 30) {
             wheelMotor.set(-1.0);
             wheelCounter++;
         } else {
@@ -117,7 +122,7 @@ public class AlgaeArmSubsystem extends SubsystemBase {
     /** Stops both motors. */
     public void stop() {
         armMotor.stopMotor();
-        wheelMotor.stopMotor();
+      //   wheelMotor.stopMotor();
     }
 
     /** Resets the arm encoder. */
