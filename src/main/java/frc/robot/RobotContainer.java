@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.PS4Controller.Button;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.OIConstants;
+import frc.robot.autonomous.DriveForwardOneMeterCommand;
 import frc.robot.autonomous.OscillateDistanceCommand;
 import frc.robot.autonomous.TrajectoryAutoCommand;
 import frc.robot.commands.CollectBallCommand;
@@ -102,7 +103,7 @@ public class RobotContainer {
          // This branch will likely never be reached.
       }
       // Set up an autonomous chooser for auton options.
-      autoChooser.setDefaultOption("Competition Ready Auton", new OscillateDistanceCommand(m_robotDrive));
+      autoChooser.setDefaultOption("Competition Ready Auton", new DriveForwardOneMeterCommand(m_robotDrive));
       autoChooser.addOption("Dynamic DriveToTagCommand", new DynamicDriveToTagCommand(m_robotDrive));
       autoChooser.addOption("SwerveTrajectoryCommand 10",
             new SwerveTrajectoryCommand(
@@ -141,9 +142,14 @@ public class RobotContainer {
 
    private void configureButtonBindings() {
       // ************ Driver Controller
+      // left bumper reduces speed
       new JoystickButton(m_driverController, Button.kL1.value)
             .whileTrue(new InstantCommand(() -> m_robotDrive.setSpeedMultiplier(0.1), m_robotDrive))
             .whileFalse(new InstantCommand(() -> m_robotDrive.setSpeedMultiplier(1.0), m_robotDrive));
+            
+      //right bumper reset field orientation
+      new JoystickButton(m_driverController, Button.kR1.value)
+            .onTrue(new InstantCommand(() -> m_robotDrive.resetFieldOrientation(), m_robotDrive));
 
       // Leave this here for now. We will eventually want to add a trigger to cancel
       // auton driving commands
@@ -183,7 +189,7 @@ public class RobotContainer {
       // Right bumper zeros arm encoders.
       new JoystickButton(m_mechanismController, XboxController.Button.kRightBumper.value)
             .onTrue(new RunCommand(() -> m_coralArmSubsystem.zeroEncoders(), m_coralArmSubsystem))
-            .onTrue(new RunCommand(()-> m_algaeArmSubsystem.zeroEncoders(), m_algaeArmSubsystem));
+            .onTrue(new RunCommand(() -> m_algaeArmSubsystem.zeroEncoders(), m_algaeArmSubsystem));
 
       new JoystickButton(m_mechanismController, XboxController.Button.kB.value)
             .onTrue(new ScoreCoralArmCommand(m_coralArmSubsystem));

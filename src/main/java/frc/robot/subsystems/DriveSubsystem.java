@@ -161,26 +161,30 @@ public class DriveSubsystem extends SubsystemBase {
    *                      field.
    */
   public void drive(double xSpeed, double ySpeed, double rot, boolean fieldRelative) {
-    // Here, instead of using the passed fieldRelative parameter,
-    // we use the m_fieldOriented flag.
+    // Instead of using the passed fieldRelative parameter, we use our internal flag.
     boolean useFieldRelative = m_fieldOriented;
 
     double xSpeedDelivered = xSpeed * DriveConstants.kMaxSpeedMetersPerSecond * speedMultiplier;
     double ySpeedDelivered = ySpeed * DriveConstants.kMaxSpeedMetersPerSecond * speedMultiplier;
     double rotDelivered = rot * DriveConstants.kMaxAngularSpeed;
 
-    var swerveModuleStates = DriveConstants.kDriveKinematics.toSwerveModuleStates(
-        useFieldRelative
-            ? ChassisSpeeds.fromFieldRelativeSpeeds(xSpeedDelivered, ySpeedDelivered, rotDelivered,
-                Rotation2d.fromDegrees(m_gyro.getAngle(IMUAxis.kZ)))
-            : new ChassisSpeeds(xSpeedDelivered, ySpeedDelivered, rotDelivered));
-    SwerveDriveKinematics.desaturateWheelSpeeds(
-        swerveModuleStates, DriveConstants.kMaxSpeedMetersPerSecond);
+    // Use getAdjustedHeading() for field-oriented drive.
+    var chassisSpeeds = useFieldRelative
+        ? ChassisSpeeds.fromFieldRelativeSpeeds(
+            xSpeedDelivered,
+            ySpeedDelivered,
+            rotDelivered,
+            Rotation2d.fromDegrees(getAdjustedHeading()))
+        : new ChassisSpeeds(xSpeedDelivered, ySpeedDelivered, rotDelivered);
+
+    SwerveModuleState[] swerveModuleStates = DriveConstants.kDriveKinematics.toSwerveModuleStates(chassisSpeeds);
+    SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, DriveConstants.kMaxSpeedMetersPerSecond);
     m_frontLeft.setDesiredState(swerveModuleStates[0]);
     m_frontRight.setDesiredState(swerveModuleStates[1]);
     m_rearLeft.setDesiredState(swerveModuleStates[2]);
     m_rearRight.setDesiredState(swerveModuleStates[3]);
-  }
+}
+
 
   /**
    * Sets the wheels into an X formation to prevent movement.
@@ -252,5 +256,22 @@ public class DriveSubsystem extends SubsystemBase {
     this.speedMultiplier = multiplier;
     SmartDashboard.putNumber("Drive Speed Multiplier", speedMultiplier);
 }
+
+// In DriveSubsystem.java
+
+// In DriveSubsystem.java
+private double fieldOrientationOffset = 0.0;
+
+public void resetFieldOrientation() {
+    // Set the current heading as the new zero reference.
+    fieldOrientationOffset = getHeading();
+    SmartDashboard.putNumber("Field Orientation Offset", fieldOrientationOffset);
+}
+
+public double getAdjustedHeading() {
+    // Adjust the raw heading by subtracting the offset.
+    return getHeading() - fieldOrientationOffset;
+}
+
 
 }
