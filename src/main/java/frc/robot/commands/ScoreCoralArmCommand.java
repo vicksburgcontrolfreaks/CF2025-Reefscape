@@ -5,7 +5,6 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.NewCoralArmSubsystem;
-import frc.robot.Constants.ArmConstants;
 
 
 public class ScoreCoralArmCommand extends Command {

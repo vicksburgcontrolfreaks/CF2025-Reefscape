@@ -7,11 +7,9 @@ import java.util.Set;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import frc.robot.Constants.AutoConstants;
@@ -36,8 +34,10 @@ public class DriveForwardOneMeterCommand extends Command {
         // Compute target pose: 1 meter forward in the current heading.
         double targetX = startPose.getTranslation().getX() + Math.cos(theta) * 1.0;
         double targetY = startPose.getTranslation().getY() + Math.sin(theta) * 1.0;
-        Pose2d targetPose = new Pose2d(targetX, targetY, startPose.getRotation().plus(Rotation2d.fromDegrees(180)));
         
+        // Keep the target pose's heading the same.
+        Pose2d targetPose = new Pose2d(targetX, targetY, startPose.getRotation());
+    
         // Configure trajectory settings.
         TrajectoryConfig config = new TrajectoryConfig(
             AutoConstants.kMaxSpeedMetersPerSecond,
@@ -55,27 +55,34 @@ public class DriveForwardOneMeterCommand extends Command {
         // Create PID controllers for x and y.
         PIDController xController = new PIDController(AutoConstants.kPXController, 0, 0);
         PIDController yController = new PIDController(AutoConstants.kPYController, 0, 0);
+        
         // Create a motion-profiled PID controller for rotation.
         ProfiledPIDController thetaController = new ProfiledPIDController(
             AutoConstants.kPThetaController, 0, 0, AutoConstants.kThetaControllerConstraints);
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
-        
+    
+        // Set the final heading goal (rotate 180 degrees).
+        thetaController.setGoal(startPose.getRotation().getRadians() + Math.PI);
+    
         // Create the SwerveControllerCommand.
         internalCommand = new SwerveControllerCommand(
             trajectory,
             driveSubsystem::getPose,                   // Pose supplier.
-            DriveConstants.kDriveKinematics,             // Drivetrain kinematics.
+            DriveConstants.kDriveKinematics,           // Drivetrain kinematics.
             xController,
             yController,
             thetaController,
-            driveSubsystem::setModuleStates,             // Module state consumer.
-            driveSubsystem                               // Required subsystem.
+            (moduleStates) -> {
+                driveSubsystem.setModuleStates(moduleStates);
+            },
+            driveSubsystem                                // Required subsystem.
         );
         
         // Reset the odometry to the starting pose.
         driveSubsystem.resetOdometry(startPose);
         internalCommand.initialize();
     }
+    
 
     @Override
     public void execute() {
