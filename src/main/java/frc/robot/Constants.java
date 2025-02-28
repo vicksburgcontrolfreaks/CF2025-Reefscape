@@ -89,7 +89,7 @@ public final class Constants {
     // Coral Arm Angle  
     public static final double lowTgtAngle  =  37; //target offset from init 39.28
     public static final double midTgtAngle  =  21; //target offset from init 21.93
-    public static final double highTgtAngle =  8; //target offset from init 10.93
+    public static final double highTgtAngle =  11; //target offset from init 10.93
 
     public static final double CA_PGain = 0.01;
     public static final double CA_IGain = 0.002;
