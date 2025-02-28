@@ -47,7 +47,7 @@ public class LocalizationSubsystem extends SubsystemBase {
     @Override
     public void periodic() {
         // Set the Limelight to use its internal IMU for MegaTag2 localization.
-        LimelightHelpers.SetIMUMode("limelight", 1);
+        LimelightHelpers.SetIMUMode("limelight", 3);
 
         // Optionally, if using an external IMU, update robot orientation.
         LimelightHelpers.SetRobotOrientation("limelight", driveSubsystem.getHeading(), 0, 0, 0, 0, 0);

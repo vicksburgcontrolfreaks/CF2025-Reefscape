@@ -33,11 +33,11 @@ public class TrajectoryAutoCommand extends Command {
         // Generate an example trajectory.
         Trajectory trajectory = TrajectoryGenerator.generateTrajectory(
             // Start at the origin facing the +X direction.
-            new Pose2d(9.97, 1.9, new Rotation2d(0)),
+            new Pose2d(10, 4, new Rotation2d(0)),
             // Pass through interior waypoints.
             List.of(),
             // End 3 meters straight ahead.
-            new Pose2d(12.4, 3, new Rotation2d(1.0472)),
+            new Pose2d(12.4, 4, new Rotation2d(0)),
             config
         );
 
