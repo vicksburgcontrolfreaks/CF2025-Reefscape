@@ -7,6 +7,7 @@ import java.util.Set;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
@@ -30,13 +31,16 @@ public class DriveForwardOneMeterCommand extends Command {
         // Get the starting pose.
         Pose2d startPose = driveSubsystem.getPose();
         double theta = startPose.getRotation().getRadians();
+        Rotation2d endPose = new Rotation2d(Math.PI);
         
         // Compute target pose: 1 meter forward in the current heading.
         double targetX = startPose.getTranslation().getX() + Math.cos(theta) * 1.0;
         double targetY = startPose.getTranslation().getY() + Math.sin(theta) * 1.0;
         
         // Keep the target pose's heading the same for now.
-        Pose2d targetPose = new Pose2d(targetX, targetY, startPose.getRotation());
+        // Pose2d targetPose = new Pose2d(targetX, targetY, startPose.getRotation());
+        Pose2d targetPose = new Pose2d(targetX, targetY, endPose);
+
     
         // Reset odometry immediately
         driveSubsystem.resetOdometry(startPose);
@@ -64,9 +68,9 @@ public class DriveForwardOneMeterCommand extends Command {
             AutoConstants.kPThetaController, 0, 0, AutoConstants.kThetaControllerConstraints);
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
     
-        // Set the final heading goal (rotate 180 degrees).
-        thetaController.reset(startPose.getRotation().getRadians()); // Ensure reset
-        thetaController.setGoal(startPose.getRotation().getRadians() + Math.PI);
+        // // Set the final heading goal (rotate 180 degrees).
+        // thetaController.reset(startPose.getRotation().getRadians()); // Ensure reset
+        // thetaController.setGoal(startPose.getRotation().getRadians());
     
         // Create the SwerveControllerCommand.
         internalCommand = new SwerveControllerCommand(
