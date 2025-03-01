@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.PS4Controller.Button;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.OIConstants;
+import frc.robot.autonomous.AutoDriveAndTurn;
 import frc.robot.autonomous.DriveForwardOneMeterCommand;
 import frc.robot.autonomous.OscillateDistanceCommand;
 import frc.robot.autonomous.TrajectoryAutoCommand;
@@ -100,7 +101,7 @@ public class RobotContainer {
          // This branch will likely never be reached.
       }
       // Set up an autonomous chooser for auton options.
-      autoChooser.setDefaultOption("Competition Ready Auton", new DriveForwardOneMeterCommand(m_robotDrive));
+      autoChooser.setDefaultOption("Competition Ready Auton", new AutoDriveAndTurn(m_robotDrive));
       autoChooser.addOption("Dynamic DriveToTagCommand", new DynamicDriveToTagCommand(m_robotDrive));
       autoChooser.addOption("SwerveTrajectoryCommand 10",
             new SwerveTrajectoryCommand(
