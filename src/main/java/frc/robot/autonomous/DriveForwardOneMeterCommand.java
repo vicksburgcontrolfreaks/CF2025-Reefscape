@@ -104,7 +104,7 @@ public class DriveForwardOneMeterCommand extends Command {
         if (internalCommand != null) {
             internalCommand.end(interrupted);
         }
-        driveSubsystem.drive(0, 0, 0, false);
+        driveSubsystem.drive(0, 0, 0, true);
     }
 
     @Override
