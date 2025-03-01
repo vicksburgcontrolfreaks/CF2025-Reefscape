@@ -20,6 +20,7 @@ import frc.robot.subsystems.DriveSubsystem;
 public class DriveForwardOneMeterCommand extends Command {
     private final DriveSubsystem driveSubsystem;
     private SwerveControllerCommand internalCommand;
+    private Pose2d startPose = null;
 
     public DriveForwardOneMeterCommand(DriveSubsystem driveSubsystem) {
         this.driveSubsystem = driveSubsystem;
@@ -29,17 +30,17 @@ public class DriveForwardOneMeterCommand extends Command {
     @Override
     public void initialize() {
         // Get the starting pose.
-        Pose2d startPose = driveSubsystem.getPose();
+        startPose = driveSubsystem.getPose();
         double theta = startPose.getRotation().getRadians();
-        Rotation2d endPose = new Rotation2d(Math.PI);
+        // Rotation2d endPose = new Rotation2d(Math.PI*0.5);
         
         // Compute target pose: 1 meter forward in the current heading.
         double targetX = startPose.getTranslation().getX() + Math.cos(theta) * 1.0;
         double targetY = startPose.getTranslation().getY() + Math.sin(theta) * 1.0;
         
         // Keep the target pose's heading the same for now.
-        // Pose2d targetPose = new Pose2d(targetX, targetY, startPose.getRotation());
-        Pose2d targetPose = new Pose2d(targetX, targetY, endPose);
+        Pose2d targetPose = new Pose2d(targetX, targetY, startPose.getRotation());
+        // Pose2d targetPose = new Pose2d(targetX, targetY, endPose);
 
     
         // Reset odometry immediately
@@ -89,12 +90,13 @@ public class DriveForwardOneMeterCommand extends Command {
         internalCommand.initialize(); // Initialize the internal command
     }
     
-    
+    private boolean hasRunOnce = false;
 
     @Override
     public void execute() {
         if (internalCommand != null) {
             internalCommand.execute();
+            
         }
     }
 
