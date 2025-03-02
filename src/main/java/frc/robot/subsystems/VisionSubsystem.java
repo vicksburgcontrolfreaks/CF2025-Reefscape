@@ -5,7 +5,7 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import frc.robot.LimelightHelpers; 
+import frc.robot.LimelightHelpers;
 
 public class VisionSubsystem extends SubsystemBase {
     private final NetworkTable limelightTable;
@@ -21,8 +21,9 @@ public class VisionSubsystem extends SubsystemBase {
     @Override
     public void periodic() {
 
-        // Optionally, continuously enforce the desired IMU mode.
-        LimelightHelpers.SetIMUMode("limelight", 4);
+        // // Optionally, continuously enforce the desired IMU mode. (This happens
+        // already in LocalizationSubsystem's periodic)
+        // LimelightHelpers.SetIMUMode("limelight", 0);
 
         // Check if the Limelight is publishing values.
         if (limelightTable.getEntry("tv").getValue() == null) {

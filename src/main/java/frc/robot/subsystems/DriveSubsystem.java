@@ -241,6 +241,16 @@ public class DriveSubsystem extends SubsystemBase {
     return m_gyro.getRate(IMUAxis.kZ) * (DriveConstants.kGyroReversed ? -1.0 : 1.0);
   }
 
+  public double getChassisSpeed() {
+    double speedFL = Math.abs(m_frontLeft.getState().speedMetersPerSecond);
+    double speedFR = Math.abs(m_frontRight.getState().speedMetersPerSecond);
+    double speedRL = Math.abs(m_rearLeft.getState().speedMetersPerSecond);
+    double speedRR = Math.abs(m_rearRight.getState().speedMetersPerSecond);
+    return (speedFL + speedFR + speedRL + speedRR) / 4.0;
+}
+
+
+
   public SwerveModulePosition[] getModulePositions() {
     return new SwerveModulePosition[] {
         m_frontLeft.getPosition(),
