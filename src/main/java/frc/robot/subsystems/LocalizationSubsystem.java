@@ -45,35 +45,50 @@ public class LocalizationSubsystem extends SubsystemBase {
     }
 
     @Override
-    public void periodic() {
-        // Set the Limelight to use its internal IMU for MegaTag2 localization.
-        LimelightHelpers.SetIMUMode("limelight", 3);
+public void periodic() {
+    // Set Limelight IMU mode and update robot orientation.
+    LimelightHelpers.SetIMUMode("limelight", 3);
+    LimelightHelpers.SetRobotOrientation("limelight", driveSubsystem.getHeading(), 0, 0, 0, 0, 0);
 
-        // Optionally, if using an external IMU, update robot orientation.
-        LimelightHelpers.SetRobotOrientation("limelight", driveSubsystem.getHeading(), 0, 0, 0, 0, 0);
+    // Update odometry using sensor values from the drive subsystem.
+    poseEstimator.update(
+        Rotation2d.fromDegrees(driveSubsystem.getHeading()),
+        driveSubsystem.getModulePositions()
+    );
 
-        // Update odometry using sensor values from the drive subsystem.
-        poseEstimator.update(
-            Rotation2d.fromDegrees(driveSubsystem.getHeading()),
-            driveSubsystem.getModulePositions()
-        );
-
-        // Retrieve the vision estimate (using the blue alliance key, for example).
-        LimelightHelpers.PoseEstimate mt2Estimate = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight");
-        if (mt2Estimate != null && mt2Estimate.tagCount > 0) {
-            double visionStdDev = (mt2Estimate.tagCount > 1) ? 0.3 : 0.5;
-            poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(visionStdDev, visionStdDev, visionStdDev));
-            poseEstimator.addVisionMeasurement(mt2Estimate.pose, mt2Estimate.timestampSeconds);
-        }
-
-        // Publish the estimated pose.
-        Pose2d estimatedPose = poseEstimator.getEstimatedPosition();
-        m_field.setRobotPose(estimatedPose);
-        SmartDashboard.putNumber("Estimated X", estimatedPose.getTranslation().getX());
-        SmartDashboard.putNumber("Estimated Y", estimatedPose.getTranslation().getY());
-        SmartDashboard.putNumber("Estimated Rotation", estimatedPose.getRotation().getDegrees());
-        SmartDashboard.putString("Estimated Pose", estimatedPose.toString());
+    // Retrieve vision estimate.
+    LimelightHelpers.PoseEstimate mt2Estimate = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight");
+    
+    // Define thresholds (you may need to tune these)
+    double maxRotationalRate = 720; // degrees per second; adjust as needed
+    double maxTranslationalSpeed = 1.0; // m/s; adjust as needed
+    
+    // Check current speeds (assuming driveSubsystem provides a method to get chassis speeds)
+    double currentRotRate = Math.abs(driveSubsystem.getTurnRate());
+    // For translation, you might compute a combined speed from your module velocities or a method from your drive subsystem.
+    double currentTransSpeed = driveSubsystem.getChassisSpeed();  // Example method; you may have to implement one.
+    
+    // Only update vision measurement if the robot is moving slowly.
+    if (mt2Estimate != null && mt2Estimate.tagCount > 0 && 
+        currentRotRate < maxRotationalRate && currentTransSpeed < maxTranslationalSpeed) {
+        // Trust vision data heavily when moving slowly.
+        poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(0.1, 0.1, 0.1));
+        poseEstimator.addVisionMeasurement(mt2Estimate.pose, mt2Estimate.timestampSeconds);
+    } else {
+        // Optionally, if moving fast, you can either not update or set very high uncertainties.
+        // For example, you could set:
+        // poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(10, 10, 10));
     }
+
+    // Publish the estimated pose.
+    Pose2d estimatedPose = poseEstimator.getEstimatedPosition();
+    m_field.setRobotPose(estimatedPose);
+    SmartDashboard.putNumber("Estimated X", estimatedPose.getTranslation().getX());
+    SmartDashboard.putNumber("Estimated Y", estimatedPose.getTranslation().getY());
+    SmartDashboard.putNumber("Estimated Rotation", estimatedPose.getRotation().getDegrees());
+    SmartDashboard.putString("Estimated Pose", estimatedPose.toString());
+}
+
 
     /**
      * Captures the current pose to be used later for trajectory planning.
