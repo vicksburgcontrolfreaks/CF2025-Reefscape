@@ -24,7 +24,7 @@ public class AlgaeArmSubsystem extends SubsystemBase {
     private double holdPosition;        // The arm position to hold once ball is collected.
 
     // Placeholder target for arm extension (encoder units).
-    private final double armExtendTarget = 50; 
+    private final double armExtendTarget = 70; 
     // Current threshold for wheel current (in Amps).
     private final double wheelStopSoftCap = 30.0; // Adjust based on testing.
 

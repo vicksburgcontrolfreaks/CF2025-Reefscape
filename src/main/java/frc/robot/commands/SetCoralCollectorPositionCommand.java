@@ -2,6 +2,8 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Subsystem;
+import frc.robot.RobotContainer;
 import frc.robot.subsystems.CoralCollectorSubsystem;
 
 public class SetCoralCollectorPositionCommand extends Command {
@@ -26,9 +28,16 @@ public class SetCoralCollectorPositionCommand extends Command {
     
     @Override
     public boolean isFinished() {
+        double current = collectorSubsystem.getPosition();
+
         // Optionally, finish when the error is within an acceptable threshold.
+        if (Math.abs(targetPosition - current) < 0.5){
+            return true;
+        }
         // For now, we return false so the command keeps running.
-        return false;
+        else{
+            return false;
+        }
     }
     
     @Override

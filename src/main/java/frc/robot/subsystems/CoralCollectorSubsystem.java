@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 public class CoralCollectorSubsystem extends SubsystemBase {
     private final SparkMax m_motor;
     private final RelativeEncoder m_encoder;
+    private final double tolerance = 0.5;
     
     public CoralCollectorSubsystem() {
         // Use the CAN ID from your constants.
@@ -24,7 +25,7 @@ public class CoralCollectorSubsystem extends SubsystemBase {
      * @param target The desired encoder position.
      */
 
-    public Double getPosition() {
+    public double getPosition() {
         return m_encoder.getPosition();
     }
 
@@ -34,7 +35,7 @@ public class CoralCollectorSubsystem extends SubsystemBase {
         // Example proportional gain; adjust as needed.
         double output = error * 0.4;
         // Clamp the output to a safe range.
-        output = Math.max(-0.1, Math.min(0.1, output));
+        output = Math.max(-0.5, Math.min(0.5, output));
         m_motor.set(output);
         
         SmartDashboard.putNumber("CoralCollector Error", error);
@@ -48,6 +49,11 @@ public class CoralCollectorSubsystem extends SubsystemBase {
     public void stop() {
         m_motor.stopMotor();
     }
+
+    public void zeroEncoders() {
+        m_encoder.setPosition(0.0);
+  
+     }
     
     @Override
     public void periodic() {

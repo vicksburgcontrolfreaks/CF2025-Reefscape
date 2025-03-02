@@ -7,7 +7,7 @@ public class SetArmPositionCommand extends Command {
     private final NewCoralArmSubsystem armSubsystem;
     private final double targetAngle;
     private final double targetExtension;
-    private static final double BIG_TOLERANCE = 10.0;
+    private static final double BIG_TOLERANCE = 4.0;
     private static final double TOL_INCREMENT = 0.002;
     private static final double TOLERANCE = 1.0; // Tune as needed
     private double currentAngle;
@@ -23,6 +23,7 @@ public class SetArmPositionCommand extends Command {
     @Override
     public void initialize() {
         // Optionally reset control integrals here if needed.
+        tolerance_offset = 0.0;
     }
     
     @Override
@@ -32,6 +33,7 @@ public class SetArmPositionCommand extends Command {
         // if it is close to target, start increasing the small tolerance
         if (Math.abs(currentAngle - targetAngle) < BIG_TOLERANCE) {
             tolerance_offset = tolerance_offset + TOL_INCREMENT;
+            if (tolerance_offset > 2.0) tolerance_offset = 2.0;
         } else {
             tolerance_offset = 0;
         }

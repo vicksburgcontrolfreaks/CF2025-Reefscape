@@ -19,6 +19,7 @@ import frc.robot.commands.CollectBallCommand;
 import frc.robot.commands.ReleaseBallCommand;
 import frc.robot.commands.ScoreCoralArmCommand;
 import frc.robot.commands.DynamicDriveToTagCommand;
+import frc.robot.commands.HighScoringSequenceCommand;
 import frc.robot.commands.SwerveTrajectoryCommand;
 import frc.robot.commands.HomeCoralArmCommand;
 import frc.robot.commands.LowScoringSequenceCommand;
@@ -26,8 +27,10 @@ import frc.robot.commands.ManualCoralArmAdjustCommand;
 import frc.robot.commands.MidScoringSequenceCommand;
 import frc.robot.commands.ScoreCoralDriveCommand;
 import frc.robot.commands.SetArmPositionCommand;
+import frc.robot.commands.SetCoralCollectorPositionCommand;
 import frc.robot.subsystems.NewCoralArmSubsystem;
 import frc.robot.subsystems.AlgaeArmSubsystem;
+import frc.robot.subsystems.CoralCollectorSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
 import frc.robot.subsystems.HarpoonSubsystem;
@@ -53,6 +56,7 @@ public class RobotContainer {
    private final HarpoonSubsystem m_harpoon = new HarpoonSubsystem();
    private final VisionSubsystem m_visionSubsystem = new VisionSubsystem();
    private final LocalizationSubsystem m_localizationSubsystem = new LocalizationSubsystem(m_robotDrive);
+   private final CoralCollectorSubsystem m_CoralCollectorSubsystem = new CoralCollectorSubsystem();
 
    // Use the enum for arm positions.
    public enum ArmPosition {
@@ -102,19 +106,19 @@ public class RobotContainer {
       }
       // Set up an autonomous chooser for auton options.
       autoChooser.setDefaultOption("Competition Ready Auton", new AutoDriveAndTurn(m_robotDrive));
-      autoChooser.addOption("Dynamic DriveToTagCommand", new DynamicDriveToTagCommand(m_robotDrive));
-      autoChooser.addOption("SwerveTrajectoryCommand 10",
-            new SwerveTrajectoryCommand(
-                  m_robotDrive,
-                  m_localizationSubsystem.getEstimatedPose(), // Starting pose from your localization subsystem.
-                  List.of(), // Empty list: a direct path.
-                  ReefscapeTargetPoses.RED_TAG10_RIGHT // Target pose for tag #10.
-            ));
-      autoChooser.addOption("Trajectory Auto", new TrajectoryAutoCommand(m_robotDrive));
-      autoChooser.addOption("Forward Tune", new OscillateDistanceCommand(m_robotDrive));
-      // (Optional) Add a "Do Nothing" option.
-      autoChooser.addOption("No Auto",
-            new RunCommand(() -> m_robotDrive.drive(0, 0, 0, false), m_robotDrive));
+      // autoChooser.addOption("Dynamic DriveToTagCommand", new DynamicDriveToTagCommand(m_robotDrive));
+      // autoChooser.addOption("SwerveTrajectoryCommand 10",
+      //       new SwerveTrajectoryCommand(
+      //             m_robotDrive,
+      //             m_localizationSubsystem.getEstimatedPose(), // Starting pose from your localization subsystem.
+      //             List.of(), // Empty list: a direct path.
+      //             ReefscapeTargetPoses.RED_TAG10_RIGHT // Target pose for tag #10.
+      //       ));
+      // autoChooser.addOption("Trajectory Auto", new TrajectoryAutoCommand(m_robotDrive));
+      // autoChooser.addOption("Forward Tune", new OscillateDistanceCommand(m_robotDrive));
+      // // (Optional) Add a "Do Nothing" option.
+      // autoChooser.addOption("No Auto",
+      //       new RunCommand(() -> m_robotDrive.drive(0, 0, 0, false), m_robotDrive));
 
       // Configure button bindings.
       configureButtonBindings();
@@ -173,11 +177,17 @@ public class RobotContainer {
 
       // DPad Right drives to right scoring position of reef section visible to the
       // robot
-      dpadRightButton.onTrue(new ScoreCoralDriveCommand(m_robotDrive, m_visionSubsystem, false));
+      //dpadRightButton.onTrue(new ScoreCoralDriveCommand(m_robotDrive, m_visionSubsystem, false));
 
       // DPad Left drives to right scoring position of reef section visible to the
       // robot
-      dpadLeftButton.onTrue(new ScoreCoralDriveCommand(m_robotDrive, m_visionSubsystem, true));
+      //dpadLeftButton.onTrue(new ScoreCoralDriveCommand(m_robotDrive, m_visionSubsystem, true));
+
+      new Trigger(() -> m_driverController.getRightTriggerAxis() > 0.2)
+         .onTrue(new CollectBallCommand(m_algaeArmSubsystem));
+
+      new Trigger(() -> m_driverController.getLeftTriggerAxis() > 0.2)
+         .onTrue(new ReleaseBallCommand(m_algaeArmSubsystem));
 
       // ************ Mechanism Controller
 
@@ -187,16 +197,17 @@ public class RobotContainer {
       // Right bumper zeros arm encoders.
       new JoystickButton(m_mechanismController, XboxController.Button.kRightBumper.value)
             .onTrue(new RunCommand(() -> m_coralArmSubsystem.zeroEncoders(), m_coralArmSubsystem))
-            .onTrue(new RunCommand(() -> m_algaeArmSubsystem.zeroEncoders(), m_algaeArmSubsystem));
+            .onTrue(new RunCommand(() -> m_algaeArmSubsystem.zeroEncoders(), m_algaeArmSubsystem))
+            .onTrue(new RunCommand(() -> m_CoralCollectorSubsystem.zeroEncoders(), m_CoralCollectorSubsystem));
 
-      new JoystickButton(m_mechanismController, XboxController.Button.kB.value)
-            .onTrue(new ScoreCoralArmCommand(m_coralArmSubsystem));
+      // new JoystickButton(m_mechanismController, XboxController.Button.kB.value)
+      //       .onTrue(new ScoreCoralArmCommand(m_coralArmSubsystem));
 
-      new Trigger(() -> m_mechanismController.getLeftTriggerAxis() > 0.2)
-            .onTrue(new CollectBallCommand(m_algaeArmSubsystem));
+      // new Trigger(() -> m_mechanismController.getLeftTriggerAxis() > 0.2)
+      //       .onTrue(new CollectBallCommand(m_algaeArmSubsystem));
 
-      new Trigger(() -> m_mechanismController.getRightTriggerAxis() > 0.2)
-            .onTrue(new ReleaseBallCommand(m_algaeArmSubsystem));
+      // new Trigger(() -> m_mechanismController.getRightTriggerAxis() > 0.2)
+      //       .onTrue(new ReleaseBallCommand(m_algaeArmSubsystem));
 
       mech_dpadRightButton
             .whileTrue(new RunCommand(() -> m_harpoon.setMotor(0.5), m_harpoon))
@@ -264,6 +275,8 @@ public class RobotContainer {
                   currentArmPosition = targetArmPosition;
                   if (currentArmPosition == ArmPosition.INIT) {
                      m_currentArmCommand = new HomeCoralArmCommand(m_coralArmSubsystem);
+                     // new SetCoralCollectorPositionCommand(m_CoralCollectorSubsystem, 0).schedule();
+                     
                   } else {
                      m_currentArmCommand = new SetArmPositionCommand(
                            m_coralArmSubsystem,
@@ -286,7 +299,7 @@ public class RobotContainer {
                      new MidScoringSequenceCommand(m_coralArmSubsystem).schedule();
                      break;
                   case HIGH:
-                     new HomeCoralArmCommand(m_coralArmSubsystem).schedule();
+                     new HighScoringSequenceCommand(m_coralArmSubsystem).schedule();
                      break;
                   default:
                      // For INIT or any unspecified state, you could do nothing or a default action.
