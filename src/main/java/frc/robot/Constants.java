@@ -78,7 +78,7 @@ public final class Constants {
 
     // Coral Extender
     public static final double lowTgtHeight  =  -40; //target offset from init -40.28
-    public static final double midTgtHeight  =  -60; //target offset from init -72.31
+    public static final double midTgtHeight  =  -58; //target offset from init -72.31
     public static final double highTgtHeight = -102;//target offset from init -103.72
 
     public static final double CE_PGain = 0.01; //0.02
@@ -87,14 +87,14 @@ public final class Constants {
     public static final double CE_MAX   = 0.55;
 
     // Coral Arm Angle  
-    public static final double lowTgtAngle  =  37; //target offset from init 39.28
-    public static final double midTgtAngle  =  21; //target offset from init 21.93
-    public static final double highTgtAngle =  9; //target offset from init 10.93
+    public static final double lowTgtAngle  =  0.37; //target offset from init 39.28
+    public static final double midTgtAngle  =  0.22; //target offset from init 21.93
+    public static final double highTgtAngle =  0.11; //target offset from init 10.93
 
-    public static final double CA_PGain = 0.01;
-    public static final double CA_IGain = 0.002;
-    public static final double CA_I_MAX = 5.0;
-    public static final double CA_MAX   = 0.60;
+    public static final double CA_PGain = 2.0;  //0.01
+    public static final double CA_IGain = 0.05;  //0.002
+    public static final double CA_I_MAX = 0.5;
+    public static final double CA_MAX   = 0.35;
   }
 
   public static final class ModuleConstants {

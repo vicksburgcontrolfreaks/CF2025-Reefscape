@@ -6,6 +6,7 @@ package frc.robot.subsystems;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.RelativeEncoder;
+import com.revrobotics.AbsoluteEncoder;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 //import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -16,7 +17,7 @@ public class NewCoralArmSubsystem extends SubsystemBase {
    private final SparkMax m_armExtend;
    private final SparkMax m_armAngle;
    private final RelativeEncoder e_armExtend;
-   private final RelativeEncoder e_armAngle;
+   private final AbsoluteEncoder e_armAngle;
     
    // For PI control of coral extender and coral arm angle
    private double ce_integral;
@@ -25,6 +26,14 @@ public class NewCoralArmSubsystem extends SubsystemBase {
    // Need home positions for extender and arm angle
    private double ca_initTgt;
    private double ce_initTgt;
+
+   private double ca_cmd;
+   private double ca_error;
+
+
+   private double ce_cmd;
+   private double ce_error;
+   private double currentAngle;
 
       // Limit math
       private double lim_m;
@@ -36,7 +45,7 @@ public class NewCoralArmSubsystem extends SubsystemBase {
       m_armAngle  = new SparkMax(ArmConstants.kCoralAngleExtenderCanId, MotorType.kBrushless);
         
       e_armExtend = m_armExtend.getEncoder();
-      e_armAngle  = m_armAngle.getEncoder();
+      e_armAngle  = m_armAngle.getAbsoluteEncoder();
         
       // Reset encoders on startup (or before autonomous)
       zeroEncoders();
@@ -45,6 +54,8 @@ public class NewCoralArmSubsystem extends SubsystemBase {
       ce_integral = 0.0;
       lim_m = -2.25;
       lim_b = 140;
+      ca_error = 0.0;
+      ce_error = 0.0;
    }
     
    /******************************************************* 
@@ -56,10 +67,11 @@ public class NewCoralArmSubsystem extends SubsystemBase {
     ******************************************************/
    public void zeroEncoders() {
       e_armExtend.setPosition(0.0);
-      e_armAngle.setPosition(0.0);
+      //e_armAngle.setPosition(0.0);
 
-      ca_initTgt = e_armAngle.getPosition();
+      ca_initTgt = 0.0;//e_armAngle.getPosition();
       ce_initTgt = e_armExtend.getPosition();
+      currentAngle = 0.0;
    }
 
    public double getInitArmAngle() {
@@ -75,9 +87,11 @@ public class NewCoralArmSubsystem extends SubsystemBase {
    * @param targetAngle The desired encoder value for the arm angle.
    ******************************************************/
    public void setArmAngle(double targetAngle) {
-      double currentAngle = e_armAngle.getPosition();
-      double error = targetAngle - currentAngle;
-      ca_integral += error;
+      currentAngle = e_armAngle.getPosition();
+      if (currentAngle > 0.9) currentAngle = 0.0;
+
+      ca_error = (targetAngle - currentAngle);
+      ca_integral += ca_error;
 
       // this prevents the I term for getting oversaturated
       // we really only want it to work to get remove the last 
@@ -85,13 +99,13 @@ public class NewCoralArmSubsystem extends SubsystemBase {
       if (ca_integral > ArmConstants.CA_I_MAX) ca_integral = ArmConstants.CA_I_MAX;
       if (ca_integral < -ArmConstants.CA_I_MAX) ca_integral = -ArmConstants.CA_I_MAX;
 
-      double command = error * ArmConstants.CA_PGain + ca_integral * ArmConstants.CA_IGain;
+      ca_cmd = ca_error * ArmConstants.CA_PGain + ca_integral * ArmConstants.CA_IGain;
 
       // this saturates the command making sure it is never too large
-      if (command > ArmConstants.CA_MAX) command = ArmConstants.CA_MAX;
-      if (command < -ArmConstants.CA_MAX) command = -ArmConstants.CA_MAX;
+      if (ca_cmd > ArmConstants.CA_MAX) ca_cmd = ArmConstants.CA_MAX;
+      if (ca_cmd < -ArmConstants.CA_MAX) ca_cmd = -ArmConstants.CA_MAX;
    
-      m_armAngle.set(command);
+      m_armAngle.set(ca_cmd);//ca_cmd);//command);
    }
     
    /*******************************************************
@@ -100,8 +114,8 @@ public class NewCoralArmSubsystem extends SubsystemBase {
    ******************************************************/
    public void moveArm(double targetExtension) {
       double currentExtension = e_armExtend.getPosition();
-      double error = targetExtension - currentExtension;
-      ce_integral += error;
+      ce_error = targetExtension - currentExtension;
+      ce_integral += ce_error;
 
       // this prevents the I term for getting oversaturated
       // we really only want it to work to get remove the last 
@@ -109,12 +123,13 @@ public class NewCoralArmSubsystem extends SubsystemBase {
       if (ce_integral > ArmConstants.CE_I_MAX) ce_integral = ArmConstants.CE_I_MAX;
       if (ce_integral < -ArmConstants.CE_I_MAX) ce_integral = -ArmConstants.CE_I_MAX;
 
-      double command = error * ArmConstants.CE_PGain + ce_integral * ArmConstants.CE_IGain;
+      double ce_cmd = ce_error * ArmConstants.CE_PGain + ce_integral * ArmConstants.CE_IGain;
 
       // this saturates the command making sure it is never too large
-      if (command > ArmConstants.CE_MAX) command = ArmConstants.CE_MAX;
-      if (command < -ArmConstants.CE_MAX) command = -ArmConstants.CE_MAX;
-      m_armExtend.set(command);
+      if (ce_cmd > ArmConstants.CE_MAX) ce_cmd = ArmConstants.CE_MAX;
+      if (ce_cmd < -ArmConstants.CE_MAX) ce_cmd = -ArmConstants.CE_MAX;
+
+      m_armExtend.set(ce_cmd);
    }
     
    /*******************************************************
@@ -124,7 +139,8 @@ public class NewCoralArmSubsystem extends SubsystemBase {
    * @param speed A value that directly commands the motor.
    ******************************************************/
    public void manualAdjustArmAngle(double speed) {
-      double currentAngle = e_armAngle.getPosition();
+      currentAngle = e_armAngle.getPosition();
+      if (currentAngle > 0.9) currentAngle = 0.0;
       double homeAngle = 0.0; // Define your home angle here (assumed 0)
       double newAngle = currentAngle + speed;
 
@@ -153,7 +169,8 @@ public class NewCoralArmSubsystem extends SubsystemBase {
    ******************************************************/
    public void manualAdjustArmExtension(double speed) {
       double currentExtension = e_armExtend.getPosition();
-      double currentAngle = e_armAngle.getPosition();
+      currentAngle = e_armAngle.getPosition();
+      if (currentAngle > 0.9) currentAngle = 0.0;
     
       // Compute the maximum allowed extension (a negative number) for the current angle.
       double maxAllowed = getMaxAllowedExtension(currentAngle);
@@ -220,19 +237,21 @@ public class NewCoralArmSubsystem extends SubsystemBase {
     
    @Override
    public void periodic() {
+      //double currentAngle = e_armAngle.getPosition();
+      //if (currentAngle > 0.9) currentAngle = 0.0;
       //SmartDashboard.putNumber("Arm error", ca_error);
-      SmartDashboard.putNumber("Arm Extension", e_armExtend.getPosition());
+      //SmartDashboard.putNumber("Arm Extension", e_armExtend.getPosition());
       SmartDashboard.putNumber("Arm Angle", e_armAngle.getPosition());
-
-      //SmartDashboard.putNumber("Ex error", ce_error);
-      //SmartDashboard.putNumber("Ex Cmd", ce_cmd);
-      //SmartDashboard.putNumber("Ex Pos", e_armExtend.getPosition());
+      //SmartDashboard.putNumber("CA Cmd", ca_cmd);
+      SmartDashboard.putNumber("Ex error", ce_error);
+      SmartDashboard.putNumber("Ex Cmd", ce_cmd);
+      SmartDashboard.putNumber("Ex Pos", e_armExtend.getPosition());
       //private double ;
       //private double ce_cmd;
    }
     
    public double getArmAngle() {
-      return e_armAngle.getPosition();
+      return currentAngle;
    }
     
    public double getCurrentExtension() {

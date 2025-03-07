@@ -21,15 +21,15 @@ public class LowScoringSequenceCommand extends SequentialCommandGroup {
      */
     public LowScoringSequenceCommand(NewCoralArmSubsystem armSubsystem) {
         addCommands(
-            new InstantCommand(() -> armSubsystem.setArmAngle(44), armSubsystem),
+            new InstantCommand(() -> armSubsystem.setArmAngle(.44), armSubsystem),
             new WaitCommand(0.5),
             new InstantCommand(() -> armSubsystem.moveArm(-24), armSubsystem),
             new WaitCommand(0.5),
-            new InstantCommand(() -> armSubsystem.setArmAngle(35), armSubsystem),
+            new InstantCommand(() -> armSubsystem.setArmAngle(.35), armSubsystem),
             new WaitCommand(0.5),
             new InstantCommand(() -> armSubsystem.moveArm(-5), armSubsystem),
             new WaitCommand(0.5),
-            new InstantCommand(() -> armSubsystem.setArmAngle(25), armSubsystem),
+            new InstantCommand(() -> armSubsystem.setArmAngle(.25), armSubsystem),
             new WaitCommand(0.5),
             new HomeCoralArmCommand(armSubsystem)
         );
