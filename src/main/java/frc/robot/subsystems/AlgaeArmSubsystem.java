@@ -1,6 +1,7 @@
 // File: AlgaeArmSubsystem.java
 package frc.robot.subsystems;
 
+import frc.robot.Constants;
 import frc.robot.Constants.ArmConstants;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
@@ -16,31 +17,26 @@ public class AlgaeArmSubsystem extends SubsystemBase {
 
     // Encoder for the arm.
     private final RelativeEncoder armEncoder = armMotor.getEncoder();
+    // (Optionally, you can use the wheel encoder if needed.)
     private final RelativeEncoder wheelEncoder = wheelMotor.getEncoder();
 
     // State variables.
     private double wheelCounter;
-    private boolean collectionComplete; // Indicates ball collection complete.
-    private double holdPosition;        // The arm position to hold once ball is collected.
+    private boolean collectionComplete; // True when a ball is collected.
+    private double holdPosition;        // The arm encoder position to hold after collection.
 
-    // Placeholder target for arm extension (encoder units).
-    private final double armExtendTarget = 70; 
-    // Current threshold for wheel current (in Amps).
-    private final double wheelStopSoftCap = 30.0; // Adjust based on testing.
+    // Current threshold for the wheel motor (in Amps).
+    private final double wheelStopSoftCap = 30.0; // Adjust as needed.
 
-    // Proportional gain for holding the arm position.
+    // Proportional gain for holding/positioning the arm.
     private final double kHoldP = 0.1;  // Tune this value as needed.
 
     public AlgaeArmSubsystem() {
+        // Assume the arm is retracted at startup.
         armEncoder.setPosition(0.0);
         resetState();
         SmartDashboard.putNumber("AlgaeArm Encoder", armEncoder.getPosition());
     }
-
-    public void zeroEncoders() {
-      armEncoder.setPosition(0.0);
-
-   }
 
     /** Resets state variables for a new collection cycle. */
     public void resetState() {
@@ -50,71 +46,89 @@ public class AlgaeArmSubsystem extends SubsystemBase {
     }
 
     /**
-     * Runs the collector action.
-     * Extends the arm until it reaches armExtendTarget and runs the wheel motor to collect the ball.
-     * For the first 10 cycles, the current is not evaluated to allow startup current to settle.
-     * Once the wheel motor current exceeds the threshold, the system records the current arm position,
-     * stops the wheels, and holds the arm at that position using a simple proportional control.
-     *
+     * Resets both the arm and wheel encoders.
+     */
+    public void zeroEncoders() {
+        armEncoder.setPosition(0.0);
+        // If desired, reset the wheel encoder as well:
+        wheelEncoder.setPosition(0.0);
+    }
+
+    /**
+     * Sets the arm position using a simple proportional control.
+     * This method calculates the error between the target position and the current encoder reading,
+     * then sets the motor output proportional to that error.
+     * @param targetPosition The desired encoder position.
+     */
+    public void setArmPosition(double targetPosition) {
+        double error = targetPosition - armEncoder.getPosition();
+        double output = error * kHoldP;
+        // Clamp the output between -1 and 1.
+        double clamp = 0.15;
+        output = Math.max(-clamp, Math.min(clamp, output));
+        armMotor.set(output);
+    }
+
+    /**
+     * Directly sets the wheel motor output.
+     * @param power Motor output (typically between -1 and 1).
+     */
+    public void setWheelMotor(double power) {
+        wheelMotor.set(power);
+    }
+
+    /**
+     * Collector action: extends the arm until reaching a target, then runs the wheels until a current spike
+     * is detected, then holds the arm at that position.
      * @return true when ball collection is complete and the arm is held.
      */
     public boolean algaeArmCollect() {
-        // If collection is not complete, run collection actions.
         if (!collectionComplete) {
-            // Extend the arm until reaching the target.
-            if (armEncoder.getPosition() < armExtendTarget) {
-                armMotor.set(0.5); // Extend at 50% power.
+            // Extend the arm until the target extension is reached.
+            if (armEncoder.getPosition() < Constants.AlgaeConstants.extended) {
+                armMotor.set(0.5);
             } else {
                 armMotor.set(0.0);
             }
-            
             // Run the collector wheels.
             wheelMotor.set(0.20);
   
-            // Delay evaluation of the wheel current for the first 10 cycles.
+            // Allow a brief delay before evaluating wheel current.
             if (wheelCounter < 10) {
                 wheelCounter++;
             } else {
-                // After delay, if current exceeds threshold, mark collection complete.
                 if (wheelMotor.getOutputCurrent() >= wheelStopSoftCap) {
                     collectionComplete = true;
-                    // Capture current arm position to hold.
+                    // Record the current arm position so that it can be held.
+                    holdPosition = armEncoder.getPosition();
                 }
             }
         } else {
-            // Ball is collected; hold the arm at the captured position.
-            // double error = holdPosition - wheelEncoder.getPosition();
-            // double output = error * kHoldP;
-            // // Clamp the output if necessary.
-            // output = Math.max(-1.0, Math.min(1.0, output));
-            // wheelMotor.set(output);
-            // Ensure wheels are stopped.
-            wheelMotor.set(0.1);
+            // Ball collected; hold the arm at the recorded position.
+            setArmPosition(holdPosition);
+            // Ensure the wheels are stopped.
+            wheelMotor.set(0.0);
         }
         return collectionComplete;
     }
 
     /**
-     * Runs the release action: reverses the wheel motor to eject the ball and retracts the arm until
-     * the encoder reaches zero.
-     *
-     * @return true when the release and retraction are complete.
+     * Release action: reverses the wheel motor to eject the ball and retracts the arm until it reaches zero.
+     * @return true when release and retraction are complete.
      */
     public boolean algaeArmShoot() {
-        // For simplicity, run the wheel motor in reverse for 10 iterations then stop.
         if (wheelCounter < 30) {
             wheelMotor.set(-1.0);
             wheelCounter++;
         } else {
-            wheelMotor.set(0);
+            wheelMotor.set(0.0);
         }
         
-        // Retract the arm continuously until it is at or below zero.
         if (armEncoder.getPosition() > 0) {
             armMotor.set(-0.5);
             return false;
         } else {
-            armMotor.set(0);
+            armMotor.set(0.0);
             return true;
         }
     }
@@ -122,7 +136,7 @@ public class AlgaeArmSubsystem extends SubsystemBase {
     /** Stops both motors. */
     public void stop() {
         armMotor.stopMotor();
-      //   wheelMotor.stopMotor();
+        wheelMotor.stopMotor();
     }
 
     /** Resets the arm encoder. */

@@ -79,7 +79,7 @@ public class DriveSubsystem extends SubsystemBase {
         // Optionally, publish these values for debugging.
         SmartDashboard.putNumber("Accel X (g)", accelX);
         SmartDashboard.putNumber("Accel Y (g)", accelY);
-        SmartDashboard.putNumber("Accel Z (g)", accelZ);
+        // SmartDashboard.putNumber("Accel Z (g)", accelZ);
 
         // If any axis exceeds the threshold, consider it a collision.
         return (Math.abs(accelX) > thresholdG ||
@@ -249,8 +249,6 @@ public class DriveSubsystem extends SubsystemBase {
     return (speedFL + speedFR + speedRL + speedRR) / 4.0;
 }
 
-
-
   public SwerveModulePosition[] getModulePositions() {
     return new SwerveModulePosition[] {
         m_frontLeft.getPosition(),
@@ -264,23 +262,28 @@ public class DriveSubsystem extends SubsystemBase {
 
   public void setSpeedMultiplier(double multiplier) {
     this.speedMultiplier = multiplier;
-    SmartDashboard.putNumber("Drive Speed Multiplier", speedMultiplier);
+    // SmartDashboard.putNumber("Drive Speed Multiplier", speedMultiplier);
 }
 
-// In DriveSubsystem.java
-
-// In DriveSubsystem.java
 private double fieldOrientationOffset = 0.0;
 
 public void resetFieldOrientation() {
     // Set the current heading as the new zero reference.
     fieldOrientationOffset = getHeading();
-    SmartDashboard.putNumber("Field Orientation Offset", fieldOrientationOffset);
+    // SmartDashboard.putNumber("Field Orientation Offset", fieldOrientationOffset);
 }
 
 public double getAdjustedHeading() {
     // Adjust the raw heading by subtracting the offset.
     return getHeading() - fieldOrientationOffset;
+}
+
+public void setDriveVoltage(double voltage) {
+  // For simplicity, send the same voltage to all drive motors.
+  m_frontLeft.setDrivingVoltage(voltage);
+  m_frontRight.setDrivingVoltage(voltage);
+  m_rearLeft.setDrivingVoltage(voltage);
+  m_rearRight.setDrivingVoltage(voltage);
 }
 
 

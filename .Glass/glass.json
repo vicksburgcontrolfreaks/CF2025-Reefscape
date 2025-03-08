@@ -26,7 +26,8 @@
     "types": {
       "/FMSInfo": "FMSInfo",
       "/SmartDashboard/Auto Tuning Mode": "String Chooser",
-      "/SmartDashboard/Field": "Field2d"
+      "/SmartDashboard/Field": "Field2d",
+      "/SmartDashboard/Ungrouped": "ProfiledPIDController"
     },
     "windows": {
       "/SmartDashboard/Field": {

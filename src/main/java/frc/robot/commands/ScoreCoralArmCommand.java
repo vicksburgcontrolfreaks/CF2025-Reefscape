@@ -20,13 +20,6 @@ public class ScoreCoralArmCommand extends Command {
         addRequirements(m_armSubsystem);
     }
 
-    // Low target scoring sequence 
-    // step 1: set angle to 44
-    // step 2: set extension to -24
-    // step 3: set angle to 30
-
-    
-
     @Override
     public void execute() {
         // Command the subsystem using the manual adjustment methods.

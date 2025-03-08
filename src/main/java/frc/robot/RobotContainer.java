@@ -3,39 +3,34 @@
 
 package frc.robot;
 
-import java.util.List;
-
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.PS4Controller.Button;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.OIConstants;
-import frc.robot.autonomous.AutoDriveAndTurn;
-import frc.robot.autonomous.DriveForwardOneMeterCommand;
-import frc.robot.autonomous.OscillateDistanceCommand;
 import frc.robot.autonomous.TrajectoryAutoCommand;
 import frc.robot.commands.CollectBallCommand;
+import frc.robot.commands.DeployAndStowAlgaeArmCommand;
 import frc.robot.commands.ReleaseBallCommand;
-import frc.robot.commands.ScoreCoralArmCommand;
+import frc.robot.commands.RunAlgaeCollectorWheelsCommand;
 import frc.robot.commands.DynamicDriveToTagCommand;
 import frc.robot.commands.HighScoringSequenceCommand;
-import frc.robot.commands.SwerveTrajectoryCommand;
 import frc.robot.commands.HomeCoralArmCommand;
+import frc.robot.commands.InitAlgaeCollectorPositionCommand;
+import frc.robot.commands.InitializeLocalizationCommand;
 import frc.robot.commands.LowScoringSequenceCommand;
 import frc.robot.commands.ManualCoralArmAdjustCommand;
 import frc.robot.commands.MidScoringSequenceCommand;
-import frc.robot.commands.ScoreCoralDriveCommand;
 import frc.robot.commands.SetArmPositionCommand;
-import frc.robot.commands.SetCoralCollectorPositionCommand;
 import frc.robot.subsystems.NewCoralArmSubsystem;
+import frc.robot.subsystems.VisionSubsystem;
 import frc.robot.subsystems.AlgaeArmSubsystem;
 import frc.robot.subsystems.CoralCollectorSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
-import frc.robot.subsystems.VisionSubsystem;
 import frc.robot.subsystems.HarpoonSubsystem;
 import frc.robot.subsystems.LocalizationSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
@@ -43,7 +38,6 @@ import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.DriverStation;
-import frc.robot.Constants.ReefscapeTargetPoses;
 
 public class RobotContainer {
    // Determine alliance assignment
@@ -55,7 +49,8 @@ public class RobotContainer {
    private final NewCoralArmSubsystem m_coralArmSubsystem = new NewCoralArmSubsystem();
    private final HarpoonSubsystem m_harpoon = new HarpoonSubsystem();
    private final VisionSubsystem m_visionSubsystem = new VisionSubsystem();
-   private final LocalizationSubsystem m_localizationSubsystem = new LocalizationSubsystem(m_robotDrive);
+   private final LocalizationSubsystem m_localizationSubsystem = new LocalizationSubsystem(m_robotDrive,
+         m_visionSubsystem);
    private final CoralCollectorSubsystem m_CoralCollectorSubsystem = new CoralCollectorSubsystem();
 
    // Use the enum for arm positions.
@@ -67,7 +62,7 @@ public class RobotContainer {
    private ArmPosition targetArmPosition = ArmPosition.INIT;
 
    // Variable to track scoring side (true = left, false = right); default left.
-   //private boolean m_scoringSideLeft = true;
+   // private boolean m_scoringSideLeft = true;
 
    // The driver's controller (for driving)
    private final XboxController m_driverController = new XboxController(OIConstants.kDriverControllerPort);
@@ -93,32 +88,32 @@ public class RobotContainer {
    // m_autoDriveCommand.schedule();
 
    public RobotContainer() {
-
+      
       SmartDashboard.putData("Field", m_localizationSubsystem.getField());
 
-      // Auton Settings
-      if (alliance == DriverStation.Alliance.Blue) {
-         // Set up autonomous command for blue alliance.
-      } else if (alliance == DriverStation.Alliance.Red) {
-         // Set up autonomous command for red alliance.
-      } else {
-         // This branch will likely never be reached.
-      }
+      // Set the algae arm to the "ready position" to get it out of the way a bit
+      CommandScheduler.getInstance()
+            .schedule(new InitAlgaeCollectorPositionCommand(m_algaeArmSubsystem, Constants.AlgaeConstants.ready));
+
       // Set up an autonomous chooser for auton options.
-      autoChooser.setDefaultOption("Competition Ready Auton", new AutoDriveAndTurn(m_robotDrive));
-      // autoChooser.addOption("Dynamic DriveToTagCommand", new DynamicDriveToTagCommand(m_robotDrive));
-      // autoChooser.addOption("SwerveTrajectoryCommand 10",
-      //       new SwerveTrajectoryCommand(
-      //             m_robotDrive,
-      //             m_localizationSubsystem.getEstimatedPose(), // Starting pose from your localization subsystem.
-      //             List.of(), // Empty list: a direct path.
-      //             ReefscapeTargetPoses.RED_TAG10_RIGHT // Target pose for tag #10.
-      //       ));
-      // autoChooser.addOption("Trajectory Auto", new TrajectoryAutoCommand(m_robotDrive));
-      // autoChooser.addOption("Forward Tune", new OscillateDistanceCommand(m_robotDrive));
-      // // (Optional) Add a "Do Nothing" option.
-      // autoChooser.addOption("No Auto",
-      //       new RunCommand(() -> m_robotDrive.drive(0, 0, 0, false), m_robotDrive));
+      autoChooser.setDefaultOption("Competition Ready Auton",
+            new DynamicDriveToTagCommand(m_robotDrive, m_localizationSubsystem));
+      // autoChooser.setDefaultOption("Competition Ready Auton",
+      // new DynamicDriveToTagCommand(m_robotDrive, m_localizationSubsystem));
+      autoChooser.addOption("Trajectory Auto", new TrajectoryAutoCommand(m_robotDrive));
+      autoChooser.addOption(
+            "Dynamic Drive to Tag with Init",
+            new InitializeLocalizationCommand(m_robotDrive, m_localizationSubsystem)
+                  .andThen(new DynamicDriveToTagCommand(m_robotDrive, m_localizationSubsystem))
+                  .andThen(new InitAlgaeCollectorPositionCommand(m_algaeArmSubsystem, Constants.AlgaeConstants.ready))
+                  .andThen(new RunAlgaeCollectorWheelsCommand(m_algaeArmSubsystem, 0.5, 1.0)));
+      autoChooser.addOption(
+            "Trajectory Auto Score",
+            new TrajectoryAutoCommand(m_robotDrive)
+                  .andThen(new DeployAndStowAlgaeArmCommand(m_algaeArmSubsystem)));
+      // (Optional) Add a "Do Nothing" option.
+      autoChooser.addOption("No Auto",
+            new RunCommand(() -> m_robotDrive.drive(0, 0, 0, false), m_robotDrive));
 
       // Configure button bindings.
       configureButtonBindings();
@@ -126,14 +121,22 @@ public class RobotContainer {
       // Configure default driver command: drive the robot.
       // The default controls for the driver are manual so they can override auton
       // functions.
+      // m_robotDrive.setDefaultCommand(
+      // new RunCommand(
+      // () -> m_robotDrive.drive(
+      // -scaleJoystick(m_driverController.getLeftY()),
+      // -scaleJoystick(m_driverController.getLeftX()),
+      // -scaleJoystick(m_driverController.getRightX()),
+      // true),
+      // m_robotDrive));
+      // exponetial drive controls
       m_robotDrive.setDefaultCommand(
-            new RunCommand(
-                  () -> m_robotDrive.drive(
-                        -MathUtil.applyDeadband(m_driverController.getLeftY() * 0.5, OIConstants.kDriveDeadband),
-                        -MathUtil.applyDeadband(m_driverController.getLeftX() * 0.5, OIConstants.kDriveDeadband),
-                        -MathUtil.applyDeadband(m_driverController.getRightX() * 0.5, OIConstants.kDriveDeadband),
-                        true),
-                  m_robotDrive));
+            new RunCommand(() -> {
+               double forward = expoScale(-m_driverController.getLeftY(), 1.5); // example exponent 2
+               double strafe = expoScale(-m_driverController.getLeftX(), 3);
+               double rotation = expoScale(-m_driverController.getRightX(), 2);
+               m_robotDrive.drive(forward, strafe, rotation, true);
+            }, m_robotDrive));
 
       // Configure default mech command: control the arm.
       // The default controls for the arm angle and extension are manual so they can
@@ -148,8 +151,8 @@ public class RobotContainer {
       new JoystickButton(m_driverController, Button.kL1.value)
             .whileTrue(new InstantCommand(() -> m_robotDrive.setSpeedMultiplier(0.1), m_robotDrive))
             .whileFalse(new InstantCommand(() -> m_robotDrive.setSpeedMultiplier(1.0), m_robotDrive));
-            
-      //right bumper reset field orientation
+
+      // right bumper reset field orientation
       new JoystickButton(m_driverController, Button.kR1.value)
             .onTrue(new InstantCommand(() -> m_robotDrive.resetFieldOrientation(), m_robotDrive));
 
@@ -177,17 +180,19 @@ public class RobotContainer {
 
       // DPad Right drives to right scoring position of reef section visible to the
       // robot
-      //dpadRightButton.onTrue(new ScoreCoralDriveCommand(m_robotDrive, m_visionSubsystem, false));
+      // dpadRightButton.onTrue(new ScoreCoralDriveCommand(m_robotDrive,
+      // m_visionSubsystem, false));
 
       // DPad Left drives to right scoring position of reef section visible to the
       // robot
-      //dpadLeftButton.onTrue(new ScoreCoralDriveCommand(m_robotDrive, m_visionSubsystem, true));
+      // dpadLeftButton.onTrue(new ScoreCoralDriveCommand(m_robotDrive,
+      // m_visionSubsystem, true));
 
       new Trigger(() -> m_driverController.getRightTriggerAxis() > 0.2)
-         .onTrue(new CollectBallCommand(m_algaeArmSubsystem));
+            .onTrue(new CollectBallCommand(m_algaeArmSubsystem));
 
       new Trigger(() -> m_driverController.getLeftTriggerAxis() > 0.2)
-         .onTrue(new ReleaseBallCommand(m_algaeArmSubsystem));
+            .onTrue(new ReleaseBallCommand(m_algaeArmSubsystem));
 
       // ************ Mechanism Controller
 
@@ -201,13 +206,13 @@ public class RobotContainer {
             .onTrue(new RunCommand(() -> m_CoralCollectorSubsystem.zeroEncoders(), m_CoralCollectorSubsystem));
 
       // new JoystickButton(m_mechanismController, XboxController.Button.kB.value)
-      //       .onTrue(new ScoreCoralArmCommand(m_coralArmSubsystem));
+      // .onTrue(new ScoreCoralArmCommand(m_coralArmSubsystem));
 
       // new Trigger(() -> m_mechanismController.getLeftTriggerAxis() > 0.2)
-      //       .onTrue(new CollectBallCommand(m_algaeArmSubsystem));
+      // .onTrue(new CollectBallCommand(m_algaeArmSubsystem));
 
       // new Trigger(() -> m_mechanismController.getRightTriggerAxis() > 0.2)
-      //       .onTrue(new ReleaseBallCommand(m_algaeArmSubsystem));
+      // .onTrue(new ReleaseBallCommand(m_algaeArmSubsystem));
 
       mech_dpadRightButton
             .whileTrue(new RunCommand(() -> m_harpoon.setMotor(0.5), m_harpoon))
@@ -275,8 +280,9 @@ public class RobotContainer {
                   currentArmPosition = targetArmPosition;
                   if (currentArmPosition == ArmPosition.INIT) {
                      m_currentArmCommand = new HomeCoralArmCommand(m_coralArmSubsystem);
-                     // new SetCoralCollectorPositionCommand(m_CoralCollectorSubsystem, 0).schedule();
-                     
+                     // new SetCoralCollectorPositionCommand(m_CoralCollectorSubsystem,
+                     // 0).schedule();
+
                   } else {
                      m_currentArmCommand = new SetArmPositionCommand(
                            m_coralArmSubsystem,
@@ -307,6 +313,11 @@ public class RobotContainer {
                }
             }, m_coralArmSubsystem));
 
+   }
+
+   // This method scales input from the driver joysticks
+   public double expoScale(double input, double exponent) {
+      return Math.copySign(Math.pow(Math.abs(input), exponent), input);
    }
 
    private double getTargetAngle(ArmPosition pos) {

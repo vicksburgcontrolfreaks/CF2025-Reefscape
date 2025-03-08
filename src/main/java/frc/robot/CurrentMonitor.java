@@ -51,16 +51,16 @@ public class CurrentMonitor {
         m_rearRightMaxCurrent = Math.max(m_rearRightMaxCurrent, rearRightCurrent);
         
         // Publish live current values.
-        SmartDashboard.putNumber("Front Left Current", frontLeftCurrent);
-        SmartDashboard.putNumber("Front Right Current", frontRightCurrent);
-        SmartDashboard.putNumber("Rear Left Current", rearLeftCurrent);
-        SmartDashboard.putNumber("Rear Right Current", rearRightCurrent);
+        // SmartDashboard.putNumber("Front Left Current", frontLeftCurrent);
+        // SmartDashboard.putNumber("Front Right Current", frontRightCurrent);
+        // SmartDashboard.putNumber("Rear Left Current", rearLeftCurrent);
+        // SmartDashboard.putNumber("Rear Right Current", rearRightCurrent);
         
         // Publish maximum current values.
-        SmartDashboard.putNumber("Front Left Max Current", m_frontLeftMaxCurrent);
-        SmartDashboard.putNumber("Front Right Max Current", m_frontRightMaxCurrent);
-        SmartDashboard.putNumber("Rear Left Max Current", m_rearLeftMaxCurrent);
-        SmartDashboard.putNumber("Rear Right Max Current", m_rearRightMaxCurrent);
+        // SmartDashboard.putNumber("Front Left Max Current", m_frontLeftMaxCurrent);
+        // SmartDashboard.putNumber("Front Right Max Current", m_frontRightMaxCurrent);
+        // SmartDashboard.putNumber("Rear Left Max Current", m_rearLeftMaxCurrent);
+        // SmartDashboard.putNumber("Rear Right Max Current", m_rearRightMaxCurrent);
     }
     
     /**

@@ -1,3 +1,4 @@
+
 // File: LocalizationSubsystem.java
 package frc.robot.subsystems;
 
@@ -14,12 +15,14 @@ import edu.wpi.first.wpilibj.DriverStation;
 
 public class LocalizationSubsystem extends SubsystemBase {
     private final DriveSubsystem driveSubsystem;
+    private final VisionSubsystem visionSubsystem;
     private final SwerveDrivePoseEstimator poseEstimator;
     private final Field2d m_field = new Field2d();
     private Pose2d capturedPose = null; // For trajectory planning
 
-    public LocalizationSubsystem(DriveSubsystem driveSubsystem) {
+    public LocalizationSubsystem(DriveSubsystem driveSubsystem, VisionSubsystem visionSubsystem) {
         this.driveSubsystem = driveSubsystem;
+        this.visionSubsystem = visionSubsystem;
         
         // Set an initial pose based on alliance.
         // For red alliance: x=10, y=4, 0° heading.
@@ -47,7 +50,7 @@ public class LocalizationSubsystem extends SubsystemBase {
     @Override
 public void periodic() {
     // Set Limelight IMU mode and update robot orientation.
-    LimelightHelpers.SetIMUMode("limelight", 3);
+    LimelightHelpers.SetIMUMode("limelight", 0);
     LimelightHelpers.SetRobotOrientation("limelight", driveSubsystem.getHeading(), 0, 0, 0, 0, 0);
 
     // Update odometry using sensor values from the drive subsystem.

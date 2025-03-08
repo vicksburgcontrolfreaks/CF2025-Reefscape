@@ -7,7 +7,6 @@ package frc.robot.subsystems;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkBase.ControlType;
@@ -16,7 +15,6 @@ import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.RelativeEncoder;
-
 import frc.robot.Configs;
 
 public class MAXSwerveModule {
@@ -35,8 +33,7 @@ public class MAXSwerveModule {
   /**
    * Constructs a MAXSwerveModule and configures the driving and turning motor,
    * encoder, and PID controller. This configuration is specific to the REV
-   * MAXSwerve Module built with NEOs, SPARKS MAX, and a Through Bore
-   * Encoder.
+   * MAXSwerve Module built with NEOs, SPARKS MAX, and a Through Bore Encoder.
    */
   public MAXSwerveModule(int drivingCANId, int turningCANId, double chassisAngularOffset) {
     m_drivingSpark = new SparkMax(drivingCANId, MotorType.kBrushless);
@@ -67,8 +64,7 @@ public class MAXSwerveModule {
    * @return The current state of the module.
    */
   public SwerveModuleState getState() {
-    // Apply chassis angular offset to the encoder position to get the position
-    // relative to the chassis.
+    // Apply chassis angular offset to the encoder position to get the position relative to the chassis.
     return new SwerveModuleState(m_drivingEncoder.getVelocity(),
         new Rotation2d(m_turningEncoder.getPosition() - m_chassisAngularOffset));
   }
@@ -79,8 +75,7 @@ public class MAXSwerveModule {
    * @return The current position of the module.
    */
   public SwerveModulePosition getPosition() {
-    // Apply chassis angular offset to the encoder position to get the position
-    // relative to the chassis.
+    // Apply chassis angular offset to the encoder position to get the position relative to the chassis.
     return new SwerveModulePosition(
         m_drivingEncoder.getPosition(),
         new Rotation2d(m_turningEncoder.getPosition() - m_chassisAngularOffset));
@@ -114,6 +109,24 @@ public class MAXSwerveModule {
 
   public double getCurrent() {
     return m_drivingSpark.getOutputCurrent();
-}
-
+  }
+  
+  /**
+   * Sets the driving motor output using a direct voltage command.
+   * This method converts the given voltage (in volts) to a percent output.
+   *
+   * @param voltage The desired voltage to apply.
+   */
+  public void setDrivingVoltage(double voltage) {
+    // Assume a nominal battery voltage of 12V.
+    double percentOutput = voltage / 12.0;
+    // Optionally clamp the percent output between -1 and 1.
+    if (percentOutput > 1.0) {
+      percentOutput = 1.0;
+    } else if (percentOutput < -1.0) {
+      percentOutput = -1.0;
+    }
+    // Set the motor output directly.
+    m_drivingSpark.set(percentOutput);
+  }
 }
