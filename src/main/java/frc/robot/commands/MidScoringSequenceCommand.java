@@ -23,20 +23,20 @@ public class MidScoringSequenceCommand extends SequentialCommandGroup {
      */
     public MidScoringSequenceCommand(NewCoralArmSubsystem armSubsystem) {
         addCommands(
-            new InstantCommand(() -> armSubsystem.setArmAngle(24), armSubsystem),
-            new WaitCommand(0.5),
+            new InstantCommand(() -> armSubsystem.setArmAngle(.28), armSubsystem),
+            new WaitCommand(0.2),
             new InstantCommand(() -> armSubsystem.moveArm(-52), armSubsystem),
-            new WaitCommand(0.5),
-            new InstantCommand(() -> armSubsystem.setArmAngle(40), armSubsystem),
-            new WaitCommand(0.5),
-            new InstantCommand(() -> armSubsystem.moveArm(-37), armSubsystem),
-            new WaitCommand(0.5),
-            new InstantCommand(() -> armSubsystem.setArmAngle(35), armSubsystem),
-            new WaitCommand(0.5),
-            new InstantCommand(() -> armSubsystem.moveArm(-5), armSubsystem),
-            new WaitCommand(0.5),
-            new InstantCommand(() -> armSubsystem.setArmAngle(25), armSubsystem),
-            new WaitCommand(0.5),
+            new WaitCommand(0.2),
+            new InstantCommand(() -> armSubsystem.setArmAngle(.31), armSubsystem),
+            new WaitCommand(0.8),
+            new InstantCommand(() -> armSubsystem.moveArm(-35), armSubsystem),
+            new WaitCommand(0.8),
+            new InstantCommand(() -> armSubsystem.setArmAngle(.25), armSubsystem),
+            new WaitCommand(3.0),
+            //new InstantCommand(() -> armSubsystem.moveArm(-50), armSubsystem),
+            //new WaitCommand(0.8),
+            //new InstantCommand(() -> armSubsystem.setArmAngle(.2), armSubsystem),
+            //new WaitCommand(0.8),
             new HomeCoralArmCommand(armSubsystem)
         );
     }

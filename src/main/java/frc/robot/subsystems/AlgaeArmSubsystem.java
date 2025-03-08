@@ -133,6 +133,8 @@ public class AlgaeArmSubsystem extends SubsystemBase {
         }
     }
 
+
+    
     /** Stops both motors. */
     public void stop() {
         armMotor.stopMotor();

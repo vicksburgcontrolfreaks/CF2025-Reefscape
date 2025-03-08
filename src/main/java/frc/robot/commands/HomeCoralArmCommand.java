@@ -10,8 +10,11 @@ public class HomeCoralArmCommand extends Command {
     private final NewCoralArmSubsystem m_armSubsystem;
    
     private static final double TOL_INCREMENT = 0.002;
+    private static final double ANG_TOL_INC   = 0.0002;
     private static final double POSITION_TOLERANCE = 0.2; // acceptable error
+    private static final double ANG_POS_TOL = 0.02;
     private double tolerance_offset;
+    private double ang_tol_off;
 
 
     /**
@@ -28,6 +31,7 @@ public class HomeCoralArmCommand extends Command {
     public void initialize() {
         // Optionally reset integrators here.
         tolerance_offset = 0;
+        ang_tol_off = 0.0;
     }
 
     @Override
@@ -42,10 +46,12 @@ public class HomeCoralArmCommand extends Command {
         // make sure the extension is back before angling into home
         // to avoid contact with intake
         if (m_armSubsystem.getCurrentExtension() > -2.0) {
-            m_armSubsystem.setArmAngle(ArmConstants.TGT_INIT);
+            m_armSubsystem.setArmAngle(0.0); //Home is zero
             tolerance_offset = tolerance_offset + TOL_INCREMENT;
+            ang_tol_off = ang_tol_off + ANG_TOL_INC;
         } else {
             tolerance_offset = 0;
+            ang_tol_off = 0.0;
         }
 
         // Publish current measurements for debugging.
@@ -62,7 +68,7 @@ public class HomeCoralArmCommand extends Command {
         double currentExtension = m_armSubsystem.getCurrentExtension();
         double currentAngle = m_armSubsystem.getArmAngle();
         boolean nearHome = (Math.abs(currentExtension - m_armSubsystem.getInitArmExtend()) < (POSITION_TOLERANCE+tolerance_offset));
-        boolean angleNearHome = (Math.abs(currentAngle - m_armSubsystem.getInitArmAngle()) < (POSITION_TOLERANCE+tolerance_offset));
+        boolean angleNearHome = (Math.abs(currentAngle - m_armSubsystem.getInitArmAngle()) < (ANG_POS_TOL+ang_tol_off));
         return angleNearHome && nearHome;
     }
 
