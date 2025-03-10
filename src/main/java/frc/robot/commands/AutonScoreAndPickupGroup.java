@@ -21,7 +21,7 @@ public class AutonScoreAndPickupGroup extends SequentialCommandGroup {
 
             // 2. Drive to the scoring location with preloaded gamepiece while concurrently setting the arm.
             new ParallelCommandGroup(
-                new DriveToPoseCommand(driveSubsystem, ReefscapeTargetPoses.RED_TAG10_LEFT),
+                new DriveToPoseCommand(driveSubsystem, ReefscapeTargetPoses.RED_TAG11_LEFT),
                 new SequentialCommandGroup(
                     new WaitCommand(0.1), // Delay 0.5 seconds before starting arm set.
                     new SetArmPositionCommand(coralArmSubsystem, ArmConstants.highTgtAngle, ArmConstants.highTgtHeight)
