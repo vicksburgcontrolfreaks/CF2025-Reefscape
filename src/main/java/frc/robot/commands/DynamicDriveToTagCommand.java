@@ -29,10 +29,13 @@ public class DynamicDriveToTagCommand extends Command {
     private final DriveSubsystem driveSubsystem;
     private final LocalizationSubsystem localizationSubsystem;
     private Pose2d targetPose;
+    private final boolean m_isLeft; // true for left target; false for right target
 
-    public DynamicDriveToTagCommand(DriveSubsystem driveSubsystem, LocalizationSubsystem localizationSubsystem) {
+
+    public DynamicDriveToTagCommand(DriveSubsystem driveSubsystem, LocalizationSubsystem localizationSubsystem, boolean isLeft) {
         this.driveSubsystem = driveSubsystem;
         this.localizationSubsystem = localizationSubsystem;
+        m_isLeft = isLeft;
         addRequirements(driveSubsystem);
     }
 
@@ -43,24 +46,12 @@ public class DynamicDriveToTagCommand extends Command {
         if (DriverStation.getAlliance().orElse(DriverStation.Alliance.Red) == DriverStation.Alliance.Blue) {
             // Blue Alliance
             switch (tagId) {
-                case 17:
-                    targetPose = ReefscapeTargetPoses.BLUE_TAG17_RIGHT;
-                    break;
-                case 18:
-                    targetPose = ReefscapeTargetPoses.BLUE_TAG18_RIGHT;
-                    break;
-                case 19:
-                    targetPose = ReefscapeTargetPoses.BLUE_TAG19_RIGHT;
-                    break;
-                case 20:
-                    targetPose = ReefscapeTargetPoses.BLUE_TAG20_RIGHT;
-                    break;
-                case 21:
-                    targetPose = ReefscapeTargetPoses.BLUE_TAG21_RIGHT;
-                    break;
-                case 22:
-                    targetPose = ReefscapeTargetPoses.BLUE_TAG22_RIGHT;
-                    break;
+                case 17: targetPose = m_isLeft ? ReefscapeTargetPoses.BLUE_TAG17_LEFT : ReefscapeTargetPoses.BLUE_TAG17_RIGHT; break;
+                case 18: targetPose = m_isLeft ? ReefscapeTargetPoses.BLUE_TAG18_LEFT : ReefscapeTargetPoses.BLUE_TAG18_RIGHT; break;
+                case 19: targetPose = m_isLeft ? ReefscapeTargetPoses.BLUE_TAG19_LEFT : ReefscapeTargetPoses.BLUE_TAG19_RIGHT; break;
+                case 20: targetPose = m_isLeft ? ReefscapeTargetPoses.BLUE_TAG20_LEFT : ReefscapeTargetPoses.BLUE_TAG20_RIGHT; break;
+                case 21: targetPose = m_isLeft ? ReefscapeTargetPoses.BLUE_TAG21_LEFT : ReefscapeTargetPoses.BLUE_TAG21_RIGHT; break;
+                case 22: targetPose = m_isLeft ? ReefscapeTargetPoses.BLUE_TAG22_LEFT : ReefscapeTargetPoses.BLUE_TAG22_RIGHT; break;
                 default:
                     targetPose = driveSubsystem.getPose().plus(
                             new Transform2d(new Translation2d(-1.0, 0.0), new Rotation2d(0)));
@@ -68,24 +59,12 @@ public class DynamicDriveToTagCommand extends Command {
             }
         } else { // Red Alliance
             switch (tagId) {
-                case 6:
-                    targetPose = ReefscapeTargetPoses.RED_TAG6_RIGHT;
-                    break;
-                case 7:
-                    targetPose = ReefscapeTargetPoses.RED_TAG7_RIGHT;
-                    break;
-                case 8:
-                    targetPose = ReefscapeTargetPoses.RED_TAG8_RIGHT;
-                    break;
-                case 9:
-                    targetPose = ReefscapeTargetPoses.RED_TAG9_RIGHT;
-                    break;
-                case 10:
-                    targetPose = ReefscapeTargetPoses.RED_TAG10_RIGHT;
-                    break;
-                case 11:
-                    targetPose = ReefscapeTargetPoses.RED_TAG11_RIGHT;
-                    break;
+                case 6:  targetPose = m_isLeft ? ReefscapeTargetPoses.RED_TAG6_LEFT  : ReefscapeTargetPoses.RED_TAG6_RIGHT;  break;
+                case 7:  targetPose = m_isLeft ? ReefscapeTargetPoses.RED_TAG7_LEFT  : ReefscapeTargetPoses.RED_TAG7_RIGHT;  break;
+                case 8:  targetPose = m_isLeft ? ReefscapeTargetPoses.RED_TAG8_LEFT  : ReefscapeTargetPoses.RED_TAG8_RIGHT;  break;
+                case 9:  targetPose = m_isLeft ? ReefscapeTargetPoses.RED_TAG9_LEFT  : ReefscapeTargetPoses.RED_TAG9_RIGHT;  break;
+                case 10: targetPose = m_isLeft ? ReefscapeTargetPoses.RED_TAG10_LEFT : ReefscapeTargetPoses.RED_TAG10_RIGHT; break;
+                case 11: targetPose = m_isLeft ? ReefscapeTargetPoses.RED_TAG11_LEFT : ReefscapeTargetPoses.RED_TAG11_RIGHT; break;
                 default:
                     targetPose = driveSubsystem.getPose().plus(
                             new Transform2d(new Translation2d(1.0, 0.0), new Rotation2d(0)));

@@ -2,6 +2,7 @@
 package frc.robot.subsystems;
 
 import frc.robot.Constants;
+import frc.robot.Constants.AlgaeConstants;
 import frc.robot.Constants.ArmConstants;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
@@ -113,7 +114,7 @@ public class AlgaeArmSubsystem extends SubsystemBase {
     }
 
     /**
-     * Release action: reverses the wheel motor to eject the ball and retracts the arm until it reaches zero.
+     * Release action: reverses the wheel motor to eject the ball and retracts the arm until it returns to the ready position.
      * @return true when release and retraction are complete.
      */
     public boolean algaeArmShoot() {
@@ -124,7 +125,7 @@ public class AlgaeArmSubsystem extends SubsystemBase {
             wheelMotor.set(0.0);
         }
         
-        if (armEncoder.getPosition() > 0) {
+        if (armEncoder.getPosition() > AlgaeConstants.ready) {
             armMotor.set(-0.5);
             return false;
         } else {
