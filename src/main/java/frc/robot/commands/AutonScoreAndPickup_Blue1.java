@@ -15,8 +15,8 @@ import frc.robot.subsystems.VisionSubsystem;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.ReefscapeTargetPoses;
 
-public class AutonScoreAndPickup_Red0 extends SequentialCommandGroup {
-    public AutonScoreAndPickup_Red0(DriveSubsystem driveSubsystem,
+public class AutonScoreAndPickup_Blue1 extends SequentialCommandGroup {
+    public AutonScoreAndPickup_Blue1(DriveSubsystem driveSubsystem,
                                    LocalizationSubsystem localizationSubsystem,
                                    VisionSubsystem visionSubsystem,
                                    NewCoralArmSubsystem coralArmSubsystem) {
@@ -26,8 +26,8 @@ public class AutonScoreAndPickup_Red0 extends SequentialCommandGroup {
 
             // 2. Drive to the scoring location with preloaded gamepiece while concurrently setting the arm.
             new ParallelCommandGroup(
-                // new DriveToPoseCommand(driveSubsystem, ReefscapeTargetPoses.RED_TAG11_LEFT),
-                new DriveToPoseCommand(driveSubsystem, ReefscapeTargetPoses.RED_TAG11_LEFT, List.of(new Pose2d(12.5, 2.73, new Rotation2d(Math.toRadians(60))))),
+                new DriveToPoseCommand(driveSubsystem, ReefscapeTargetPoses.BLUE_TAG20_RIGHT, List.of
+                    (new Pose2d(5.626, 5.86, new Rotation2d(Math.toRadians(240))))),
 
                 new SequentialCommandGroup(
                     new WaitCommand(0.1), // Delay 0.5 seconds before starting arm set.
