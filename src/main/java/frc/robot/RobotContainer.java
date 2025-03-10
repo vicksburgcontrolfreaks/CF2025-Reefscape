@@ -8,7 +8,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.PS4Controller.Button;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.OIConstants;
-import frc.robot.commands.AutonScoreAndPickupGroup;
+import frc.robot.commands.AutonScoreAndPickup_Red0;
 import frc.robot.commands.CollectBallCommand;
 import frc.robot.commands.ReleaseBallCommand;
 import frc.robot.commands.RunAlgaeCollectorWheelsCommand;
@@ -100,7 +100,7 @@ public class RobotContainer {
                   .andThen(new RunAlgaeCollectorWheelsCommand(m_algaeArmSubsystem, 0.5, 1.0))
       );
       autoChooser.setDefaultOption("Score, Pickup, and Score",
-            new AutonScoreAndPickupGroup(m_robotDrive, m_localizationSubsystem, m_visionSubsystem, m_coralArmSubsystem)
+            new AutonScoreAndPickup_Red0(m_robotDrive, m_localizationSubsystem, m_visionSubsystem, m_coralArmSubsystem)
       );
       autoChooser.addOption("No Auto",
             new RunCommand(() -> m_robotDrive.drive(0, 0, 0, false), m_robotDrive)

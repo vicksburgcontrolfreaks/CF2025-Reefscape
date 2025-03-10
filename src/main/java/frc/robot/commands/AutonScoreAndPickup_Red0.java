@@ -2,6 +2,11 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+
+import java.util.List;
+
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.LocalizationSubsystem;
@@ -10,8 +15,8 @@ import frc.robot.subsystems.VisionSubsystem;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.ReefscapeTargetPoses;
 
-public class AutonScoreAndPickupGroup extends SequentialCommandGroup {
-    public AutonScoreAndPickupGroup(DriveSubsystem driveSubsystem,
+public class AutonScoreAndPickup_Red0 extends SequentialCommandGroup {
+    public AutonScoreAndPickup_Red0(DriveSubsystem driveSubsystem,
                                    LocalizationSubsystem localizationSubsystem,
                                    VisionSubsystem visionSubsystem,
                                    NewCoralArmSubsystem coralArmSubsystem) {
@@ -21,7 +26,9 @@ public class AutonScoreAndPickupGroup extends SequentialCommandGroup {
 
             // 2. Drive to the scoring location with preloaded gamepiece while concurrently setting the arm.
             new ParallelCommandGroup(
-                new DriveToPoseCommand(driveSubsystem, ReefscapeTargetPoses.RED_TAG11_LEFT),
+                // new DriveToPoseCommand(driveSubsystem, ReefscapeTargetPoses.RED_TAG11_LEFT),
+                new DriveToPoseCommand(driveSubsystem, ReefscapeTargetPoses.RED_TAG11_LEFT, List.of(new Pose2d(12.5, 2.73, new Rotation2d(Math.toRadians(60))))),
+
                 new SequentialCommandGroup(
                     new WaitCommand(0.1), // Delay 0.5 seconds before starting arm set.
                     new SetArmPositionCommand(coralArmSubsystem, ArmConstants.highTgtAngle, ArmConstants.highTgtHeight)
