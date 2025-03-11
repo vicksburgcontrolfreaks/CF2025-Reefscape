@@ -100,7 +100,7 @@ public class RobotContainer {
                   .andThen(new RunAlgaeCollectorWheelsCommand(m_algaeArmSubsystem, 0.5, 1.0))
       );
       autoChooser.setDefaultOption("Score, Pickup, and Score",
-            new AutonScoreAndPickup_Red0(m_robotDrive, m_localizationSubsystem, m_visionSubsystem, m_coralArmSubsystem)
+            new AutonScoreAndPickup_Red0(m_robotDrive, m_localizationSubsystem, m_visionSubsystem, m_coralArmSubsystem, m_algaeArmSubsystem)
       );
       autoChooser.addOption("No Auto",
             new RunCommand(() -> m_robotDrive.drive(0, 0, 0, false), m_robotDrive)
