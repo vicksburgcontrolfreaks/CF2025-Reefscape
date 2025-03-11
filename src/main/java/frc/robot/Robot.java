@@ -5,8 +5,6 @@
 
 package frc.robot;
 
-import org.littletonrobotics.urcl.URCL;
-
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.cscore.UsbCamera;
 import edu.wpi.first.net.PortForwarder;
@@ -48,10 +46,6 @@ public class Robot extends TimedRobot {
     }
 
     // camera1 = CameraServer.startAutomaticCapture(0);
-
-    // If publishing to NetworkTables and DataLog
-    DataLogManager.start();
-    URCL.start();
   }
 
   /**

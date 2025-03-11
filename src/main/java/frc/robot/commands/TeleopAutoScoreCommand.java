@@ -8,23 +8,58 @@ import frc.robot.subsystems.LocalizationSubsystem;
 import frc.robot.subsystems.NewCoralArmSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
 import frc.robot.Constants.ArmConstants;
+import frc.robot.RobotContainer; // Contains ArmPosition enum
 
 public class TeleopAutoScoreCommand extends SequentialCommandGroup {
+    /**
+     * @param driveSubsystem the drive subsystem
+     * @param localizationSubsystem the localization subsystem
+     * @param visionSubsystem the vision subsystem
+     * @param coralArmSubsystem the coral arm subsystem
+     * @param isLeft if true, drive toward the left target; if false, drive toward the right target.
+     * @param targetArmPosition the desired arm position (LOW, MID, HIGH)
+     */
     public TeleopAutoScoreCommand(DriveSubsystem driveSubsystem,
-            LocalizationSubsystem localizationSubsystem,
-            VisionSubsystem visionSubsystem,
-            NewCoralArmSubsystem coralArmSubsystem, boolean isLeft) {
+                                  LocalizationSubsystem localizationSubsystem,
+                                  VisionSubsystem visionSubsystem,
+                                  NewCoralArmSubsystem coralArmSubsystem,
+                                  boolean isLeft,
+                                  RobotContainer.ArmPosition targetArmPosition) {
+        // Determine the target arm angle and extension based on the argument.
+        double targetAngle;
+        double targetExtension;
+        switch (targetArmPosition) {
+            case LOW:
+                targetAngle = ArmConstants.lowTgtAngle;
+                targetExtension = ArmConstants.lowTgtHeight;
+                break;
+            case MID:
+                targetAngle = ArmConstants.midTgtAngle;
+                targetExtension = ArmConstants.midTgtHeight;
+                break;
+            case HIGH:
+                targetAngle = ArmConstants.highTgtAngle;
+                targetExtension = ArmConstants.highTgtHeight;
+                break;
+            default:
+                // Fallback to HIGH if not specified.
+                targetAngle = ArmConstants.highTgtAngle;
+                targetExtension = ArmConstants.highTgtHeight;
+                break;
+        }
+        
         addCommands(
-                // 1. Initialize localization.
-                new InitializeLocalizationCommand(driveSubsystem, localizationSubsystem),
-
-                // 2. Drive to the scoring location with preloaded gamepiece while concurrently
-                // setting the arm.
-                new ParallelCommandGroup(
-                        new DynamicDriveToTagCommand(driveSubsystem, localizationSubsystem, isLeft),
-                        new SequentialCommandGroup(
-                                new WaitCommand(0.5), // Delay in seconds before starting arm set.
-                                new SetArmPositionCommand(coralArmSubsystem, ArmConstants.highTgtAngle,
-                                        ArmConstants.highTgtHeight))));
+            // 1. Initialize localization.
+            new InitializeLocalizationCommand(driveSubsystem, localizationSubsystem),
+            
+            // 2. Drive to the scoring location while concurrently setting the arm.
+            new ParallelCommandGroup(
+                new DynamicDriveToTagCommand(driveSubsystem, localizationSubsystem, isLeft),
+                new SequentialCommandGroup(
+                    new WaitCommand(0.5), // Delay before starting the arm command.
+                    new SetArmPositionCommand(coralArmSubsystem, targetAngle, targetExtension)
+                )
+            )
+        );
     }
 }
