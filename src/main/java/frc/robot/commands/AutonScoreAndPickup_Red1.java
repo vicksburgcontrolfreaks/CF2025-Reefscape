@@ -14,48 +14,64 @@ import frc.robot.subsystems.NewCoralArmSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.ReefscapeTargetPoses;
+import frc.robot.subsystems.AlgaeArmSubsystem;
 
-public class AutonScoreAndPickup_Red0 extends SequentialCommandGroup {
-    public AutonScoreAndPickup_Red0(DriveSubsystem driveSubsystem,
+public class AutonScoreAndPickup_Red1 extends SequentialCommandGroup {
+    public AutonScoreAndPickup_Red1(DriveSubsystem driveSubsystem,
                                    LocalizationSubsystem localizationSubsystem,
                                    VisionSubsystem visionSubsystem,
-                                   NewCoralArmSubsystem coralArmSubsystem) {
+                                   NewCoralArmSubsystem coralArmSubsystem,
+								    AlgaeArmSubsystem algaeArmSubsystem) {
         addCommands(
             // 1. Initialize localization.
             new InitializeLocalizationCommand(driveSubsystem, localizationSubsystem),
 
             // 2. Drive to the scoring location with preloaded gamepiece while concurrently setting the arm.
             new ParallelCommandGroup(
-                // new DriveToPoseCommand(driveSubsystem, ReefscapeTargetPoses.RED_TAG11_LEFT),
-                new DriveToPoseCommand(driveSubsystem, ReefscapeTargetPoses.RED_TAG11_LEFT, List.of(new Pose2d(12.5, 2.73, new Rotation2d(Math.toRadians(60))))),
+                new DriveToPoseCommand(driveSubsystem, ReefscapeTargetPoses.RED_TAG9_LEFT)
+            ),
+            //InitAlgaeCollectorPositionCommand
+            // 3. Score the preloaded coral while driving to the pickup location.
+            new ParallelCommandGroup(
+                new SequentialCommandGroup(
+                    new WaitCommand(0.1), // Delay 0.5 seconds before starting arm set.
+                    new RunAlgaeCollectorWheelsCommand(algaeArmSubsystem, 0.25, 2.0),
+                    new WaitCommand(1.0)
+                )
+            ),
 
+            // 4. Back up from the reef to find a location to turn and drive to 
+            new ParallelCommandGroup(
+                new DriveToPoseCommand(driveSubsystem, ReefscapeTargetPoses.RED_1_INT)
+            ),
+
+            // 5. drive to coral station
+            new ParallelCommandGroup(
+                new DriveToPoseCommand(driveSubsystem, ReefscapeTargetPoses.RED_CORAL_STATION_1)
+            ),
+
+            // 6. Wait for coral to be deposited
+            new ParallelCommandGroup(
+                new SequentialCommandGroup(
+                    new WaitCommand(2.0)
+                )
+            ),
+
+            //  7. Drive back up to reef 
+            new ParallelCommandGroup(
+                new DriveToPoseCommand(driveSubsystem, ReefscapeTargetPoses.RED_TAG8_LEFT),
                 new SequentialCommandGroup(
                     new WaitCommand(0.1), // Delay 0.5 seconds before starting arm set.
                     new SetArmPositionCommand(coralArmSubsystem, ArmConstants.highTgtAngle, ArmConstants.highTgtHeight)
                 )
             ),
 
-            // 3. Score the preloaded coral while driving to the pickup location.
+            // 8. Score high 
             new ParallelCommandGroup(
+                new WaitCommand(1.0),
                 new HighScoringSequenceCommand(coralArmSubsystem),
-                new SequentialCommandGroup(
-                    new WaitCommand(2.0), // Delay for the arm to clear the reef
-                    new DriveToPoseCommand(driveSubsystem, ReefscapeTargetPoses.RED_CORAL_STATION_0),
-                    new WaitCommand(2.0)  // Delay to allow human player to load coral
-                )
-            // ),
-
-            // // 4. Return to the reef while concurrently setting the arm for scoring.
-            // new ParallelCommandGroup(
-            //     new DriveToPoseCommand(driveSubsystem, ReefscapeTargetPoses.RED_TAG6_LEFT),
-            //     new SequentialCommandGroup(
-            //         new WaitCommand(0.5), // Delay before starting arm set.
-            //         new SetArmPositionCommand(coralArmSubsystem, ArmConstants.highTgtAngle, ArmConstants.highTgtHeight)
-                )
-            // ),
-
-            // // 5. Score the second coral.
-            // new HighScoringSequenceCommand(coralArmSubsystem)
-        );
+                new WaitCommand(2.0)
+            )
+        );;
     }
 }
