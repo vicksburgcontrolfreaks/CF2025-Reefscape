@@ -105,6 +105,15 @@ public class NewCoralArmSubsystem extends SubsystemBase {
       if (ca_cmd > ArmConstants.CA_MAX) ca_cmd = ArmConstants.CA_MAX;
       if (ca_cmd < -ArmConstants.CA_MAX) ca_cmd = -ArmConstants.CA_MAX;
    
+      if (targetAngle < 0.01) {
+         if (currentAngle < 0.05) {
+            ca_cmd = ca_cmd * 0.5;
+         }
+         if (currentAngle < 0.01) {
+            ca_cmd = ca_cmd *0.5;
+         }
+      }
+
       m_armAngle.set(ca_cmd);//ca_cmd);//command);
    }
     
