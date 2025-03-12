@@ -77,9 +77,9 @@ public final class Constants {
     public static final int TGT_HIGH = 3; // enumeration do not change
 
     // Coral Extender
-    public static final double lowTgtHeight  =  -40; //target offset from init -40.28
-    public static final double midTgtHeight  =  -58; //target offset from init -72.31
-    public static final double highTgtHeight = -102;//target offset from init -103.72
+    public static final double lowTgtHeight  =  -35; //target offset from init -40.28
+    public static final double midTgtHeight  =  -57; //target offset from init -72.31
+    public static final double highTgtHeight = -100;//target offset from init -103.72
 
     public static final double CE_PGain = 0.01; // 0.02
     public static final double CE_IGain = 0.01;
@@ -87,14 +87,14 @@ public final class Constants {
     public static final double CE_MAX = 0.55;
 
     // Coral Arm Angle  
-    public static final double lowTgtAngle  =  0.37; //target offset from init 39.28
+    public static final double lowTgtAngle  =  0.42; //0.44 target offset from init 39.28
     public static final double midTgtAngle  =  0.22; //target offset from init 21.93
-    public static final double highTgtAngle =  0.11; //target offset from init 10.93
+    public static final double highTgtAngle =  0.127; //target offset from init 10.93
 
     public static final double CA_PGain = 2.0;  //0.01
     public static final double CA_IGain = 0.05;  //0.002
     public static final double CA_I_MAX = 0.5;
-    public static final double CA_MAX   = 0.35;
+    public static final double CA_MAX   = 0.12;  //0.25 was looking ok
   }
 
   public static final class ModuleConstants {
@@ -164,8 +164,8 @@ public final class Constants {
 
   public static final class ReefscapeTargetPoses {
     // Red Alliance Targets
-    public static final Pose2d RedProcessor = new Pose2d(6.099, 0.595, new Rotation2d(0));
-    public static final Pose2d RED_CORAL_STATION_0 = new Pose2d(16.000, 0.670, new Rotation2d(125));
+    public static final Pose2d RED_PROCESSOR = new Pose2d(6.099, 0.595, new Rotation2d(0));
+    public static final Pose2d RED_CORAL_STATION_0 = new Pose2d(16.000, 0.670, new Rotation2d(-235));
     public static final Pose2d RED_CORAL_STATION_1 = new Pose2d(16.000, 7.370, new Rotation2d(0));
 
     public static final Pose2d RED_TAG6_RIGHT = new Pose2d(13.83, 3.060, new Rotation2d(Math.toRadians(120)));
@@ -186,8 +186,16 @@ public final class Constants {
     public static final Pose2d RED_TAG11_RIGHT = new Pose2d(12.588, 2.812, new Rotation2d(Math.toRadians(60)));
     public static final Pose2d RED_TAG11_LEFT = new Pose2d(12.285, 2.989, new Rotation2d(Math.toRadians(60)));
 
+
+    // Intermediate positions that should have no obstructions to turning
+    // red 0 starts by going to tag 11
+    // red 1 starts by going to tag 9
+    public static final Pose2d RED_0_INTA = new Pose2d(11.8, 2.2, new Rotation2d(Math.toRadians(100)));
+    public static final Pose2d RED_0_INTB = new Pose2d(13.5, 1.75, new Rotation2d(Math.toRadians(100)));
+    public static final Pose2d RED_1_INT = new Pose2d(12.0, 5.80, new Rotation2d(Math.toRadians(300)));
+
     // Blue Alliance Targets
-    public static final Pose2d BlueProcessor = new Pose2d(11.529, 7.399, new Rotation2d(-Math.PI));
+    public static final Pose2d BLUE_PROCESSOR = new Pose2d(11.529, 7.399, new Rotation2d(-Math.PI));
     public static final Pose2d BLUE_CORAL_STATION_0 = new Pose2d(1.600, 0.660, new Rotation2d(54));
     public static final Pose2d BLUE_CORAL_STATION_1 = new Pose2d(1.600, 7.370, new Rotation2d(-54));
 
@@ -209,5 +217,9 @@ public final class Constants {
     public static final Pose2d BLUE_TAG22_RIGHT = new Pose2d(5.253, 3.065, new Rotation2d(Math.toRadians(120)));
     public static final Pose2d BLUE_TAG22_LEFT = new Pose2d(4.942, 2.889, new Rotation2d(Math.toRadians(120)));
 
+    // Intermediate positions that should have no obstructions to turning
+    public static final Pose2d BLUE_0_INT = new Pose2d(5.347, 2.407, new Rotation2d(Math.toRadians(120)));
+    public static final Pose2d BLUE_1_INT = new Pose2d(5.626, 5.86, new Rotation2d(Math.toRadians(240)));
+    
   }
 }

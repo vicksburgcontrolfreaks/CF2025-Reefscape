@@ -1,13 +1,14 @@
-// File: DriveToPoseCommand.java
 package frc.robot.commands;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
@@ -16,38 +17,66 @@ import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.subsystems.DriveSubsystem;
+import frc.robot.subsystems.LocalizationSubsystem;
 import frc.robot.LimelightHelpers;
 
 public class DriveToPoseCommand extends Command {
     private SwerveControllerCommand internalCommand;
     private final DriveSubsystem driveSubsystem;
     private final Pose2d targetPose;
+    private final List<Pose2d> interiorWaypoints;
+    private final LocalizationSubsystem localizationSubsystem;
 
-    public DriveToPoseCommand(DriveSubsystem driveSubsystem, Pose2d targetPose) {
+    /**
+     * Creates a new DriveToPoseCommand that will generate a trajectory from the current
+     * pose to the target pose using the provided interior waypoints.
+     *
+     * @param driveSubsystem  The drive subsystem.
+     * @param targetPose      The final target pose.
+     * @param interiorWaypoints A list of interior waypoints (as Pose2d objects) for the trajectory.
+     */
+    public DriveToPoseCommand(DriveSubsystem driveSubsystem, Pose2d targetPose, List<Pose2d> interiorWaypoints, LocalizationSubsystem localizationSubsystem) {
         this.driveSubsystem = driveSubsystem;
         this.targetPose = targetPose;
+        this.interiorWaypoints = interiorWaypoints;
+        this.localizationSubsystem = localizationSubsystem;
         addRequirements(driveSubsystem);
+    }
+
+    /**
+     * Overloaded constructor that assumes no interior waypoints.
+     *
+     * @param driveSubsystem The drive subsystem.
+     * @param targetPose     The final target pose.
+     */
+    public DriveToPoseCommand(DriveSubsystem driveSubsystem, Pose2d targetPose, LocalizationSubsystem localizationSubsystem) {
+        this(driveSubsystem, targetPose, List.of(), localizationSubsystem);
     }
 
     @Override
     public void initialize() {
-        // Get the current odometry as the default starting pose.
-        Pose2d startPose = driveSubsystem.getPose();
-        // Check if a vision estimate is available (e.g., via Limelight with MegaTag2).
+        // Get the current odometry as the starting pose.
+        Pose2d startPose = localizationSubsystem.getEstimatedPose();
+        // Check if a vision estimate is available.
         var visionEstimate = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight");
         if (visionEstimate != null && visionEstimate.tagCount > 0) {
-            // Use the vision pose if a tag is visible.
             startPose = visionEstimate.pose;
         }
 
-        // Build a trajectory from the starting pose to the target pose.
+        // Convert interior waypoints (Pose2d) to a list of Translation2d.
+        List<Translation2d> translations = interiorWaypoints.stream()
+                .map(Pose2d::getTranslation)
+                .collect(Collectors.toList());
+
+        // Build a trajectory from startPose to targetPose using the interior waypoints.
         TrajectoryConfig config = new TrajectoryConfig(
                 AutoConstants.kMaxSpeedMetersPerSecond,
                 AutoConstants.kMaxAccelerationMetersPerSecondSquared)
                 .setKinematics(DriveConstants.kDriveKinematics);
+
         Trajectory trajectory = TrajectoryGenerator.generateTrajectory(
                 startPose,
-                List.of(),  // No interior waypoints.
+                translations,
                 targetPose,
                 config
         );
@@ -72,7 +101,7 @@ public class DriveToPoseCommand extends Command {
                 driveSubsystem
         );
 
-        // Reset odometry to the vision-based (or default) starting pose.
+        // Reset odometry to the starting pose.
         driveSubsystem.resetOdometry(startPose);
         internalCommand.initialize();
     }

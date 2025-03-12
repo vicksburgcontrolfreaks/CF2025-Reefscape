@@ -8,7 +8,10 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.PS4Controller.Button;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.OIConstants;
-import frc.robot.commands.AutonScoreAndPickupGroup;
+import frc.robot.commands.AutonScoreAndPickup_Blue0;
+import frc.robot.commands.AutonScoreAndPickup_Blue1;
+import frc.robot.commands.AutonScoreAndPickup_Red0;
+import frc.robot.commands.AutonScoreAndPickup_Red1;
 import frc.robot.commands.CollectBallCommand;
 import frc.robot.commands.ReleaseBallCommand;
 import frc.robot.commands.RunAlgaeCollectorWheelsCommand;
@@ -50,7 +53,8 @@ public class RobotContainer {
    private final NewCoralArmSubsystem m_coralArmSubsystem = new NewCoralArmSubsystem();
    private final HarpoonSubsystem m_harpoon = new HarpoonSubsystem();
    private final VisionSubsystem m_visionSubsystem = new VisionSubsystem();
-   private final LocalizationSubsystem m_localizationSubsystem = new LocalizationSubsystem(m_robotDrive, m_visionSubsystem);
+   private final LocalizationSubsystem m_localizationSubsystem = new LocalizationSubsystem(m_robotDrive,
+         m_visionSubsystem);
    private final CoralCollectorSubsystem m_CoralCollectorSubsystem = new CoralCollectorSubsystem();
    private final LedSubsystem m_LedSubsystem = new LedSubsystem();
 
@@ -58,19 +62,20 @@ public class RobotContainer {
    public enum ArmPosition {
       INIT, LOW, MID, HIGH;
    }
+
    private ArmPosition currentArmPosition = ArmPosition.INIT;
    private ArmPosition targetArmPosition = ArmPosition.INIT;
 
    // Controllers.
    private final XboxController m_driverController = new XboxController(OIConstants.kDriverControllerPort);
    private final XboxController m_mechanismController = new XboxController(OIConstants.kMechanismControllerPort);
-   
+
    // POV buttons for driver controller.
    private final POVButton dpadUpButton = new POVButton(m_driverController, 0);
    private final POVButton dpadRightButton = new POVButton(m_driverController, 90);
    private final POVButton dpadDownButton = new POVButton(m_driverController, 180);
    private final POVButton dpadLeftButton = new POVButton(m_driverController, 270);
-   
+
    // POV buttons for mechanism controller.
    private final POVButton mech_dpadUpButton = new POVButton(m_mechanismController, 0);
    private final POVButton mech_dpadRightButton = new POVButton(m_mechanismController, 90);
@@ -89,38 +94,44 @@ public class RobotContainer {
 
       // Schedule the algae collector initialization command.
       CommandScheduler.getInstance().schedule(
-            new InitAlgaeCollectorPositionCommand(m_algaeArmSubsystem, Constants.AlgaeConstants.ready)
-      );
+            new InitAlgaeCollectorPositionCommand(m_algaeArmSubsystem, Constants.AlgaeConstants.ready));
 
       // Set up autonomous chooser options.
       autoChooser.setDefaultOption("Auton Score L1",
             new InitializeLocalizationCommand(m_robotDrive, m_localizationSubsystem)
                   .andThen(new DynamicDriveToTagCommand(m_robotDrive, m_localizationSubsystem, true))
                   .andThen(new InitAlgaeCollectorPositionCommand(m_algaeArmSubsystem, Constants.AlgaeConstants.ready))
-                  .andThen(new RunAlgaeCollectorWheelsCommand(m_algaeArmSubsystem, 0.5, 1.0))
-      );
-      autoChooser.setDefaultOption("Score, Pickup, and Score",
-            new AutonScoreAndPickupGroup(m_robotDrive, m_localizationSubsystem, m_visionSubsystem, m_coralArmSubsystem)
-      );
+                  .andThen(new RunAlgaeCollectorWheelsCommand(m_algaeArmSubsystem, 0.5, 1.0)));
+      autoChooser.setDefaultOption("Red 0",
+            new AutonScoreAndPickup_Red0(m_robotDrive, m_localizationSubsystem, m_visionSubsystem,
+                  m_coralArmSubsystem, m_algaeArmSubsystem));
+      autoChooser.setDefaultOption("Red 1",
+            new AutonScoreAndPickup_Red1(m_robotDrive, m_localizationSubsystem, m_visionSubsystem,
+                  m_coralArmSubsystem, m_algaeArmSubsystem));
+      autoChooser.setDefaultOption("Blue 0",
+            new AutonScoreAndPickup_Blue0(m_robotDrive, m_localizationSubsystem, m_visionSubsystem,
+                  m_coralArmSubsystem, m_algaeArmSubsystem));
+      autoChooser.setDefaultOption("Blue 1",
+            new AutonScoreAndPickup_Blue1(m_robotDrive, m_localizationSubsystem, m_visionSubsystem,
+                  m_coralArmSubsystem, m_algaeArmSubsystem));
       autoChooser.addOption("No Auto",
-            new RunCommand(() -> m_robotDrive.drive(0, 0, 0, false), m_robotDrive)
-      );
+            new RunCommand(() -> m_robotDrive.drive(0, 0, 0, false), m_robotDrive));
 
       // Configure button bindings.
       configureButtonBindings();
 
       // Set default driver command with exponential scaling.
       m_robotDrive.setDefaultCommand(new RunCommand(() -> {
-         double forward = expoScale(-m_driverController.getLeftY(), 1.5);
-         double strafe = expoScale(-m_driverController.getLeftX(), 3);
-         double rotation = expoScale(-m_driverController.getRightX(), 2);
+         double forward = expoScale(-m_driverController.getLeftY()*0.5, 2);
+         double strafe = expoScale(-m_driverController.getLeftX()*0.5 , 2);
+         double rotation = expoScale(-m_driverController.getRightX()*0.5, 2);
          m_robotDrive.drive(forward, strafe, rotation, true);
       }, m_robotDrive));
 
+
       // Set default mechanism command.
       m_coralArmSubsystem.setDefaultCommand(
-            new ManualCoralArmAdjustCommand(m_coralArmSubsystem, m_mechanismController)
-      );
+            new ManualCoralArmAdjustCommand(m_coralArmSubsystem, m_mechanismController));
    }
 
    private void configureButtonBindings() {
@@ -151,19 +162,25 @@ public class RobotContainer {
       // DPad Down toggles field-oriented drive.
       dpadDownButton.onTrue(new InstantCommand(m_robotDrive::toggleFieldOriented, m_robotDrive));
 
-      // Teleop Auto Score: Bind Xbox button X for one scoring mode.
+      // B button: Teleop Auto Score RIGHT.
       new JoystickButton(m_driverController, XboxController.Button.kX.value)
             .onTrue(new InstantCommand(() -> {
                m_autoDriveCommand = new TeleopAutoScoreCommand(m_robotDrive, m_localizationSubsystem, m_visionSubsystem,
-                     m_coralArmSubsystem, false);
+                     m_coralArmSubsystem, false, targetArmPosition);
                m_autoDriveCommand.schedule();
             }));
-      // (Optionally, add a second binding for the other scoring mode if needed.)
-      
+      // X button: Teleop Auto Score LEFT.
+      new JoystickButton(m_driverController, XboxController.Button.kX.value)
+            .onTrue(new InstantCommand(() -> {
+               m_autoDriveCommand = new TeleopAutoScoreCommand(m_robotDrive, m_localizationSubsystem, m_visionSubsystem,
+                     m_coralArmSubsystem, true, targetArmPosition);
+               m_autoDriveCommand.schedule();
+            }));
+
       // Right Trigger starts ball collection.
       new Trigger(() -> m_driverController.getRightTriggerAxis() > 0.2)
             .onTrue(new CollectBallCommand(m_algaeArmSubsystem));
-      
+
       // Left Trigger shoots ball and retracts ball collector.
       new Trigger(() -> m_driverController.getLeftTriggerAxis() > 0.2)
             .onTrue(new ReleaseBallCommand(m_algaeArmSubsystem));
@@ -175,9 +192,9 @@ public class RobotContainer {
       // Right bumper on mechanism controller zeros arm encoders.
       new JoystickButton(m_mechanismController, XboxController.Button.kRightBumper.value)
             .onTrue(new RunCommand(() -> {
-                m_coralArmSubsystem.zeroEncoders();
-                m_algaeArmSubsystem.zeroEncoders();
-                m_CoralCollectorSubsystem.zeroEncoders();
+               m_coralArmSubsystem.zeroEncoders();
+               m_algaeArmSubsystem.zeroEncoders();
+               m_CoralCollectorSubsystem.zeroEncoders();
             }, m_coralArmSubsystem));
 
       // Harpoon control: DPad Right for forward, DPad Left for reverse.
@@ -201,12 +218,15 @@ public class RobotContainer {
          switch (targetArmPosition) {
             case INIT:
                targetArmPosition = ArmPosition.LOW;
+               m_LedSubsystem.setLEDMode(LedSubsystem.LEDMode.ARM_LOW);
                break;
             case LOW:
                targetArmPosition = ArmPosition.MID;
+               m_LedSubsystem.setLEDMode(LedSubsystem.LEDMode.ARM_MID);
                break;
             case MID:
                targetArmPosition = ArmPosition.HIGH;
+               m_LedSubsystem.setLEDMode(LedSubsystem.LEDMode.ARM_HIGH);
                break;
             case HIGH:
                // do nothing
@@ -221,9 +241,11 @@ public class RobotContainer {
          switch (targetArmPosition) {
             case HIGH:
                targetArmPosition = ArmPosition.MID;
+               m_LedSubsystem.setLEDMode(LedSubsystem.LEDMode.ARM_MID);
                break;
             case MID:
                targetArmPosition = ArmPosition.LOW;
+               m_LedSubsystem.setLEDMode(LedSubsystem.LEDMode.ARM_LOW);
                break;
             case LOW:
                targetArmPosition = ArmPosition.INIT;
@@ -247,8 +269,7 @@ public class RobotContainer {
                      m_currentArmCommand = new SetArmPositionCommand(
                            m_coralArmSubsystem,
                            getTargetAngle(currentArmPosition),
-                           getTargetExtension(currentArmPosition)
-                     );
+                           getTargetExtension(currentArmPosition));
                   }
                }
                m_currentArmCommand.schedule();
@@ -318,32 +339,32 @@ public class RobotContainer {
 
    public void periodic() {
       SmartDashboard.putData("Auto Tuning Mode", autoChooser);
-      
+
       // LED control based on robot state.
       if (!DriverStation.isEnabled()) {
-         if (m_visionSubsystem.getDetectedTagIDFromNT() > 1) {
+         if (m_visionSubsystem.getDetectedTagIDFromNT() > 0) {
             m_LedSubsystem.setLEDMode(LedSubsystem.LEDMode.SOLID_GREEN);
          } else {
             m_LedSubsystem.setLEDMode(LedSubsystem.LEDMode.FLASH_GREEN);
          }
       } else {
-         switch (currentArmPosition) {
-            case HIGH:
-               m_LedSubsystem.setLEDMode(LedSubsystem.LEDMode.ARM_HIGH);
-               break;
-            case MID:
-               m_LedSubsystem.setLEDMode(LedSubsystem.LEDMode.ARM_MID);
-               break;
-            case LOW:
-               m_LedSubsystem.setLEDMode(LedSubsystem.LEDMode.ARM_LOW);
-               break;
-            default:
-               m_LedSubsystem.setLEDMode(LedSubsystem.LEDMode.IDLE);
-               break;
+         // switch (currentArmPosition) {
+         //    case HIGH:
+         //       m_LedSubsystem.setLEDMode(LedSubsystem.LEDMode.ARM_HIGH);
+         //       break;
+         //    case MID:
+         //       m_LedSubsystem.setLEDMode(LedSubsystem.LEDMode.ARM_MID);
+         //       break;
+         //    case LOW:
+         //       m_LedSubsystem.setLEDMode(LedSubsystem.LEDMode.ARM_LOW);
+         //       break;
+         //    default:
+         //       m_LedSubsystem.setLEDMode(LedSubsystem.LEDMode.IDLE);
+         //       break;
          }
          if (DriverStation.getMatchTime() < 15) {
             m_LedSubsystem.setLEDMode(LedSubsystem.LEDMode.MATCH_END_FLASH);
          }
       }
    }
-}
+

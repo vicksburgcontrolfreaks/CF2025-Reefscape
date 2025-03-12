@@ -50,7 +50,7 @@ public class LocalizationSubsystem extends SubsystemBase {
     @Override
 public void periodic() {
     // Set Limelight IMU mode and update robot orientation.
-    LimelightHelpers.SetIMUMode("limelight", 0);
+    LimelightHelpers.SetIMUMode("limelight", 3);
     LimelightHelpers.SetRobotOrientation("limelight", driveSubsystem.getHeading(), 0, 0, 0, 0, 0);
 
     // Update odometry using sensor values from the drive subsystem.
@@ -75,12 +75,12 @@ public void periodic() {
     if (mt2Estimate != null && mt2Estimate.tagCount > 0 && 
         currentRotRate < maxRotationalRate && currentTransSpeed < maxTranslationalSpeed) {
         // Trust vision data heavily when moving slowly.
-        poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(0.1, 0.1, 0.1));
+        poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(0.01, 0.01, 0.01));
         poseEstimator.addVisionMeasurement(mt2Estimate.pose, mt2Estimate.timestampSeconds);
     } else {
         // Optionally, if moving fast, you can either not update or set very high uncertainties.
         // For example, you could set:
-        // poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(10, 10, 10));
+        poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(10, 10, 10));
     }
 
     // Publish the estimated pose.
