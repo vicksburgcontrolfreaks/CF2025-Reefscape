@@ -104,16 +104,16 @@ public class RobotContainer {
                   .andThen(new RunAlgaeCollectorWheelsCommand(m_algaeArmSubsystem, 0.5, 1.0)));
       autoChooser.setDefaultOption("Red 0",
             new AutonScoreAndPickup_Red0(m_robotDrive, m_localizationSubsystem, m_visionSubsystem,
-                  m_coralArmSubsystem));
+                  m_coralArmSubsystem, m_algaeArmSubsystem));
       autoChooser.setDefaultOption("Red 1",
             new AutonScoreAndPickup_Red1(m_robotDrive, m_localizationSubsystem, m_visionSubsystem,
-                  m_coralArmSubsystem));
+                  m_coralArmSubsystem, m_algaeArmSubsystem));
       autoChooser.setDefaultOption("Blue 0",
             new AutonScoreAndPickup_Blue0(m_robotDrive, m_localizationSubsystem, m_visionSubsystem,
-                  m_coralArmSubsystem));
+                  m_coralArmSubsystem, m_algaeArmSubsystem));
       autoChooser.setDefaultOption("Blue 1",
             new AutonScoreAndPickup_Blue1(m_robotDrive, m_localizationSubsystem, m_visionSubsystem,
-                  m_coralArmSubsystem));
+                  m_coralArmSubsystem, m_algaeArmSubsystem));
       autoChooser.addOption("No Auto",
             new RunCommand(() -> m_robotDrive.drive(0, 0, 0, false), m_robotDrive));
 
@@ -122,11 +122,12 @@ public class RobotContainer {
 
       // Set default driver command with exponential scaling.
       m_robotDrive.setDefaultCommand(new RunCommand(() -> {
-         double forward = expoScale(-m_driverController.getLeftY(), 1.5);
-         double strafe = expoScale(-m_driverController.getLeftX(), 3);
+         double forward = expoScale(-m_driverController.getLeftY(), 2);
+         double strafe = expoScale(-m_driverController.getLeftX() , 2);
          double rotation = expoScale(-m_driverController.getRightX(), 2);
          m_robotDrive.drive(forward, strafe, rotation, true);
       }, m_robotDrive));
+
 
       // Set default mechanism command.
       m_coralArmSubsystem.setDefaultCommand(
@@ -217,12 +218,15 @@ public class RobotContainer {
          switch (targetArmPosition) {
             case INIT:
                targetArmPosition = ArmPosition.LOW;
+               m_LedSubsystem.setLEDMode(LedSubsystem.LEDMode.ARM_LOW);
                break;
             case LOW:
                targetArmPosition = ArmPosition.MID;
+               m_LedSubsystem.setLEDMode(LedSubsystem.LEDMode.ARM_MID);
                break;
             case MID:
                targetArmPosition = ArmPosition.HIGH;
+               m_LedSubsystem.setLEDMode(LedSubsystem.LEDMode.ARM_HIGH);
                break;
             case HIGH:
                // do nothing
@@ -237,9 +241,11 @@ public class RobotContainer {
          switch (targetArmPosition) {
             case HIGH:
                targetArmPosition = ArmPosition.MID;
+               m_LedSubsystem.setLEDMode(LedSubsystem.LEDMode.ARM_MID);
                break;
             case MID:
                targetArmPosition = ArmPosition.LOW;
+               m_LedSubsystem.setLEDMode(LedSubsystem.LEDMode.ARM_LOW);
                break;
             case LOW:
                targetArmPosition = ArmPosition.INIT;
@@ -336,29 +342,29 @@ public class RobotContainer {
 
       // LED control based on robot state.
       if (!DriverStation.isEnabled()) {
-         if (m_visionSubsystem.getDetectedTagIDFromNT() > 1) {
+         if (m_visionSubsystem.getDetectedTagIDFromNT() > 0) {
             m_LedSubsystem.setLEDMode(LedSubsystem.LEDMode.SOLID_GREEN);
          } else {
             m_LedSubsystem.setLEDMode(LedSubsystem.LEDMode.FLASH_GREEN);
          }
       } else {
-         switch (currentArmPosition) {
-            case HIGH:
-               m_LedSubsystem.setLEDMode(LedSubsystem.LEDMode.ARM_HIGH);
-               break;
-            case MID:
-               m_LedSubsystem.setLEDMode(LedSubsystem.LEDMode.ARM_MID);
-               break;
-            case LOW:
-               m_LedSubsystem.setLEDMode(LedSubsystem.LEDMode.ARM_LOW);
-               break;
-            default:
-               m_LedSubsystem.setLEDMode(LedSubsystem.LEDMode.IDLE);
-               break;
+         // switch (currentArmPosition) {
+         //    case HIGH:
+         //       m_LedSubsystem.setLEDMode(LedSubsystem.LEDMode.ARM_HIGH);
+         //       break;
+         //    case MID:
+         //       m_LedSubsystem.setLEDMode(LedSubsystem.LEDMode.ARM_MID);
+         //       break;
+         //    case LOW:
+         //       m_LedSubsystem.setLEDMode(LedSubsystem.LEDMode.ARM_LOW);
+         //       break;
+         //    default:
+         //       m_LedSubsystem.setLEDMode(LedSubsystem.LEDMode.IDLE);
+         //       break;
          }
          if (DriverStation.getMatchTime() < 15) {
             m_LedSubsystem.setLEDMode(LedSubsystem.LEDMode.MATCH_END_FLASH);
          }
       }
    }
-}
+

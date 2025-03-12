@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.subsystems.DriveSubsystem;
+import frc.robot.subsystems.LocalizationSubsystem;
 import frc.robot.LimelightHelpers;
 
 public class DriveToPoseCommand extends Command {
@@ -24,6 +25,7 @@ public class DriveToPoseCommand extends Command {
     private final DriveSubsystem driveSubsystem;
     private final Pose2d targetPose;
     private final List<Pose2d> interiorWaypoints;
+    private final LocalizationSubsystem localizationSubsystem;
 
     /**
      * Creates a new DriveToPoseCommand that will generate a trajectory from the current
@@ -33,10 +35,11 @@ public class DriveToPoseCommand extends Command {
      * @param targetPose      The final target pose.
      * @param interiorWaypoints A list of interior waypoints (as Pose2d objects) for the trajectory.
      */
-    public DriveToPoseCommand(DriveSubsystem driveSubsystem, Pose2d targetPose, List<Pose2d> interiorWaypoints) {
+    public DriveToPoseCommand(DriveSubsystem driveSubsystem, Pose2d targetPose, List<Pose2d> interiorWaypoints, LocalizationSubsystem localizationSubsystem) {
         this.driveSubsystem = driveSubsystem;
         this.targetPose = targetPose;
         this.interiorWaypoints = interiorWaypoints;
+        this.localizationSubsystem = localizationSubsystem;
         addRequirements(driveSubsystem);
     }
 
@@ -46,14 +49,14 @@ public class DriveToPoseCommand extends Command {
      * @param driveSubsystem The drive subsystem.
      * @param targetPose     The final target pose.
      */
-    public DriveToPoseCommand(DriveSubsystem driveSubsystem, Pose2d targetPose) {
-        this(driveSubsystem, targetPose, List.of());
+    public DriveToPoseCommand(DriveSubsystem driveSubsystem, Pose2d targetPose, LocalizationSubsystem localizationSubsystem) {
+        this(driveSubsystem, targetPose, List.of(), localizationSubsystem);
     }
 
     @Override
     public void initialize() {
         // Get the current odometry as the starting pose.
-        Pose2d startPose = driveSubsystem.getPose();
+        Pose2d startPose = localizationSubsystem.getEstimatedPose();
         // Check if a vision estimate is available.
         var visionEstimate = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight");
         if (visionEstimate != null && visionEstimate.tagCount > 0) {

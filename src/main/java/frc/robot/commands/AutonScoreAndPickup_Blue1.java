@@ -28,7 +28,7 @@ public class AutonScoreAndPickup_Blue1 extends SequentialCommandGroup {
             
             // 2. Drive to the scoring location with preloaded gamepiece while concurrently setting the arm.
             new ParallelCommandGroup(
-                new DriveToPoseCommand(driveSubsystem, ReefscapeTargetPoses.BLUE_TAG20_LEFT),
+                new DriveToPoseCommand(driveSubsystem, ReefscapeTargetPoses.BLUE_TAG20_LEFT, localizationSubsystem),
                 new SequentialCommandGroup(
                     new WaitCommand(0.1), // Delay 0.5 seconds before starting arm set.
                     new RunAlgaeCollectorWheelsCommand(algaeArmSubsystem, 0.25, 2.0),
@@ -47,12 +47,12 @@ public class AutonScoreAndPickup_Blue1 extends SequentialCommandGroup {
                             
             // 4. Back up from the reef to find a location to turn and drive to 
             new ParallelCommandGroup(
-                new DriveToPoseCommand(driveSubsystem, ReefscapeTargetPoses.BLUE_1_INT)
+                new DriveToPoseCommand(driveSubsystem, ReefscapeTargetPoses.BLUE_1_INT, localizationSubsystem)
             ),
 
             // 5. drive to coral station
             new ParallelCommandGroup(
-                new DriveToPoseCommand(driveSubsystem, ReefscapeTargetPoses.BLUE_CORAL_STATION_1)
+                new DriveToPoseCommand(driveSubsystem, ReefscapeTargetPoses.BLUE_CORAL_STATION_1, localizationSubsystem)
             ),
                             
              // 6. Wait for coral to be deposited
@@ -64,7 +64,7 @@ public class AutonScoreAndPickup_Blue1 extends SequentialCommandGroup {
                             
              //  7. Drive back up to reef 
              new ParallelCommandGroup(
-                new DriveToPoseCommand(driveSubsystem, ReefscapeTargetPoses.BLUE_TAG17_LEFT),
+                new DriveToPoseCommand(driveSubsystem, ReefscapeTargetPoses.BLUE_TAG17_LEFT, localizationSubsystem),
                 new SequentialCommandGroup(
                     new WaitCommand(0.1), // Delay 0.5 seconds before starting arm set.
                     new SetArmPositionCommand(coralArmSubsystem, ArmConstants.highTgtAngle, ArmConstants.highTgtHeight)

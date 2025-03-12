@@ -9,7 +9,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.DriverStation;
 
 public class LedSubsystem extends SubsystemBase {
-    private static final int LED_PWM_PORT = 9;
+    private static final int LED_PWM_PORT = 0;
     private static final int LED_COUNT = 36;
 
     private final AddressableLED led;

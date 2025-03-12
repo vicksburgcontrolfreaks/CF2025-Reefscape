@@ -50,8 +50,6 @@ public class DriveSubsystem extends SubsystemBase {
   // Method to toggle the drive mode.
   public void toggleFieldOriented() {
     m_fieldOriented = !m_fieldOriented;
-    // Optionally, log the new mode.
-    System.out.println("Field Oriented mode: " + m_fieldOriented);
   }
 
   // Getter for the drive mode.
@@ -65,29 +63,30 @@ public class DriveSubsystem extends SubsystemBase {
   private final BuiltInAccelerometer m_accel = new BuiltInAccelerometer();
 
   /**
-     * Checks for a collision based on accelerometer readings.
-     * This method returns true if the acceleration in any axis exceeds the threshold (in g's).
-     */
-    public boolean isCollisionDetected() {
-        // Set a threshold in g's (for example, 3g).
-        double thresholdG = 3.0;
-        // Read accelerometer values (BuiltInAccelerometer returns values in g).
-        double accelX = m_accel.getX();
-        double accelY = m_accel.getY();
-        double accelZ = m_accel.getZ();
-        
-        // Optionally, publish these values for debugging.
-        SmartDashboard.putNumber("Accel X (g)", accelX);
-        SmartDashboard.putNumber("Accel Y (g)", accelY);
-        // SmartDashboard.putNumber("Accel Z (g)", accelZ);
+   * Checks for a collision based on accelerometer readings.
+   * This method returns true if the acceleration in any axis exceeds the
+   * threshold (in g's).
+   */
+  public boolean isCollisionDetected() {
+    // Set a threshold in g's (for example, 3g).
+    double thresholdG = 3.0;
+    // Read accelerometer values (BuiltInAccelerometer returns values in g).
+    double accelX = m_accel.getX();
+    double accelY = m_accel.getY();
+    double accelZ = m_accel.getZ();
 
-        // If any axis exceeds the threshold, consider it a collision.
-        return (Math.abs(accelX) > thresholdG ||
-                Math.abs(accelY) > thresholdG ||
-                Math.abs(accelZ) > thresholdG);
-    }
+    // Optionally, publish these values for debugging.
+    // SmartDashboard.putNumber("Accel X (g)", accelX);
+    // SmartDashboard.putNumber("Accel Y (g)", accelY);
+    // SmartDashboard.putNumber("Accel Z (g)", accelZ);
 
-  // In DriveSubsystem.java
+    // If any axis exceeds the threshold, consider it a collision.
+    return (Math.abs(accelX) > thresholdG ||
+        Math.abs(accelY) > thresholdG ||
+        Math.abs(accelZ) > thresholdG);
+  }
+
+  // Monitors motor current
   private final CurrentMonitor m_currentMonitor = new CurrentMonitor(m_frontLeft, m_frontRight, m_rearLeft,
       m_rearRight);
 
@@ -161,7 +160,8 @@ public class DriveSubsystem extends SubsystemBase {
    *                      field.
    */
   public void drive(double xSpeed, double ySpeed, double rot, boolean fieldRelative) {
-    // Instead of using the passed fieldRelative parameter, we use our internal flag.
+    // Instead of using the passed fieldRelative parameter, we use our internal
+    // flag.
     boolean useFieldRelative = m_fieldOriented;
 
     double xSpeedDelivered = xSpeed * DriveConstants.kMaxSpeedMetersPerSecond * speedMultiplier;
@@ -183,8 +183,7 @@ public class DriveSubsystem extends SubsystemBase {
     m_frontRight.setDesiredState(swerveModuleStates[1]);
     m_rearLeft.setDesiredState(swerveModuleStates[2]);
     m_rearRight.setDesiredState(swerveModuleStates[3]);
-}
-
+  }
 
   /**
    * Sets the wheels into an X formation to prevent movement.
@@ -247,7 +246,7 @@ public class DriveSubsystem extends SubsystemBase {
     double speedRL = Math.abs(m_rearLeft.getState().speedMetersPerSecond);
     double speedRR = Math.abs(m_rearRight.getState().speedMetersPerSecond);
     return (speedFL + speedFR + speedRL + speedRR) / 4.0;
-}
+  }
 
   public SwerveModulePosition[] getModulePositions() {
     return new SwerveModulePosition[] {
@@ -263,28 +262,27 @@ public class DriveSubsystem extends SubsystemBase {
   public void setSpeedMultiplier(double multiplier) {
     this.speedMultiplier = multiplier;
     // SmartDashboard.putNumber("Drive Speed Multiplier", speedMultiplier);
-}
+  }
 
-private double fieldOrientationOffset = 0.0;
+  private double fieldOrientationOffset = 0.0;
 
-public void resetFieldOrientation() {
+  public void resetFieldOrientation() {
     // Set the current heading as the new zero reference.
     fieldOrientationOffset = getHeading();
     // SmartDashboard.putNumber("Field Orientation Offset", fieldOrientationOffset);
-}
+  }
 
-public double getAdjustedHeading() {
+  public double getAdjustedHeading() {
     // Adjust the raw heading by subtracting the offset.
     return getHeading() - fieldOrientationOffset;
-}
+  }
 
-public void setDriveVoltage(double voltage) {
-  // For simplicity, send the same voltage to all drive motors.
-  m_frontLeft.setDrivingVoltage(voltage);
-  m_frontRight.setDrivingVoltage(voltage);
-  m_rearLeft.setDrivingVoltage(voltage);
-  m_rearRight.setDrivingVoltage(voltage);
-}
-
+  public void setDriveVoltage(double voltage) {
+    // For simplicity, send the same voltage to all drive motors.
+    m_frontLeft.setDrivingVoltage(voltage);
+    m_frontRight.setDrivingVoltage(voltage);
+    m_rearLeft.setDrivingVoltage(voltage);
+    m_rearRight.setDrivingVoltage(voltage);
+  }
 
 }
