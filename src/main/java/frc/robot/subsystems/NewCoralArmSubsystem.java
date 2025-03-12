@@ -240,7 +240,7 @@ public class NewCoralArmSubsystem extends SubsystemBase {
       //double currentAngle = e_armAngle.getPosition();
       //if (currentAngle > 0.9) currentAngle = 0.0;
       //SmartDashboard.putNumber("Arm error", ca_error);
-      //SmartDashboard.putNumber("Arm Extension", e_armExtend.getPosition());
+      SmartDashboard.putNumber("Arm Extension", e_armExtend.getPosition());
       SmartDashboard.putNumber("Arm Angle", e_armAngle.getPosition());
       //SmartDashboard.putNumber("CA Cmd", ca_cmd);
       SmartDashboard.putNumber("Ex error", ce_error);

@@ -63,7 +63,7 @@ public class SetArmPositionCommand extends Command {
 
         if (targetAngle > 0.3) {
             targetAngleModified = 0.3;
-            if (Math.abs(armSubsystem.getCurrentExtension()) < 10) {
+            if (Math.abs(armSubsystem.getCurrentExtension()) > 30) {
                 targetAngleModified = targetAngle;      
             }
         } else {
