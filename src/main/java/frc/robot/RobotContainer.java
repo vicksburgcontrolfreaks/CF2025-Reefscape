@@ -122,9 +122,9 @@ public class RobotContainer {
 
       // Set default driver command with exponential scaling.
       m_robotDrive.setDefaultCommand(new RunCommand(() -> {
-         double forward = expoScale(-m_driverController.getLeftY(), 2);
-         double strafe = expoScale(-m_driverController.getLeftX() , 2);
-         double rotation = expoScale(-m_driverController.getRightX(), 2);
+         double forward = expoScale(-m_driverController.getLeftY()*0.5, 2);
+         double strafe = expoScale(-m_driverController.getLeftX()*0.5 , 2);
+         double rotation = expoScale(-m_driverController.getRightX()*0.5, 2);
          m_robotDrive.drive(forward, strafe, rotation, true);
       }, m_robotDrive));
 
