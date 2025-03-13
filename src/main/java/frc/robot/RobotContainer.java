@@ -337,6 +337,14 @@ public class RobotContainer {
       return autoChooser.getSelected();
    }
 
+   public DriveSubsystem getDriveSubsystem() {
+      return m_robotDrive;
+  }
+  
+  public VisionSubsystem getVisionSubsystem() {
+      return m_visionSubsystem;
+  }
+  
    public LedSubsystem getLedSubsystem() {
       return m_LedSubsystem;
   }  

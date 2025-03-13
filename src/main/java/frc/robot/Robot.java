@@ -11,6 +11,7 @@ import edu.wpi.first.net.PortForwarder;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.commands.ResetFieldOrientationCommand;
 import frc.robot.subsystems.LedSubsystem;
 
 /**
@@ -74,11 +75,17 @@ public class Robot extends TimedRobot {
   /** This function is called once each time the robot enters Disabled mode. */
   @Override
   public void disabledInit() {
+    // Schedule the ResetFieldOrientationCommand.
+  CommandScheduler.getInstance().schedule(
+      new ResetFieldOrientationCommand(m_robotContainer.getDriveSubsystem(), 
+                                       m_robotContainer.getVisionSubsystem(), 
+                                       m_robotContainer.getLedSubsystem())
+  );
   }
 
   @Override
   public void disabledPeriodic() {
-    m_robotContainer.getLedSubsystem().setLEDMode(LedSubsystem.LEDMode.MATCH_END_FLASH);
+    // m_robotContainer.getLedSubsystem().setLEDMode(LedSubsystem.LEDMode.MATCH_END_FLASH);
   }
 
   /**
