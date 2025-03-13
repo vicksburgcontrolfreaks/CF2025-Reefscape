@@ -28,7 +28,7 @@ public class AutonScoreAndPickup_Red0 extends SequentialCommandGroup {
 
             // 2. Drive to the scoring location
             new ParallelCommandGroup(
-                new DriveToPoseCommand(driveSubsystem, ReefscapeTargetPoses.RED_TAG11_LEFT, localizationSubsystem)
+                new DriveToPoseCommand(driveSubsystem, ReefscapeTargetPoses.RED_TAG11_RIGHT, localizationSubsystem)
             ),
             //InitAlgaeCollectorPositionCommand
             // 3. Score the preloaded coral while driving to the pickup location.
