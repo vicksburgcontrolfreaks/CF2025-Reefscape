@@ -15,7 +15,8 @@ public class SetArmPositionCommand extends Command {
 
     private static final double ANG_TOL = 0.01;
     private static final double EXT_TOL = 1.0;
-
+    
+    private double targetAngleModified;
     private double currentAngle;
     private double currentExtension;
     private double ang_tol_off;
@@ -60,7 +61,15 @@ public class SetArmPositionCommand extends Command {
             ext_tol_off = 0.0;
         }
 
-        armSubsystem.setArmAngle(targetAngle);
+        if (targetAngle > 0.3) {
+            targetAngleModified = 0.3;
+            if (Math.abs(armSubsystem.getCurrentExtension()) > 30) {
+                targetAngleModified = targetAngle;      
+            }
+        } else {
+            targetAngleModified = targetAngle;
+        }
+        armSubsystem.setArmAngle(targetAngleModified);
         // Don't move extension out until past intake
         if (armSubsystem.getArmAngle() > armSubsystem.getInitArmAngle() + 0.08) {
            armSubsystem.moveArm(targetExtension);

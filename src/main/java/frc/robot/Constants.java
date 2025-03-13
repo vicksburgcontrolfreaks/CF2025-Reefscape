@@ -78,7 +78,7 @@ public final class Constants {
 
     // Coral Extender
     public static final double lowTgtHeight  =  -35; //target offset from init -40.28
-    public static final double midTgtHeight  =  -57; //target offset from init -72.31
+    public static final double midTgtHeight  =  -58.5; //target offset from init -72.31
     public static final double highTgtHeight = -100;//target offset from init -103.72
 
     public static final double CE_PGain = 0.01; // 0.02
@@ -87,14 +87,14 @@ public final class Constants {
     public static final double CE_MAX = 0.55;
 
     // Coral Arm Angle  
-    public static final double lowTgtAngle  =  0.28; //0.44 target offset from init 39.28
-    public static final double midTgtAngle  =  0.22; //target offset from init 21.93
+    public static final double lowTgtAngle  =  0.42; //0.44 target offset from init 39.28
+    public static final double midTgtAngle  =  0.21; //target offset from init 21.93
     public static final double highTgtAngle =  0.127; //target offset from init 10.93
 
     public static final double CA_PGain = 2.0;  //0.01
-    public static final double CA_IGain = 0.05;  //0.002
-    public static final double CA_I_MAX = 0.5;
-    public static final double CA_MAX   = 0.35;
+    public static final double CA_IGain = 0.03;  //0.002
+    public static final double CA_I_MAX = 0.35;
+    public static final double CA_MAX   = 0.16;  //0.25 was looking ok
   }
 
   public static final class ModuleConstants {
@@ -190,7 +190,8 @@ public final class Constants {
     // Intermediate positions that should have no obstructions to turning
     // red 0 starts by going to tag 11
     // red 1 starts by going to tag 9
-    public static final Pose2d RED_0_INT = new Pose2d(12.5, 2.3, new Rotation2d(Math.toRadians(85)));
+    public static final Pose2d RED_0_INTA = new Pose2d(11.8, 2.2, new Rotation2d(Math.toRadians(100)));
+    public static final Pose2d RED_0_INTB = new Pose2d(13.5, 1.75, new Rotation2d(Math.toRadians(100)));
     public static final Pose2d RED_1_INT = new Pose2d(12.0, 5.80, new Rotation2d(Math.toRadians(300)));
 
     // Blue Alliance Targets

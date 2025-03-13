@@ -105,6 +105,15 @@ public class NewCoralArmSubsystem extends SubsystemBase {
       if (ca_cmd > ArmConstants.CA_MAX) ca_cmd = ArmConstants.CA_MAX;
       if (ca_cmd < -ArmConstants.CA_MAX) ca_cmd = -ArmConstants.CA_MAX;
    
+      if (targetAngle < 0.01) {
+         if (currentAngle < 0.05) {
+            ca_cmd = ca_cmd * 0.5;
+         }
+         if (currentAngle < 0.01) {
+            ca_cmd = ca_cmd *0.5;
+         }
+      }
+
       m_armAngle.set(ca_cmd);//ca_cmd);//command);
    }
     
@@ -240,7 +249,7 @@ public class NewCoralArmSubsystem extends SubsystemBase {
       //double currentAngle = e_armAngle.getPosition();
       //if (currentAngle > 0.9) currentAngle = 0.0;
       //SmartDashboard.putNumber("Arm error", ca_error);
-      //SmartDashboard.putNumber("Arm Extension", e_armExtend.getPosition());
+      SmartDashboard.putNumber("Arm Extension", e_armExtend.getPosition());
       SmartDashboard.putNumber("Arm Angle", e_armAngle.getPosition());
       //SmartDashboard.putNumber("CA Cmd", ca_cmd);
       SmartDashboard.putNumber("Ex error", ce_error);
