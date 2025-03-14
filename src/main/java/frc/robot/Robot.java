@@ -42,9 +42,9 @@ public class Robot extends TimedRobot {
     // autonomous chooser on the dashboard.
     m_robotContainer = new RobotContainer();
 
-    for (int port = 5800; port <= 5809; port++) {
-      PortForwarder.add(port, "limelight.local", port);
-    }
+    // for (int port = 5800; port <= 5809; port++) {
+    //   PortForwarder.add(port, "limelight.local", port);
+    // }
 
     // camera1 = CameraServer.startAutomaticCapture(0);
   }
