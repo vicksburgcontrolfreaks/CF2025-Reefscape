@@ -38,7 +38,7 @@ public class AutonScoreAndPickup_Red0 extends SequentialCommandGroup {
                     new WaitCommand(0.1), // Delay 0.5 seconds before starting arm set.
                     new InitAlgaeCollectorPositionCommand(algaeArmSubsystem, 20),
                     new WaitCommand(0.1),
-                    new RunAlgaeCollectorWheelsCommand(algaeArmSubsystem, 0.5, 0.75),
+                    new RunAlgaeCollectorWheelsCommand(algaeArmSubsystem, 1.0,75),
                     new WaitCommand(0.1)
                 )
             ),
