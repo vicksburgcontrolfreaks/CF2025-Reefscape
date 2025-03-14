@@ -28,7 +28,7 @@ public class Robot extends TimedRobot {
 
   UsbCamera camera1;
 
-  private RobotContainer m_robotContainer;
+  public RobotContainer m_robotContainer;
 
   /**
    * This function is run when the robot is first started up and should be used

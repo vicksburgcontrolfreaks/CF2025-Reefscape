@@ -63,8 +63,8 @@ public class RobotContainer {
       INIT, LOW, MID, HIGH;
    }
 
-   private ArmPosition currentArmPosition = ArmPosition.INIT;
-   private ArmPosition targetArmPosition = ArmPosition.INIT;
+   public ArmPosition currentArmPosition = ArmPosition.INIT;
+   public ArmPosition targetArmPosition = ArmPosition.INIT;
 
    // Controllers.
    private final XboxController m_driverController = new XboxController(OIConstants.kDriverControllerPort);
@@ -163,7 +163,7 @@ public class RobotContainer {
       dpadDownButton.onTrue(new InstantCommand(m_robotDrive::toggleFieldOriented, m_robotDrive));
 
       // B button: Teleop Auto Score RIGHT.
-      new JoystickButton(m_driverController, XboxController.Button.kX.value)
+      new JoystickButton(m_driverController, XboxController.Button.kB.value)
             .onTrue(new InstantCommand(() -> {
                m_autoDriveCommand = new TeleopAutoScoreCommand(m_robotDrive, m_localizationSubsystem, m_visionSubsystem,
                      m_coralArmSubsystem, false, targetArmPosition);
