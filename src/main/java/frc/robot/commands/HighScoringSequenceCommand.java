@@ -23,8 +23,8 @@ public class HighScoringSequenceCommand extends SequentialCommandGroup {
      */
     public HighScoringSequenceCommand(NewCoralArmSubsystem armSubsystem) {
         addCommands(
-            new InstantCommand(() -> armSubsystem.setArmAngle(.14), armSubsystem),
-            new WaitCommand(0.5),
+            new InstantCommand(() -> armSubsystem.setArmAngle(.12), armSubsystem),
+            new WaitCommand(0.2),
             new HomeCoralArmCommand(armSubsystem)
         );
     }

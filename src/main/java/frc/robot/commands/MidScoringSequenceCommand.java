@@ -26,22 +26,20 @@ public class MidScoringSequenceCommand extends SequentialCommandGroup {
 
     public MidScoringSequenceCommand(NewCoralArmSubsystem armSubsystem) {
         addCommands(
-            new InstantCommand(() -> armSubsystem.setArmAngle(.25), armSubsystem),
-            new WaitCommand(waitTime),
+            new InstantCommand(() -> armSubsystem.setArmAngle(.28), armSubsystem),
+            new WaitCommand(0.2),
             new InstantCommand(() -> armSubsystem.moveArm(-52), armSubsystem),
-            new WaitCommand(waitTime),
-            new InstantCommand(() -> armSubsystem.setArmAngle(.29), armSubsystem),
-            new WaitCommand(waitTime),
-            new InstantCommand(() -> armSubsystem.moveArm(-35), armSubsystem), // coral is released here 
-            new WaitCommand(waitTime),
-            new InstantCommand(() -> armSubsystem.setArmAngle(.22), armSubsystem),
-            new WaitCommand(waitTime),
-            new InstantCommand(() -> armSubsystem.moveArm(-22), armSubsystem),
-            new WaitCommand(waitTime),
-            new InstantCommand(() -> armSubsystem.setArmAngle(.18), armSubsystem),
-            new WaitCommand(waitTime),
-            new InstantCommand(() -> armSubsystem.moveArm(-12), armSubsystem),
-            new WaitCommand(waitTime),
+            new WaitCommand(0.2),
+            new InstantCommand(() -> armSubsystem.setArmAngle(.31), armSubsystem),
+            new WaitCommand(0.2),
+            new InstantCommand(() -> armSubsystem.moveArm(-35), armSubsystem),
+            new WaitCommand(0.2),
+            new InstantCommand(() -> armSubsystem.setArmAngle(.25), armSubsystem),
+            new WaitCommand(0.2),
+            //new InstantCommand(() -> armSubsystem.moveArm(-50), armSubsystem),
+            //new WaitCommand(0.8),
+            //new InstantCommand(() -> armSubsystem.setArmAngle(.2), armSubsystem),
+            //new WaitCommand(0.8),
             new HomeCoralArmCommand(armSubsystem)
         );
     }

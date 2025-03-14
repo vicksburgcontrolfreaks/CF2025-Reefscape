@@ -11,6 +11,8 @@ import edu.wpi.first.net.PortForwarder;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.commands.ResetFieldOrientationCommand;
+import frc.robot.subsystems.LedSubsystem;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -26,7 +28,7 @@ public class Robot extends TimedRobot {
 
   UsbCamera camera1;
 
-  private RobotContainer m_robotContainer;
+  public RobotContainer m_robotContainer;
 
   /**
    * This function is run when the robot is first started up and should be used
@@ -40,9 +42,9 @@ public class Robot extends TimedRobot {
     // autonomous chooser on the dashboard.
     m_robotContainer = new RobotContainer();
 
-    for (int port = 5800; port <= 5809; port++) {
-      PortForwarder.add(port, "limelight.local", port);
-    }
+    // for (int port = 5800; port <= 5809; port++) {
+    //   PortForwarder.add(port, "limelight.local", port);
+    // }
 
     // camera1 = CameraServer.startAutomaticCapture(0);
   }
@@ -73,10 +75,17 @@ public class Robot extends TimedRobot {
   /** This function is called once each time the robot enters Disabled mode. */
   @Override
   public void disabledInit() {
+    // Schedule the ResetFieldOrientationCommand.
+  CommandScheduler.getInstance().schedule(
+      new ResetFieldOrientationCommand(m_robotContainer.getDriveSubsystem(), 
+                                       m_robotContainer.getVisionSubsystem(), 
+                                       m_robotContainer.getLedSubsystem())
+  );
   }
 
   @Override
   public void disabledPeriodic() {
+    // m_robotContainer.getLedSubsystem().setLEDMode(LedSubsystem.LEDMode.MATCH_END_FLASH);
   }
 
   /**

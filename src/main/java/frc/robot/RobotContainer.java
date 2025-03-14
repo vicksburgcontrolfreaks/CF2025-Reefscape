@@ -56,15 +56,15 @@ public class RobotContainer {
    private final LocalizationSubsystem m_localizationSubsystem = new LocalizationSubsystem(m_robotDrive,
          m_visionSubsystem);
    private final CoralCollectorSubsystem m_CoralCollectorSubsystem = new CoralCollectorSubsystem();
-   private final LedSubsystem m_LedSubsystem = new LedSubsystem();
+   public final LedSubsystem m_LedSubsystem = new LedSubsystem();
 
    // Arm position enum.
    public enum ArmPosition {
       INIT, LOW, MID, HIGH;
    }
 
-   private ArmPosition currentArmPosition = ArmPosition.INIT;
-   private ArmPosition targetArmPosition = ArmPosition.INIT;
+   public ArmPosition currentArmPosition = ArmPosition.INIT;
+   public ArmPosition targetArmPosition = ArmPosition.INIT;
 
    // Controllers.
    private final XboxController m_driverController = new XboxController(OIConstants.kDriverControllerPort);
@@ -122,9 +122,9 @@ public class RobotContainer {
 
       // Set default driver command with exponential scaling.
       m_robotDrive.setDefaultCommand(new RunCommand(() -> {
-         double forward = expoScale(-m_driverController.getLeftY()*0.5, 2);
-         double strafe = expoScale(-m_driverController.getLeftX()*0.5 , 2);
-         double rotation = expoScale(-m_driverController.getRightX()*0.5, 2);
+         double forward = expoScale(-m_driverController.getLeftY()*0.75, 2);
+         double strafe = expoScale(-m_driverController.getLeftX()*0.75 , 2);
+         double rotation = expoScale(-m_driverController.getRightX(), 2);
          m_robotDrive.drive(forward, strafe, rotation, true);
       }, m_robotDrive));
 
@@ -163,7 +163,7 @@ public class RobotContainer {
       dpadDownButton.onTrue(new InstantCommand(m_robotDrive::toggleFieldOriented, m_robotDrive));
 
       // B button: Teleop Auto Score RIGHT.
-      new JoystickButton(m_driverController, XboxController.Button.kX.value)
+      new JoystickButton(m_driverController, XboxController.Button.kB.value)
             .onTrue(new InstantCommand(() -> {
                m_autoDriveCommand = new TeleopAutoScoreCommand(m_robotDrive, m_localizationSubsystem, m_visionSubsystem,
                      m_coralArmSubsystem, false, targetArmPosition);
@@ -337,15 +337,27 @@ public class RobotContainer {
       return autoChooser.getSelected();
    }
 
+   public DriveSubsystem getDriveSubsystem() {
+      return m_robotDrive;
+  }
+  
+  public VisionSubsystem getVisionSubsystem() {
+      return m_visionSubsystem;
+  }
+  
+   public LedSubsystem getLedSubsystem() {
+      return m_LedSubsystem;
+  }  
+
    public void periodic() {
       SmartDashboard.putData("Auto Tuning Mode", autoChooser);
 
       // LED control based on robot state.
       if (!DriverStation.isEnabled()) {
          if (m_visionSubsystem.getDetectedTagIDFromNT() > 0) {
-            m_LedSubsystem.setLEDMode(LedSubsystem.LEDMode.SOLID_GREEN);
+            m_LedSubsystem.setLEDMode(LedSubsystem.LEDMode.IDLE);
          } else {
-            m_LedSubsystem.setLEDMode(LedSubsystem.LEDMode.FLASH_GREEN);
+            m_LedSubsystem.setLEDMode(LedSubsystem.LEDMode.IDLE);
          }
       } else {
          // switch (currentArmPosition) {
