@@ -58,14 +58,6 @@ public class RobotContainer {
    private final CoralCollectorSubsystem m_CoralCollectorSubsystem = new CoralCollectorSubsystem();
    public final LedSubsystem m_LedSubsystem = new LedSubsystem();
 
-   // Arm position enum.
-   public enum ArmPosition {
-      INIT, LOW, MID, HIGH;
-   }
-
-   public ArmPosition currentArmPosition = ArmPosition.INIT;
-   public ArmPosition targetArmPosition = ArmPosition.INIT;
-
    // Controllers.
    private final XboxController m_driverController = new XboxController(OIConstants.kDriverControllerPort);
    private final XboxController m_mechanismController = new XboxController(OIConstants.kMechanismControllerPort);
@@ -166,16 +158,23 @@ public class RobotContainer {
       new JoystickButton(m_driverController, XboxController.Button.kB.value)
             .onTrue(new InstantCommand(() -> {
                m_autoDriveCommand = new TeleopAutoScoreCommand(m_robotDrive, m_localizationSubsystem, m_visionSubsystem,
-                     m_coralArmSubsystem, false, targetArmPosition);
+                     m_coralArmSubsystem, false);
                m_autoDriveCommand.schedule();
+
+               SmartDashboard.putString("Target Arm Position", ArmConstants.targetArmPosition.toString());
+               SmartDashboard.putString("Current Arm Position", ArmConstants.currentArmPosition.toString());
             }));
       // X button: Teleop Auto Score LEFT.
       new JoystickButton(m_driverController, XboxController.Button.kX.value)
             .onTrue(new InstantCommand(() -> {
                m_autoDriveCommand = new TeleopAutoScoreCommand(m_robotDrive, m_localizationSubsystem, m_visionSubsystem,
-                     m_coralArmSubsystem, true, targetArmPosition);
+                     m_coralArmSubsystem, true);
                m_autoDriveCommand.schedule();
-            }));
+
+               SmartDashboard.putString("Target Arm Position", ArmConstants.targetArmPosition.toString());
+               SmartDashboard.putString("Current Arm Position", ArmConstants.currentArmPosition.toString());
+            }
+            ));
 
       // Right Trigger starts ball collection.
       new Trigger(() -> m_driverController.getRightTriggerAxis() > 0.2)
@@ -186,8 +185,8 @@ public class RobotContainer {
             .onTrue(new ReleaseBallCommand(m_algaeArmSubsystem));
 
       // --- Mechanism Controller Bindings ---
-      SmartDashboard.putString("Target Arm Position", targetArmPosition.toString());
-      SmartDashboard.putString("Current Arm Position", currentArmPosition.toString());
+      SmartDashboard.putString("Target Arm Position", ArmConstants.targetArmPosition.toString());
+      SmartDashboard.putString("Current Arm Position", ArmConstants.currentArmPosition.toString());
 
       // Right bumper on mechanism controller zeros arm encoders.
       new JoystickButton(m_mechanismController, XboxController.Button.kRightBumper.value)
@@ -215,61 +214,61 @@ public class RobotContainer {
 
       // DPad Up on mechanism controller: increment arm position.
       mech_dpadUpButton.onTrue(new InstantCommand(() -> {
-         switch (targetArmPosition) {
+         switch (ArmConstants.targetArmPosition) {
             case INIT:
-               targetArmPosition = ArmPosition.LOW;
+            ArmConstants.targetArmPosition = ArmConstants.ArmPosition.LOW;
                m_LedSubsystem.setLEDMode(LedSubsystem.LEDMode.ARM_LOW);
                break;
             case LOW:
-               targetArmPosition = ArmPosition.MID;
+            ArmConstants.targetArmPosition = ArmConstants.ArmPosition.MID;
                m_LedSubsystem.setLEDMode(LedSubsystem.LEDMode.ARM_MID);
                break;
             case MID:
-               targetArmPosition = ArmPosition.HIGH;
+            ArmConstants.targetArmPosition = ArmConstants.ArmPosition.HIGH;
                m_LedSubsystem.setLEDMode(LedSubsystem.LEDMode.ARM_HIGH);
                break;
             case HIGH:
                // do nothing
                break;
          }
-         SmartDashboard.putString("Target Arm Position", targetArmPosition.toString());
-         SmartDashboard.putString("Current Arm Position", currentArmPosition.toString());
+         SmartDashboard.putString("Target Arm Position", ArmConstants.targetArmPosition.toString());
+         SmartDashboard.putString("Current Arm Position", ArmConstants.currentArmPosition.toString());
       }, m_coralArmSubsystem));
 
       // DPad Down on mechanism controller: decrement arm position.
       mech_dpadDownButton.onTrue(new InstantCommand(() -> {
-         switch (targetArmPosition) {
+         switch (ArmConstants.targetArmPosition) {
             case HIGH:
-               targetArmPosition = ArmPosition.MID;
+            ArmConstants.targetArmPosition = ArmConstants.ArmPosition.MID;
                m_LedSubsystem.setLEDMode(LedSubsystem.LEDMode.ARM_MID);
                break;
             case MID:
-               targetArmPosition = ArmPosition.LOW;
+            ArmConstants.targetArmPosition = ArmConstants.ArmPosition.LOW;
                m_LedSubsystem.setLEDMode(LedSubsystem.LEDMode.ARM_LOW);
                break;
             case LOW:
-               targetArmPosition = ArmPosition.INIT;
+            ArmConstants.targetArmPosition = ArmConstants.ArmPosition.INIT;
                break;
             case INIT:
                // do nothing
                break;
          }
-         SmartDashboard.putString("Target Arm Position", targetArmPosition.toString());
-         SmartDashboard.putString("Current Arm Position", currentArmPosition.toString());
+         SmartDashboard.putString("Target Arm Position", ArmConstants.targetArmPosition.toString());
+         SmartDashboard.putString("Current Arm Position", ArmConstants.currentArmPosition.toString());
       }, m_coralArmSubsystem));
 
       // X Button on mechanism controller: execute the selected arm command.
       new JoystickButton(m_mechanismController, XboxController.Button.kX.value)
             .onTrue(new InstantCommand(() -> {
-               if (currentArmPosition != targetArmPosition) {
-                  currentArmPosition = targetArmPosition;
-                  if (currentArmPosition == ArmPosition.INIT) {
+               if (ArmConstants.currentArmPosition != ArmConstants.targetArmPosition) {
+                  ArmConstants.currentArmPosition = ArmConstants.targetArmPosition;
+                  if (ArmConstants.currentArmPosition == ArmConstants.ArmPosition.INIT) {
                      m_currentArmCommand = new HomeCoralArmCommand(m_coralArmSubsystem);
                   } else {
                      m_currentArmCommand = new SetArmPositionCommand(
                            m_coralArmSubsystem,
-                           getTargetAngle(currentArmPosition),
-                           getTargetExtension(currentArmPosition));
+                           getTargetAngle(ArmConstants.currentArmPosition),
+                           getTargetExtension(ArmConstants.currentArmPosition));
                   }
                }
                m_currentArmCommand.schedule();
@@ -278,20 +277,26 @@ public class RobotContainer {
       // B Button on mechanism controller: execute the coral scoring sequence.
       new JoystickButton(m_mechanismController, XboxController.Button.kB.value)
             .onTrue(new InstantCommand(() -> {
-               switch (currentArmPosition) {
+               switch (ArmConstants.currentArmPosition) {
                   case LOW:
                      new LowScoringSequenceCommand(m_coralArmSubsystem).schedule();
+                     ArmConstants.currentArmPosition = ArmConstants.ArmPosition.INIT;
                      break;
                   case MID:
+                     ArmConstants.currentArmPosition = ArmConstants.ArmPosition.INIT;
                      new MidScoringSequenceCommand(m_coralArmSubsystem).schedule();
                      break;
                   case HIGH:
+                     ArmConstants.currentArmPosition = ArmConstants.ArmPosition.INIT;
                      new HighScoringSequenceCommand(m_coralArmSubsystem).schedule();
                      break;
                   default:
                      // do nothing for INIT or unspecified state.
                      break;
                }
+
+               SmartDashboard.putString("Target Arm Position", ArmConstants.targetArmPosition.toString());
+               SmartDashboard.putString("Current Arm Position", ArmConstants.currentArmPosition.toString());
             }, m_coralArmSubsystem));
    }
 
@@ -300,7 +305,7 @@ public class RobotContainer {
       return Math.copySign(Math.pow(Math.abs(input), exponent), input);
    }
 
-   private double getTargetAngle(ArmPosition pos) {
+   private double getTargetAngle(ArmConstants.ArmPosition pos) {
       switch (pos) {
          case INIT:
             return 0.0;
@@ -315,7 +320,7 @@ public class RobotContainer {
       }
    }
 
-   private double getTargetExtension(ArmPosition pos) {
+   private double getTargetExtension(ArmConstants.ArmPosition pos) {
       switch (pos) {
          case INIT:
             return 0.0;

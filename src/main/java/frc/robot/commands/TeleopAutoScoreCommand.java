@@ -8,7 +8,6 @@ import frc.robot.subsystems.LocalizationSubsystem;
 import frc.robot.subsystems.NewCoralArmSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
 import frc.robot.Constants.ArmConstants;
-import frc.robot.RobotContainer; // Contains ArmPosition enum
 
 public class TeleopAutoScoreCommand extends SequentialCommandGroup {
     /**
@@ -23,14 +22,14 @@ public class TeleopAutoScoreCommand extends SequentialCommandGroup {
                                   LocalizationSubsystem localizationSubsystem,
                                   VisionSubsystem visionSubsystem,
                                   NewCoralArmSubsystem coralArmSubsystem,
-                                  boolean isLeft,
-                                  RobotContainer.ArmPosition targetArmPosition) {
+                                  boolean isLeft) {
         // Determine the target arm angle and extension based on the argument.
         double targetAngle;
         double targetExtension;
-        switch (targetArmPosition) {
+        switch (ArmConstants.targetArmPosition) {
             case LOW:
                 targetAngle = ArmConstants.lowTgtAngle;
+                
                 targetExtension = ArmConstants.lowTgtHeight;
                 break;
             case MID:
@@ -61,5 +60,9 @@ public class TeleopAutoScoreCommand extends SequentialCommandGroup {
                 )
             )
         );
+        if (ArmConstants.currentArmPosition != ArmConstants.targetArmPosition)
+        {
+            ArmConstants.currentArmPosition = ArmConstants.targetArmPosition;
+        }
     }
 }
