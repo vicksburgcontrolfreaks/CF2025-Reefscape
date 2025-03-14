@@ -79,7 +79,7 @@ public final class Constants {
     // Coral Extender
     public static final double lowTgtHeight  =  -35; //target offset from init -40.28
     public static final double midTgtHeight  =  -58.5; //target offset from init -72.31
-    public static final double highTgtHeight = -97;//target offset from init -103.72
+    public static final double highTgtHeight = -99;//target offset from init -103.72
 
     public static final double CE_PGain = 0.01; // 0.02
     public static final double CE_IGain = 0.01;
@@ -89,7 +89,7 @@ public final class Constants {
     // Coral Arm Angle  
     public static final double lowTgtAngle  =  0.40; //0.44 target offset from init 39.28
     public static final double midTgtAngle  =  0.21; //target offset from init 21.93
-    public static final double highTgtAngle =  0.09; //target offset from init 10.93
+    public static final double highTgtAngle =  0.11; //target offset from init 10.93
 
     public static final double CA_PGain = 2.0;  //0.01
     public static final double CA_IGain = 0.03;  //0.002
@@ -152,7 +152,7 @@ public final class Constants {
 
     // APRIL TAG: Tolerances to determine when alignment is good enough.
 
-    public static final double kForwardTolerance = Units.inchesToMeters(2); // ~0.1524 m
+    public static final double kForwardTolerance = Units.inchesToMeters(1.0); // ~0.1524 m
     public static final double kLateralTolerance = 1.0; // Acceptable error in tx (in degrees)
   }
 
@@ -191,8 +191,8 @@ public final class Constants {
     public static final Pose2d RED_TAG10_RIGHT = new Pose2d(11.81, 3.850, new Rotation2d(Math.toRadians(0)));
     public static final Pose2d RED_TAG10_LEFT = new Pose2d(11.81, 4.210, new Rotation2d(Math.toRadians(0)));
 
-    public static final Pose2d RED_TAG11_RIGHT = new Pose2d(12.588, 2.812, new Rotation2d(Math.toRadians(60)));
-    public static final Pose2d RED_TAG11_LEFT = new Pose2d(12.285, 2.989, new Rotation2d(Math.toRadians(60)));
+    public static final Pose2d RED_TAG11_RIGHT = new Pose2d(12.57, 2.890, new Rotation2d(Math.toRadians(60)));
+    public static final Pose2d RED_TAG11_LEFT = new Pose2d(12.31, 3.02, new Rotation2d(Math.toRadians(60)));
 
 
     // Intermediate positions that should have no obstructions to turning
@@ -222,8 +222,8 @@ public final class Constants {
     public static final Pose2d BLUE_TAG21_RIGHT = new Pose2d(5.705, 4.205, new Rotation2d(Math.toRadians(180)));
     public static final Pose2d BLUE_TAG21_LEFT = new Pose2d(5.705, 3.848, new Rotation2d(Math.toRadians(180)));
 
-    public static final Pose2d BLUE_TAG22_RIGHT = new Pose2d(5.253, 3.065, new Rotation2d(Math.toRadians(120)));
-    public static final Pose2d BLUE_TAG22_LEFT = new Pose2d(4.942, 2.889, new Rotation2d(Math.toRadians(120)));
+    public static final Pose2d BLUE_TAG22_RIGHT = new Pose2d(5.14, 3.30, new Rotation2d(Math.toRadians(120)));
+    public static final Pose2d BLUE_TAG22_LEFT = new Pose2d(4.88, 3.04, new Rotation2d(Math.toRadians(120)));
 
     // Intermediate positions that should have no obstructions to turning
     public static final Pose2d BLUE_0_INT = new Pose2d(5.347, 2.407, new Rotation2d(Math.toRadians(120)));

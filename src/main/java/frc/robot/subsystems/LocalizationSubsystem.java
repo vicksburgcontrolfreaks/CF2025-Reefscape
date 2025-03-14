@@ -31,7 +31,7 @@ public class LocalizationSubsystem extends SubsystemBase {
         if (DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue) == DriverStation.Alliance.Red) {
             initialPose = new Pose2d(10, 4, new Rotation2d(0));  // 0° in radians
         } else {
-            initialPose = new Pose2d(7.3, 4, new Rotation2d(Math.toRadians(0)));  // -180° in radians (-π)
+            initialPose = new Pose2d(7.3, 4, new Rotation2d(Math.toRadians(180)));  // -180° in radians (-π)
         }
         
         poseEstimator = new SwerveDrivePoseEstimator(

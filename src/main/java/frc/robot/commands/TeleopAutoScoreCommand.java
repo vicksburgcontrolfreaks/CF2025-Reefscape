@@ -55,7 +55,7 @@ public class TeleopAutoScoreCommand extends SequentialCommandGroup {
             new ParallelCommandGroup(
                 new DynamicDriveToTagCommand(driveSubsystem, localizationSubsystem, isLeft),
                 new SequentialCommandGroup(
-                    new WaitCommand(0.5), // Delay before starting the arm command.
+                    new WaitCommand(0.1), // Delay before starting the arm command.
                     new SetArmPositionCommand(coralArmSubsystem, targetAngle, targetExtension)
                 )
             )
