@@ -22,8 +22,6 @@ public class MidScoringSequenceCommand extends SequentialCommandGroup {
      * @param armSubsystem The NewCoralArmSubsystem controlling the arm.
      */
 
-    private final double waitTime = 0.2;
-
     public MidScoringSequenceCommand(NewCoralArmSubsystem armSubsystem) {
         addCommands(
             new InstantCommand(() -> armSubsystem.setArmAngle(.28), armSubsystem),
@@ -34,7 +32,7 @@ public class MidScoringSequenceCommand extends SequentialCommandGroup {
             new WaitCommand(0.2),
             new InstantCommand(() -> armSubsystem.moveArm(-35), armSubsystem),
             new WaitCommand(0.2),
-            new InstantCommand(() -> armSubsystem.setArmAngle(.25), armSubsystem),
+            new InstantCommand(() -> armSubsystem.setArmAngle(.27), armSubsystem),
             new WaitCommand(0.2),
             //new InstantCommand(() -> armSubsystem.moveArm(-50), armSubsystem),
             //new WaitCommand(0.8),
