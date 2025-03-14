@@ -27,7 +27,7 @@ public class HighScoringSequenceCommand extends SequentialCommandGroup {
             new WaitCommand(0.2), 
             new InstantCommand(() -> armSubsystem.moveArm(-60), armSubsystem),
             new WaitCommand(0.2),
-            new InstantCommand(() -> armSubsystem.setArmAngle(.24), armSubsystem),
+            new InstantCommand(() -> armSubsystem.setArmAngle(.16), armSubsystem),
             new WaitCommand(0.2),
             new InstantCommand(() -> armSubsystem.moveArm(-10), armSubsystem),
             new WaitCommand(0.2),
