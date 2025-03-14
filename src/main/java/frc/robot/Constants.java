@@ -95,6 +95,14 @@ public final class Constants {
     public static final double CA_IGain = 0.03;  //0.002
     public static final double CA_I_MAX = 0.35;
     public static final double CA_MAX   = 0.16;  //0.25 was looking ok
+
+    // Arm position enum.
+    public enum ArmPosition {
+      INIT, LOW, MID, HIGH;
+    }
+
+    public static ArmPosition currentArmPosition = ArmPosition.INIT;
+    public static ArmPosition targetArmPosition = ArmPosition.INIT;
   }
 
   public static final class ModuleConstants {
