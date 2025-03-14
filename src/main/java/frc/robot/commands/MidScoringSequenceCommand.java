@@ -32,10 +32,10 @@ public class MidScoringSequenceCommand extends SequentialCommandGroup {
             new WaitCommand(0.2),
             new InstantCommand(() -> armSubsystem.moveArm(-35), armSubsystem),
             new WaitCommand(0.2),
-            new InstantCommand(() -> armSubsystem.setArmAngle(.27), armSubsystem),
+            new InstantCommand(() -> armSubsystem.setArmAngle(.28), armSubsystem),
             new WaitCommand(0.2),
-            //new InstantCommand(() -> armSubsystem.moveArm(-50), armSubsystem),
-            //new WaitCommand(0.8),
+            new InstantCommand(() -> armSubsystem.moveArm(-15), armSubsystem),
+            new WaitCommand(0.2),
             //new InstantCommand(() -> armSubsystem.setArmAngle(.2), armSubsystem),
             //new WaitCommand(0.8),
             new HomeCoralArmCommand(armSubsystem)
