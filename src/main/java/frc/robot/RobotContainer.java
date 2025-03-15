@@ -13,6 +13,8 @@ import frc.robot.commands.AutonScoreAndPickup_Blue0;
 import frc.robot.commands.AutonScoreAndPickup_Blue1;
 import frc.robot.commands.AutonScoreAndPickup_Red0;
 import frc.robot.commands.AutonScoreAndPickup_Red1;
+import frc.robot.commands.AutonScore_BlueCenter;
+import frc.robot.commands.AutonScore_RedCenter;
 import frc.robot.commands.CollectBallCommand;
 import frc.robot.commands.ReleaseBallCommand;
 import frc.robot.commands.RunAlgaeCollectorWheelsCommand;
@@ -90,26 +92,26 @@ public class RobotContainer {
             new InitAlgaeCollectorPositionCommand(m_algaeArmSubsystem, Constants.AlgaeConstants.ready));
 
       // Set up autonomous chooser options.
-      // autoChooser.addOption("drive backwards",
-      // new AutoDriveAndTurn(m_robotDrive));
-      //       new InitializeLocalizationCommand(m_robotDrive, m_localizationSubsystem)
-      //             .andThen(new DynamicDriveToTagCommand(m_robotDrive, m_localizationSubsystem, true))
-      //             .andThen(new InitAlgaeCollectorPositionCommand(m_algaeArmSubsystem, Constants.AlgaeConstants.ready))
-      //             .andThen(new RunAlgaeCollectorWheelsCommand(m_algaeArmSubsystem, 0.5, 1.0));
       autoChooser.setDefaultOption("Red 0",
             new AutonScoreAndPickup_Red0(m_robotDrive, m_localizationSubsystem, m_visionSubsystem,
                   m_coralArmSubsystem, m_algaeArmSubsystem));
       autoChooser.addOption("Red 1",
             new AutonScoreAndPickup_Red1(m_robotDrive, m_localizationSubsystem, m_visionSubsystem,
                   m_coralArmSubsystem, m_algaeArmSubsystem));
-      // autoChooser.addOption("Blue 0",
-      //       new AutonScoreAndPickup_Blue0(m_robotDrive, m_localizationSubsystem, m_visionSubsystem,
-      //             m_coralArmSubsystem, m_algaeArmSubsystem));
-      // autoChooser.addOption("Blue 1",
-      //       new AutonScoreAndPickup_Blue1(m_robotDrive, m_localizationSubsystem, m_visionSubsystem,
-      //             m_coralArmSubsystem, m_algaeArmSubsystem));
-      // autoChooser.addOption("No Auto",
-            // new RunCommand(() -> m_robotDrive.drive(0, 0, 0, false), m_robotDrive));
+      autoChooser.addOption("Red Center",
+            new AutonScore_RedCenter(m_robotDrive, m_localizationSubsystem, m_visionSubsystem,
+                        m_coralArmSubsystem, m_algaeArmSubsystem));
+      autoChooser.addOption("Blue 0",
+            new AutonScoreAndPickup_Blue0(m_robotDrive, m_localizationSubsystem, m_visionSubsystem,
+                  m_coralArmSubsystem, m_algaeArmSubsystem));
+      autoChooser.addOption("Blue 1",
+            new AutonScoreAndPickup_Blue1(m_robotDrive, m_localizationSubsystem, m_visionSubsystem,
+                  m_coralArmSubsystem, m_algaeArmSubsystem));
+      autoChooser.addOption("Blue Center",
+                  new AutonScore_BlueCenter(m_robotDrive, m_localizationSubsystem, m_visionSubsystem,
+                              m_coralArmSubsystem, m_algaeArmSubsystem));
+      autoChooser.addOption("No Auto",
+            new RunCommand(() -> m_robotDrive.drive(0, 0, 0, false), m_robotDrive));
 
       // Configure button bindings.
       configureButtonBindings();
