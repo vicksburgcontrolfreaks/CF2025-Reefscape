@@ -32,6 +32,6 @@ public class HarpoonSubsystem extends SubsystemBase {
     @Override
     public void periodic() {
         // Display current motor output on SmartDashboard for debugging.
-        SmartDashboard.putNumber("Harpoon Output", m_harpoon.get());
+        // SmartDashboard.putNumber("Harpoon Output", m_harpoon.get());
     }
 }

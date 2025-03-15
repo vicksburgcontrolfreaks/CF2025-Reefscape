@@ -38,9 +38,9 @@ public class CoralCollectorSubsystem extends SubsystemBase {
         output = Math.max(-0.5, Math.min(0.5, output));
         m_motor.set(output);
         
-        SmartDashboard.putNumber("CoralCollector Error", error);
-        SmartDashboard.putNumber("CoralCollector Output", output);
-        SmartDashboard.putNumber("CoralCollecter Position", getPosition());
+        // SmartDashboard.putNumber("CoralCollector Error", error);
+        // SmartDashboard.putNumber("CoralCollector Output", output);
+        // SmartDashboard.putNumber("CoralCollecter Position", getPosition());
     }
     
     /**
@@ -58,6 +58,6 @@ public class CoralCollectorSubsystem extends SubsystemBase {
     @Override
     public void periodic() {
         // Publish the current encoder position for debugging.
-        SmartDashboard.putNumber("CoralCollector Position", m_encoder.getPosition());
+        // SmartDashboard.putNumber("CoralCollector Position", m_encoder.getPosition());
     }
 }

@@ -40,11 +40,11 @@ public class LocalizationSubsystem extends SubsystemBase {
             driveSubsystem.getModulePositions(),
             initialPose,  // Use our known starting pose
             VecBuilder.fill(0.1, 0.1, 0.1), // State standard deviations: [meters, meters, radians]
-            VecBuilder.fill(0.5, 0.5, 0.5)  // Vision measurement standard deviations.
+            VecBuilder.fill(0.05, 0.05, 0.05)  // Vision measurement standard deviations.
         );
         
         // Publish the Field2d widget to SmartDashboard.
-        SmartDashboard.putData("Field", m_field);
+        // SmartDashboard.putData("Field", m_field);
     }
 
     @Override
@@ -86,9 +86,9 @@ public void periodic() {
     // Publish the estimated pose.
     Pose2d estimatedPose = poseEstimator.getEstimatedPosition();
     m_field.setRobotPose(estimatedPose);
-    SmartDashboard.putNumber("Estimated X", estimatedPose.getTranslation().getX());
-    SmartDashboard.putNumber("Estimated Y", estimatedPose.getTranslation().getY());
-    SmartDashboard.putNumber("Estimated Rotation", estimatedPose.getRotation().getDegrees());
+    // SmartDashboard.putNumber("Estimated X", estimatedPose.getTranslation().getX());
+    // SmartDashboard.putNumber("Estimated Y", estimatedPose.getTranslation().getY());
+    // SmartDashboard.putNumber("Estimated Rotation", estimatedPose.getRotation().getDegrees());
     SmartDashboard.putString("Estimated Pose", estimatedPose.toString());
 }
 
@@ -99,7 +99,7 @@ public void periodic() {
      */
     public void captureStartPose(Pose2d currentPose) {
         this.capturedPose = currentPose;
-        SmartDashboard.putString("Captured Pose", currentPose.toString());
+        // SmartDashboard.putString("Captured Pose", currentPose.toString());
     }
 
     public Pose2d getCapturedPose() {

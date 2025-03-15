@@ -36,7 +36,7 @@ public class AlgaeArmSubsystem extends SubsystemBase {
         // Assume the arm is retracted at startup.
         armEncoder.setPosition(0.0);
         resetState();
-        SmartDashboard.putNumber("AlgaeArm Encoder", armEncoder.getPosition());
+        // SmartDashboard.putNumber("AlgaeArm Encoder", armEncoder.getPosition());
     }
 
     /** Resets state variables for a new collection cycle. */
@@ -155,8 +155,8 @@ public class AlgaeArmSubsystem extends SubsystemBase {
     @Override
     public void periodic() {
         SmartDashboard.putNumber("AlgaeArm Encoder", armEncoder.getPosition());
-        SmartDashboard.putNumber("Wheel Counter", wheelCounter);
-        SmartDashboard.putBoolean("Collection Complete", collectionComplete);
-        SmartDashboard.putNumber("Wheel Current", wheelMotor.getOutputCurrent());
+        // SmartDashboard.putNumber("Wheel Counter", wheelCounter);
+        // SmartDashboard.putBoolean("Collection Complete", collectionComplete);
+        // SmartDashboard.putNumber("Wheel Current", wheelMotor.getOutputCurrent());
     }
 }

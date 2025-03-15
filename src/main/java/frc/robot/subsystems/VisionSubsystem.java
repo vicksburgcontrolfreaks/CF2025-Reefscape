@@ -37,10 +37,10 @@ public class VisionSubsystem extends SubsystemBase {
         LimelightHelpers.SetIMUMode("limelight", 3);
 
         // Check if the Limelight is publishing values.
-        if (limelightTable.getEntry("tv").getValue() == null) {
-            SmartDashboard.putString("Limelight Status", "Limelight Not Connected");
-            return;
-        }
+        // if (limelightTable.getEntry("tv").getValue() == null) {
+        //     SmartDashboard.putString("Limelight Status", "Limelight Not Connected");
+        //     return;
+        // }
 
         double tv = limelightTable.getEntry("tv").getDouble(0.0);
         double tx = limelightTable.getEntry("tx").getDouble(0.0);

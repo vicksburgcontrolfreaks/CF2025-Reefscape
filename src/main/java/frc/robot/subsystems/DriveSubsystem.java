@@ -120,7 +120,7 @@ public class DriveSubsystem extends SubsystemBase {
         });
 
     m_currentMonitor.update();
-    SmartDashboard.putBoolean("Collision Detected", isCollisionDetected());
+    // SmartDashboard.putBoolean("Collision Detected", isCollisionDetected());
 
   }
 

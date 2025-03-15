@@ -25,9 +25,9 @@ public class InitializeLocalizationCommand extends Command {
         if (visionEstimate != null && visionEstimate.tagCount > 0) {
             // Reset odometry to the vision measurement.
             driveSubsystem.resetOdometry(visionEstimate.pose);
-            SmartDashboard.putString("Localization Init", "Odometry reset using vision");
+            // SmartDashboard.putString("Localization Init", "Odometry reset using vision");
         } else {
-            SmartDashboard.putString("Localization Init", "No valid vision measurement");
+            // SmartDashboard.putString("Localization Init", "No valid vision measurement");
         }
     }
 

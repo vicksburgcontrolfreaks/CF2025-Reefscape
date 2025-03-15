@@ -106,6 +106,6 @@ public class LedSubsystem extends SubsystemBase {
         }
 
         led.setData(ledBuffer);
-        SmartDashboard.putString("LED Mode", currentMode.toString());
+        // SmartDashboard.putString("LED Mode", currentMode.toString());
     }
 }

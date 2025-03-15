@@ -57,8 +57,8 @@ public class HomeCoralArmCommand extends Command {
         // Publish current measurements for debugging.
         double angleCurrent = m_armSubsystem.getAngleCurrent();
         double extendCurrent = m_armSubsystem.getExtendCurrent();
-        SmartDashboard.putNumber("Arm Angle Current", angleCurrent);
-        SmartDashboard.putNumber("Arm Extend Current", extendCurrent);
+        // SmartDashboard.putNumber("Arm Angle Current", angleCurrent);
+        // SmartDashboard.putNumber("Arm Extend Current", extendCurrent);
     }
 
     @Override

@@ -252,9 +252,9 @@ public class NewCoralArmSubsystem extends SubsystemBase {
       SmartDashboard.putNumber("Arm Extension", e_armExtend.getPosition());
       SmartDashboard.putNumber("Arm Angle", e_armAngle.getPosition());
       //SmartDashboard.putNumber("CA Cmd", ca_cmd);
-      SmartDashboard.putNumber("Ex error", ce_error);
-      SmartDashboard.putNumber("Ex Cmd", ce_cmd);
-      SmartDashboard.putNumber("Ex Pos", e_armExtend.getPosition());
+      // SmartDashboard.putNumber("Ex error", ce_error);
+      // SmartDashboard.putNumber("Ex Cmd", ce_cmd);
+      // SmartDashboard.putNumber("Ex Pos", e_armExtend.getPosition());
       //private double ;
       //private double ce_cmd;
    }

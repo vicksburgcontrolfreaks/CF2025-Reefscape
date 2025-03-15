@@ -53,8 +53,8 @@ public class DynamicDriveToTagCommand extends Command {
                 case 21: targetPose = m_isLeft ? ReefscapeTargetPoses.BLUE_TAG21_LEFT : ReefscapeTargetPoses.BLUE_TAG21_RIGHT; break;
                 case 22: targetPose = m_isLeft ? ReefscapeTargetPoses.BLUE_TAG22_LEFT : ReefscapeTargetPoses.BLUE_TAG22_RIGHT; break;
                 default:
-                    targetPose = driveSubsystem.getPose().plus(
-                            new Transform2d(new Translation2d(-1.0, 0.0), new Rotation2d(0)));
+                    // targetPose = driveSubsystem.getPose().plus(
+                    //         new Transform2d(new Translation2d(-1.0, 0.0), new Rotation2d(0)));
                     break;
             }
         } else { // Red Alliance
@@ -66,8 +66,8 @@ public class DynamicDriveToTagCommand extends Command {
                 case 10: targetPose = m_isLeft ? ReefscapeTargetPoses.RED_TAG10_LEFT : ReefscapeTargetPoses.RED_TAG10_RIGHT; break;
                 case 11: targetPose = m_isLeft ? ReefscapeTargetPoses.RED_TAG11_LEFT : ReefscapeTargetPoses.RED_TAG11_RIGHT; break;
                 default:
-                    targetPose = driveSubsystem.getPose().plus(
-                            new Transform2d(new Translation2d(1.0, 0.0), new Rotation2d(0)));
+                    // targetPose = driveSubsystem.getPose().plus(
+                    //         new Transform2d(new Translation2d(1.0, 0.0), new Rotation2d(0)));
                     break;
             }
         }
@@ -105,8 +105,8 @@ public class DynamicDriveToTagCommand extends Command {
         // Reset odometry to the starting pose.
         driveSubsystem.resetOdometry(startPose);
         internalCommand.initialize();
-        SmartDashboard.putString("Trajectory Start Pose", startPose.toString());
-        SmartDashboard.putString("Trajectory Target Pose", targetPose.toString());
+        // SmartDashboard.putString("Trajectory Start Pose", startPose.toString());
+        // SmartDashboard.putString("Trajectory Target Pose", targetPose.toString());
     }
 
     @Override

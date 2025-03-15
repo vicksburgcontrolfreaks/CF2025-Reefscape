@@ -75,11 +75,11 @@ public class SetArmPositionCommand extends Command {
            armSubsystem.moveArm(targetExtension);
         }
 
-        SmartDashboard.putNumber("ANG_tgt", targetAngle); 
-        SmartDashboard.putNumber("ANG_cur", currentAngle);   //targetAngle
-        SmartDashboard.putNumber("ANG_TOL", ANG_TOL + ang_tol_off);
+        // SmartDashboard.putNumber("ANG_tgt", targetAngle); 
+        // SmartDashboard.putNumber("ANG_cur", currentAngle);   //targetAngle
+        // SmartDashboard.putNumber("ANG_TOL", ANG_TOL + ang_tol_off);
         //SmartDashboard.putNumber("EXT_TOL", EXT_TOL + ext_tol_off);
-        SmartDashboard.putNumber("ang_err", ang_error);
+        // SmartDashboard.putNumber("ang_err", ang_error);
         //SmartDashboard.putNumber("ext_err", ext_error);
     }
     

@@ -79,7 +79,7 @@ public final class Constants {
     // Coral Extender
     public static final double lowTgtHeight  =  -35; //target offset from init -40.28
     public static final double midTgtHeight  =  -58.5; //target offset from init -72.31
-    public static final double highTgtHeight = -99;//target offset from init -103.72
+    public static final double highTgtHeight = -100;//target offset from init -103.72
 
     public static final double CE_PGain = 0.01; // 0.02
     public static final double CE_IGain = 0.01;
@@ -216,8 +216,8 @@ public final class Constants {
     public static final Pose2d BLUE_TAG19_RIGHT = new Pose2d(3.731, 4.990, new Rotation2d(Math.toRadians(300))); 
     public static final Pose2d BLUE_TAG19_LEFT = new Pose2d(4.041, 5.170, new Rotation2d(Math.toRadians(300))); 
 
-    public static final Pose2d BLUE_TAG20_RIGHT = new Pose2d(4.942, 5.170, new Rotation2d(Math.toRadians(240)));
-    public static final Pose2d BLUE_TAG20_LEFT = new Pose2d(5.253, 4.511, new Rotation2d(Math.toRadians(240))); 
+    public static final Pose2d BLUE_TAG20_RIGHT = new Pose2d(4.91, 5.13, new Rotation2d(Math.toRadians(240)));
+    public static final Pose2d BLUE_TAG20_LEFT = new Pose2d(5.23, 4.73, new Rotation2d(Math.toRadians(240))); 
 
     public static final Pose2d BLUE_TAG21_RIGHT = new Pose2d(5.705, 4.205, new Rotation2d(Math.toRadians(180)));
     public static final Pose2d BLUE_TAG21_LEFT = new Pose2d(5.705, 3.848, new Rotation2d(Math.toRadians(180)));
