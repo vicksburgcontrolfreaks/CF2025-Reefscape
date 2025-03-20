@@ -1,4 +1,4 @@
-package frc.robot.commands;
+package frc.robot.autonomous;
 
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -8,8 +8,8 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 
-public class AutoDriveAndTurn extends SequentialCommandGroup {
-    public AutoDriveAndTurn(DriveSubsystem driveSubsystem) {
+public class AutonJustDrive extends SequentialCommandGroup {
+    public AutonJustDrive(DriveSubsystem driveSubsystem) {
         addCommands(
             // Reset odometry to ensure accurate movement
             new InstantCommand(() -> driveSubsystem.resetOdometry(new Pose2d(new Translation2d(0, 0), new Rotation2d(0))), driveSubsystem),

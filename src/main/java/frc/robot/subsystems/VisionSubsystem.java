@@ -5,12 +5,11 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.robot.Constants;
 import frc.robot.LimelightHelpers;
 
 public class VisionSubsystem extends SubsystemBase {
     private final NetworkTable limelightTable;
-    public static final boolean USE_LIMELIGHT = true;
-
     /*
      * offsets for high mount position:
      * LL Forward: -0.212
@@ -24,37 +23,8 @@ public class VisionSubsystem extends SubsystemBase {
      */
 
     public VisionSubsystem() {
-        // Get the Limelight's network table (assumed to be "limelight")
-
+        // Get the Limelight's network table
         limelightTable = NetworkTableInstance.getDefault().getTable("limelight");
-
-    }
-
-    @Override
-    public void periodic() {
-
-        // Optionally, continuously enforce the desired IMU mode.
-        LimelightHelpers.SetIMUMode("limelight", 3);
-
-        // Check if the Limelight is publishing values.
-        // if (limelightTable.getEntry("tv").getValue() == null) {
-        //     SmartDashboard.putString("Limelight Status", "Limelight Not Connected");
-        //     return;
-        // }
-
-        double tv = limelightTable.getEntry("tv").getDouble(0.0);
-        double tx = limelightTable.getEntry("tx").getDouble(0.0);
-        double ty = limelightTable.getEntry("ty").getDouble(0.0);
-        double ta = limelightTable.getEntry("ta").getDouble(0.0);
-
-        if (tv == 1.0) { // Target detected
-            // SmartDashboard.putNumber("Limelight TX", tx);
-            // SmartDashboard.putNumber("Limelight TY", ty);
-            // SmartDashboard.putNumber("Limelight Target Area", ta);
-            SmartDashboard.putNumber("Detected Tag ID", getDetectedTagIDFromNT());
-        } else {
-            SmartDashboard.putNumber("Detected Tag ID", 0);
-        }
     }
 
     // Accessor methods for auto-align or command usage:
@@ -69,5 +39,29 @@ public class VisionSubsystem extends SubsystemBase {
     public int getDetectedTagIDFromNT() {
         double idDouble = limelightTable.getEntry("tid").getDouble(0);
         return (int) idDouble;
+    }
+
+    @Override
+    public void periodic() {
+
+        double tv = limelightTable.getEntry("tv").getDouble(0.0);
+        double tx = limelightTable.getEntry("tx").getDouble(0.0);
+        double ty = limelightTable.getEntry("ty").getDouble(0.0);
+        double ta = limelightTable.getEntry("ta").getDouble(0.0);
+
+        if (Constants.COMP_CODE) {
+            if (tv == 1.0) { // Target detected
+                SmartDashboard.putNumber("Detected Tag ID", getDetectedTagIDFromNT());
+            } else {
+                SmartDashboard.putNumber("Detected Tag ID", 0);
+            }
+        } else {
+            //additional debugging calls here
+            if (tv == 1.0) { // Target detected
+                SmartDashboard.putNumber("Detected Tag ID", getDetectedTagIDFromNT());
+            } else {
+                SmartDashboard.putNumber("Detected Tag ID", 0);
+            }
+        }
     }
 }

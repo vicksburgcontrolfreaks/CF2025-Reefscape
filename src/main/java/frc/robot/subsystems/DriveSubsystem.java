@@ -7,6 +7,7 @@ package frc.robot.subsystems;
 import edu.wpi.first.hal.FRCNetComm.tInstances;
 import edu.wpi.first.hal.FRCNetComm.tResourceType;
 import edu.wpi.first.hal.HAL;
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -17,9 +18,12 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.ADIS16470_IMU;
 import edu.wpi.first.wpilibj.ADIS16470_IMU.IMUAxis;
 import edu.wpi.first.wpilibj.BuiltInAccelerometer;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.robot.Constants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.CurrentMonitor;
+import frc.robot.LimelightHelpers;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class DriveSubsystem extends SubsystemBase {
@@ -105,23 +109,6 @@ public class DriveSubsystem extends SubsystemBase {
   public DriveSubsystem() {
     // Usage reporting for MAXSwerve template
     HAL.report(tResourceType.kResourceType_RobotDrive, tInstances.kRobotDriveSwerve_MaxSwerve);
-  }
-
-  @Override
-  public void periodic() {
-    // Update the odometry in the periodic block
-    m_odometry.update(
-        Rotation2d.fromDegrees(m_gyro.getAngle(IMUAxis.kZ)),
-        new SwerveModulePosition[] {
-            m_frontLeft.getPosition(),
-            m_frontRight.getPosition(),
-            m_rearLeft.getPosition(),
-            m_rearRight.getPosition()
-        });
-
-    m_currentMonitor.update();
-    // SmartDashboard.putBoolean("Collision Detected", isCollisionDetected());
-
   }
 
   /**
@@ -269,8 +256,32 @@ public class DriveSubsystem extends SubsystemBase {
   public void resetFieldOrientation() {
     // Set the current heading as the new zero reference.
     fieldOrientationOffset = getHeading();
-    // SmartDashboard.putNumber("Field Orientation Offset", fieldOrientationOffset);
+
   }
+
+  public double getMT2Heading() {
+    LimelightHelpers.PoseEstimate mt2Estimate = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight");
+    if (mt2Estimate != null && mt2Estimate.tagCount > 0) {
+        return mt2Estimate.pose.getRotation().getDegrees();
+    }
+    // Fallback to gyro heading if no valid vision estimate is available.
+    return getHeading();
+}
+
+
+  public void initFieldOrientationForAlliance() {
+
+    // double currentHeading = getHeading(); // in degrees
+    double currentHeading = getMT2Heading();
+
+    double allianceAdjustment = 0;
+    if (DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue) == DriverStation.Alliance.Red) {
+        allianceAdjustment = 180;
+    }
+    fieldOrientationOffset = Math.abs(allianceAdjustment - currentHeading);
+
+  }
+
 
   public double getAdjustedHeading() {
     // Adjust the raw heading by subtracting the offset.
@@ -284,5 +295,29 @@ public class DriveSubsystem extends SubsystemBase {
     m_rearLeft.setDrivingVoltage(voltage);
     m_rearRight.setDrivingVoltage(voltage);
   }
+
+  @Override
+  public void periodic() {
+    // Update the odometry in the periodic block
+    m_odometry.update(
+        Rotation2d.fromDegrees(m_gyro.getAngle(IMUAxis.kZ)),
+        new SwerveModulePosition[] {
+            m_frontLeft.getPosition(),
+            m_frontRight.getPosition(),
+            m_rearLeft.getPosition(),
+            m_rearRight.getPosition()
+        });
+
+    if (Constants.COMP_CODE){
+    }
+    else {
+      m_currentMonitor.update();
+    SmartDashboard.putBoolean("Collision Detected", isCollisionDetected());
+    SmartDashboard.putNumber("Field Orientation Offset", fieldOrientationOffset);
+    SmartDashboard.putNumber("Adjusted Heading", getAdjustedHeading());
+    SmartDashboard.putNumber("Heading", getHeading());
+
+  }
+
 
 }

@@ -21,6 +21,8 @@ import edu.wpi.first.math.util.Units;
  * wherever the constants are needed, to reduce verbosity.
  */
 public final class Constants {
+  // Competition Code has fewer calls to the SmartDashboard.
+  public static final boolean COMP_CODE = false;
   public static final double TEAM_NUMBER = 8126;
 
   public static final class DriveConstants {
@@ -77,24 +79,24 @@ public final class Constants {
     public static final int TGT_HIGH = 3; // enumeration do not change
 
     // Coral Extender
-    public static final double lowTgtHeight  =  -35; //target offset from init -40.28
-    public static final double midTgtHeight  =  -58.5; //target offset from init -72.31
-    public static final double highTgtHeight = -100;//target offset from init -103.72
+    public static final double lowTgtHeight = -35; // target offset from init -40.28
+    public static final double midTgtHeight = -58.5; // target offset from init -72.31
+    public static final double highTgtHeight = -100;// target offset from init -103.72
 
     public static final double CE_PGain = 0.01; // 0.02
     public static final double CE_IGain = 0.01;
     public static final double CE_I_MAX = 8.0;
     public static final double CE_MAX = 0.55;
 
-    // Coral Arm Angle  
-    public static final double lowTgtAngle  =  0.40; //0.44 target offset from init 39.28
-    public static final double midTgtAngle  =  0.21; //target offset from init 21.93
-    public static final double highTgtAngle =  0.11; //target offset from init 10.93
+    // Coral Arm Angle
+    public static final double lowTgtAngle = 0.40; // 0.44 target offset from init 39.28
+    public static final double midTgtAngle = 0.21; // target offset from init 21.93
+    public static final double highTgtAngle = 0.11; // target offset from init 10.93
 
-    public static final double CA_PGain = 2.0;  //0.01
-    public static final double CA_IGain = 0.03;  //0.002
+    public static final double CA_PGain = 2.0; // 0.01
+    public static final double CA_IGain = 0.03; // 0.002
     public static final double CA_I_MAX = 0.35;
-    public static final double CA_MAX   = 0.16;  //0.25 was looking ok
+    public static final double CA_MAX = 0.16; // 0.25 was looking ok
 
     // Arm position enum.
     public enum ArmPosition {
@@ -173,8 +175,8 @@ public final class Constants {
   public static final class ReefscapeTargetPoses {
     // Red Alliance Targets
     public static final Pose2d RED_PROCESSOR = new Pose2d(6.099, 0.595, new Rotation2d(0));
-    public static final Pose2d RED_CORAL_STATION_0 = new Pose2d(16.000, 0.670, new Rotation2d(-235));
-    public static final Pose2d RED_CORAL_STATION_1 = new Pose2d(16.000, 7.370, new Rotation2d(0));
+    public static final Pose2d RED_CORAL_STATION_0 = new Pose2d(16.000, 0.670, new Rotation2d(Math.toRadians(125)));
+    public static final Pose2d RED_CORAL_STATION_1 = new Pose2d(16.000, 7.370, new Rotation2d(Math.toRadians(0)));
 
     public static final Pose2d RED_TAG6_RIGHT = new Pose2d(13.83, 3.060, new Rotation2d(Math.toRadians(120)));
     public static final Pose2d RED_TAG6_LEFT = new Pose2d(13.566, 2.875, new Rotation2d(Math.toRadians(120)));
@@ -185,15 +187,14 @@ public final class Constants {
     public static final Pose2d RED_TAG8_RIGHT = new Pose2d(13.52, 5.170, new Rotation2d(Math.toRadians(240)));
     public static final Pose2d RED_TAG8_LEFT = new Pose2d(13.82, 4.990, new Rotation2d(Math.toRadians(240)));
 
-    public static final Pose2d RED_TAG9_RIGHT = new Pose2d(12.30, 4.990, new Rotation2d(Math.toRadians(300))); 
-    public static final Pose2d RED_TAG9_LEFT = new Pose2d(12.60, 5.170, new Rotation2d(Math.toRadians(300))); 
+    public static final Pose2d RED_TAG9_RIGHT = new Pose2d(12.30, 4.990, new Rotation2d(Math.toRadians(300)));
+    public static final Pose2d RED_TAG9_LEFT = new Pose2d(12.60, 5.170, new Rotation2d(Math.toRadians(300)));
 
     public static final Pose2d RED_TAG10_RIGHT = new Pose2d(11.81, 3.850, new Rotation2d(Math.toRadians(0)));
     public static final Pose2d RED_TAG10_LEFT = new Pose2d(11.81, 4.210, new Rotation2d(Math.toRadians(0)));
 
     public static final Pose2d RED_TAG11_RIGHT = new Pose2d(12.57, 2.890, new Rotation2d(Math.toRadians(60)));
     public static final Pose2d RED_TAG11_LEFT = new Pose2d(12.31, 3.02, new Rotation2d(Math.toRadians(60)));
-
 
     // Intermediate positions that should have no obstructions to turning
     // red 0 starts by going to tag 11
@@ -204,8 +205,8 @@ public final class Constants {
 
     // Blue Alliance Targets
     public static final Pose2d BLUE_PROCESSOR = new Pose2d(11.529, 7.399, new Rotation2d(-Math.PI));
-    public static final Pose2d BLUE_CORAL_STATION_0 = new Pose2d(1.600, 0.660, new Rotation2d(54));
-    public static final Pose2d BLUE_CORAL_STATION_1 = new Pose2d(1.600, 7.370, new Rotation2d(-54));
+    public static final Pose2d BLUE_CORAL_STATION_0 = new Pose2d(1.600, 0.660, new Rotation2d(Math.toRadians(55)));
+    public static final Pose2d BLUE_CORAL_STATION_1 = new Pose2d(1.600, 7.370, new Rotation2d(Math.toRadians(55)));
 
     public static final Pose2d BLUE_TAG17_RIGHT = new Pose2d(4.041, 2.889, new Rotation2d(Math.toRadians(60)));
     public static final Pose2d BLUE_TAG17_LEFT = new Pose2d(3.731, 3.065, new Rotation2d(Math.toRadians(60)));
@@ -213,11 +214,11 @@ public final class Constants {
     public static final Pose2d BLUE_TAG18_RIGHT = new Pose2d(4.041, 4.205, new Rotation2d(Math.toRadians(0)));
     public static final Pose2d BLUE_TAG18_LEFT = new Pose2d(4.041, 3.848, new Rotation2d(Math.toRadians(0)));
 
-    public static final Pose2d BLUE_TAG19_RIGHT = new Pose2d(3.731, 4.990, new Rotation2d(Math.toRadians(300))); 
-    public static final Pose2d BLUE_TAG19_LEFT = new Pose2d(4.041, 5.170, new Rotation2d(Math.toRadians(300))); 
+    public static final Pose2d BLUE_TAG19_RIGHT = new Pose2d(3.731, 4.990, new Rotation2d(Math.toRadians(300)));
+    public static final Pose2d BLUE_TAG19_LEFT = new Pose2d(4.041, 5.170, new Rotation2d(Math.toRadians(300)));
 
     public static final Pose2d BLUE_TAG20_RIGHT = new Pose2d(4.91, 5.13, new Rotation2d(Math.toRadians(240)));
-    public static final Pose2d BLUE_TAG20_LEFT = new Pose2d(5.23, 4.73, new Rotation2d(Math.toRadians(240))); 
+    public static final Pose2d BLUE_TAG20_LEFT = new Pose2d(5.23, 4.73, new Rotation2d(Math.toRadians(240)));
 
     public static final Pose2d BLUE_TAG21_RIGHT = new Pose2d(5.705, 4.205, new Rotation2d(Math.toRadians(180)));
     public static final Pose2d BLUE_TAG21_LEFT = new Pose2d(5.705, 3.848, new Rotation2d(Math.toRadians(180)));
@@ -228,6 +229,6 @@ public final class Constants {
     // Intermediate positions that should have no obstructions to turning
     public static final Pose2d BLUE_0_INT = new Pose2d(5.347, 2.407, new Rotation2d(Math.toRadians(120)));
     public static final Pose2d BLUE_1_INT = new Pose2d(5.626, 5.86, new Rotation2d(Math.toRadians(240)));
-    
+
   }
 }
