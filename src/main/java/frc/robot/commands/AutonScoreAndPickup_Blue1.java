@@ -28,7 +28,7 @@ public class AutonScoreAndPickup_Blue1 extends SequentialCommandGroup {
             
             // 2. Drive to the scoring location with preloaded gamepiece while concurrently setting the arm.
             new ParallelCommandGroup(
-                new DriveToPoseCommand(driveSubsystem, ReefscapeTargetPoses.BLUE_TAG20_LEFT, localizationSubsystem)
+                new DriveToPoseCommand(driveSubsystem, ReefscapeTargetPoses.BLUE_TAG20_RIGHT, localizationSubsystem)
             ),
 
             new ParallelCommandGroup(

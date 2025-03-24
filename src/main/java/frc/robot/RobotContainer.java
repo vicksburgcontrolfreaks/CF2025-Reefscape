@@ -27,6 +27,7 @@ import frc.robot.commands.LowScoringSequenceCommand;
 import frc.robot.commands.ManualCoralArmAdjustCommand;
 import frc.robot.commands.MidScoringSequenceCommand;
 import frc.robot.commands.SetArmPositionCommand;
+import frc.robot.commands.SetupHangCommand;
 import frc.robot.commands.TeleopAutoScoreCommand;
 import frc.robot.subsystems.NewCoralArmSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
@@ -40,6 +41,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -196,15 +198,18 @@ public class RobotContainer {
       new JoystickButton(m_mechanismController, XboxController.Button.kRightBumper.value)
             .onTrue(new RunCommand(() -> {
                m_coralArmSubsystem.zeroEncoders();
-               m_algaeArmSubsystem.zeroEncoders();
-               m_CoralCollectorSubsystem.zeroEncoders();
-            }, m_coralArmSubsystem));
+               // m_algaeArmSubsystem.zeroArmEncoder();
+            }, m_coralArmSubsystem, m_algaeArmSubsystem));
 
       // Harpoon control: DPad Right for forward, DPad Left for reverse.
-      mech_dpadRightButton.whileTrue(new RunCommand(() -> m_harpoon.setMotor(0.5), m_harpoon))
-            .whileFalse(new InstantCommand(() -> m_harpoon.stop(), m_harpoon));
-      mech_dpadLeftButton.whileTrue(new RunCommand(() -> m_harpoon.setMotor(-0.5), m_harpoon))
-            .whileFalse(new InstantCommand(() -> m_harpoon.stop(), m_harpoon));
+      // mech_dpadRightButton.whileTrue(new RunCommand(() -> m_harpoon.setMotor(0.5), m_harpoon))
+      //       .whileFalse(new InstantCommand(() -> m_harpoon.stop(), m_harpoon));
+      // mech_dpadLeftButton.whileTrue(new RunCommand(() -> m_harpoon.setMotor(-0.5), m_harpoon))
+      //       .whileFalse(new InstantCommand(() -> m_harpoon.stop(), m_harpoon));
+
+      mech_dpadRightButton.onTrue(new SetupHangCommand(m_harpoon, m_coralArmSubsystem, m_algaeArmSubsystem));
+      mech_dpadLeftButton.whileTrue(new RunCommand(() -> m_harpoon.setMotor(0.5), m_harpoon))
+         .whileFalse(new InstantCommand(() -> m_harpoon.stop(), m_harpoon));
 
       // Cancel arm commands if mechanism controller joysticks move beyond deadband.
       new Trigger(() -> Math.abs(m_mechanismController.getLeftY()) > 0.2 ||
@@ -284,15 +289,18 @@ public class RobotContainer {
                switch (ArmConstants.currentArmPosition) {
                   case LOW:
                      new LowScoringSequenceCommand(m_coralArmSubsystem).schedule();
+                     new WaitCommand(0.1);
                      ArmConstants.currentArmPosition = ArmConstants.ArmPosition.INIT;
                      break;
                   case MID:
-                     ArmConstants.currentArmPosition = ArmConstants.ArmPosition.INIT;
                      new MidScoringSequenceCommand(m_coralArmSubsystem).schedule();
+                     new WaitCommand(0.1);
+                     ArmConstants.currentArmPosition = ArmConstants.ArmPosition.INIT;
                      break;
                   case HIGH:
-                     ArmConstants.currentArmPosition = ArmConstants.ArmPosition.INIT;
                      new HighScoringSequenceCommand(m_coralArmSubsystem).schedule();
+                     new WaitCommand(0.1);
+                     ArmConstants.currentArmPosition = ArmConstants.ArmPosition.INIT;
                      break;
                   default:
                      // do nothing for INIT or unspecified state.

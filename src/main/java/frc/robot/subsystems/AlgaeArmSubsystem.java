@@ -154,7 +154,7 @@ public class AlgaeArmSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-        SmartDashboard.putNumber("AlgaeArm Encoder", armEncoder.getPosition());
+        // SmartDashboard.putNumber("AlgaeArm Encoder", armEncoder.getPosition());
         // SmartDashboard.putNumber("Wheel Counter", wheelCounter);
         // SmartDashboard.putBoolean("Collection Complete", collectionComplete);
         // SmartDashboard.putNumber("Wheel Current", wheelMotor.getOutputCurrent());

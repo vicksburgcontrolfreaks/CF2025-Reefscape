@@ -27,12 +27,9 @@ public class AutonScore_BlueCenter extends SequentialCommandGroup {
             new InitializeLocalizationCommand(driveSubsystem, localizationSubsystem),
 
             // 2. Drive to the scoring location with preloaded gamepiece while concurrently setting the arm.
-            new ParallelCommandGroup(
-                new DriveToPoseCommand(driveSubsystem, ReefscapeTargetPoses.BLUE_TAG21_RIGHT, localizationSubsystem)
-            ),
+            new DriveToPoseCommand(driveSubsystem, ReefscapeTargetPoses.BLUE_TAG21_LEFT, localizationSubsystem),
             //InitAlgaeCollectorPositionCommand
             // 3. Score the preloaded coral while driving to the pickup location.
-            new ParallelCommandGroup(
                 new SequentialCommandGroup(
                     new WaitCommand(0.1), // Delay 0.5 seconds before starting arm set.
                     new InitAlgaeCollectorPositionCommand(algaeArmSubsystem, 20),
@@ -40,7 +37,6 @@ public class AutonScore_BlueCenter extends SequentialCommandGroup {
                     new RunAlgaeCollectorWheelsCommand(algaeArmSubsystem, 1.0,0.75),
                     new WaitCommand(0.1)
                 )
-            )
         );
     }
 }
