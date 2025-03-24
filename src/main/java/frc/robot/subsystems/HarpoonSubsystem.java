@@ -4,6 +4,7 @@ package frc.robot.subsystems;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.Constants.ArmConstants;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -31,7 +32,12 @@ public class HarpoonSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
+        if (Constants.COMP_CODE){
+        // Not really interested in seeing anything for this one.
+        }
+        else{
         // Display current motor output on SmartDashboard for debugging.
-        // SmartDashboard.putNumber("Harpoon Output", m_harpoon.get());
+        SmartDashboard.putNumber("Harpoon Output", m_harpoon.get());
+        }
     }
 }

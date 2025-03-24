@@ -36,7 +36,6 @@ public class AlgaeArmSubsystem extends SubsystemBase {
         // Assume the arm is retracted at startup.
         armEncoder.setPosition(0.0);
         resetState();
-        // SmartDashboard.putNumber("AlgaeArm Encoder", armEncoder.getPosition());
     }
 
     /** Resets state variables for a new collection cycle. */
@@ -47,12 +46,10 @@ public class AlgaeArmSubsystem extends SubsystemBase {
     }
 
     /**
-     * Resets both the arm and wheel encoders.
+     * Resets algae arm encoder.
      */
     public void zeroEncoders() {
         armEncoder.setPosition(0.0);
-        // If desired, reset the wheel encoder as well:
-        wheelEncoder.setPosition(0.0);
     }
 
     /**
@@ -134,17 +131,10 @@ public class AlgaeArmSubsystem extends SubsystemBase {
         }
     }
 
-
-    
     /** Stops both motors. */
     public void stop() {
         armMotor.stopMotor();
         wheelMotor.stopMotor();
-    }
-
-    /** Resets the arm encoder. */
-    public void zeroArmEncoder() {
-        armEncoder.setPosition(0.0);
     }
 
     /** Returns the current arm encoder position. */
@@ -154,9 +144,16 @@ public class AlgaeArmSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-        // SmartDashboard.putNumber("AlgaeArm Encoder", armEncoder.getPosition());
-        // SmartDashboard.putNumber("Wheel Counter", wheelCounter);
-        // SmartDashboard.putBoolean("Collection Complete", collectionComplete);
-        // SmartDashboard.putNumber("Wheel Current", wheelMotor.getOutputCurrent());
+        if (Constants.COMP_CODE){
+            SmartDashboard.putNumber("AlgaeArm Encoder", armEncoder.getPosition());
+        }
+        else{
+        SmartDashboard.putNumber("AlgaeArm Encoder", armEncoder.getPosition());
+        SmartDashboard.putNumber("Wheel Counter", wheelCounter);
+        SmartDashboard.putBoolean("Collection Complete", collectionComplete);
+        SmartDashboard.putNumber("Wheel Current", wheelMotor.getOutputCurrent());
+        }
+    
+        
     }
 }

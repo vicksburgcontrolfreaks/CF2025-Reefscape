@@ -1,4 +1,4 @@
-package frc.robot.commands;
+package frc.robot.autonomous;
 
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
@@ -14,6 +14,12 @@ import frc.robot.subsystems.NewCoralArmSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.ReefscapeTargetPoses;
+import frc.robot.commands.DriveToPoseCommand;
+import frc.robot.commands.HighScoringSequenceCommand;
+import frc.robot.commands.InitAlgaeCollectorPositionCommand;
+import frc.robot.commands.InitializeLocalizationCommand;
+import frc.robot.commands.RunAlgaeCollectorWheelsCommand;
+import frc.robot.commands.SetArmPositionCommand;
 import frc.robot.subsystems.AlgaeArmSubsystem;
 
 public class AutonScoreAndPickup_Red1 extends SequentialCommandGroup {

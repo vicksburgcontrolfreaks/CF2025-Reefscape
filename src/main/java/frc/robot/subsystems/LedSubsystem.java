@@ -2,6 +2,7 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
 import edu.wpi.first.wpilibj.util.Color;
@@ -44,7 +45,7 @@ public class LedSubsystem extends SubsystemBase {
 
     private Color getAllianceColor() {
         return (DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue) == DriverStation.Alliance.Red)
-                ? Color.kRed : Color.kBlue;
+                ? Color.kGreen : Color.kBlue;
     }
 
     @Override
@@ -97,15 +98,36 @@ public class LedSubsystem extends SubsystemBase {
                 }
                 break;
 
-            case IDLE:
-            default:
-                for (int i = 0; i < LED_COUNT; i++) {
-                    ledBuffer.setLED(i, Color.kBlack);
-                }
-                break;
+                case IDLE:
+                default:
+                    // Calculate a brightness value that oscillates between 0 and 1 over a 2-second period.
+                    double fadePeriod = 2000.0; // period in milliseconds (2 seconds)
+                    double t = (System.currentTimeMillis() % fadePeriod) / fadePeriod; // t in [0, 1)
+                    // Using sine wave shifted so brightness goes from 0 to 1 smoothly:
+                    double brightness = 0.5 * (1 + Math.sin(2 * Math.PI * t - Math.PI / 2));
+                    
+                    // Create a new color by scaling each channel of the allianceColor by the brightness factor.
+                    // Note: The WPILib Color class components range from 0 to 1.
+                    Color fadedColor = new Color(
+                            allianceColor.red * brightness,
+                            allianceColor.green * brightness,
+                            allianceColor.blue * brightness
+                    );
+                    
+                    // Set all LEDs to the faded color.
+                    for (int i = 0; i < LED_COUNT; i++) {
+                        ledBuffer.setLED(i, fadedColor);
+                    }
+                    break;
+                
         }
 
         led.setData(ledBuffer);
-        // SmartDashboard.putString("LED Mode", currentMode.toString());
+        if (Constants.COMP_CODE){
+        // Not really interested in seeing anything during comp for this one.
+        }
+        else{
+        SmartDashboard.putString("LED Mode", currentMode.toString());
+        }
     }
 }

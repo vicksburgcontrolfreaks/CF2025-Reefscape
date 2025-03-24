@@ -7,11 +7,12 @@ package frc.robot;
 
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.cscore.UsbCamera;
+import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.net.PortForwarder;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.robot.commands.ResetFieldOrientationCommand;
 import frc.robot.subsystems.LedSubsystem;
 
 /**
@@ -38,12 +39,11 @@ public class Robot extends TimedRobot {
   @Override
   public void robotInit() {
     // Instantiate our RobotContainer. This will perform all our button bindings,
-    // and put our
-    // autonomous chooser on the dashboard.
+    // and put our autonomous chooser on the dashboard.
     m_robotContainer = new RobotContainer();
 
     // for (int port = 5800; port <= 5809; port++) {
-    //   PortForwarder.add(port, "limelight.local", port);
+    // PortForwarder.add(port, "limelight.local", port);
     // }
 
     // camera1 = CameraServer.startAutomaticCapture(0);
@@ -51,23 +51,21 @@ public class Robot extends TimedRobot {
 
   /**
    * This function is called every 20 ms, no matter the mode. Use this for items
-   * like diagnostics
-   * that you want ran during disabled, autonomous, teleoperated and test.
+   * like diagnostics that you want ran during disabled, autonomous, teleoperated
+   * and test.
    *
-   * <p>
    * This runs after the mode specific periodic functions, but before LiveWindow
-   * and
-   * SmartDashboard integrated updating.
+   * and SmartDashboard integrated updating.
    */
   @Override
   public void robotPeriodic() {
-    // Runs the Scheduler. This is responsible for polling buttons, adding
-    // newly-scheduled
-    // commands, running already-scheduled commands, removing finished or
-    // interrupted commands,
-    // and running subsystem periodic() methods. This must be called from the
-    // robot's periodic
-    // block in order for anything in the Command-based framework to work.
+    /*
+     * Runs the Scheduler. This is responsible for polling buttons, adding
+     * newly-scheduled commands, running already-scheduled commands, removing
+     * finished or interrupted commands, and running subsystem periodic() methods.
+     * This must be called from the robot's periodic block in order for anything in
+     * the Command-based framework to work.
+     */
     CommandScheduler.getInstance().run();
     m_robotContainer.periodic();
   }
@@ -75,17 +73,36 @@ public class Robot extends TimedRobot {
   /** This function is called once each time the robot enters Disabled mode. */
   @Override
   public void disabledInit() {
-    // Schedule the ResetFieldOrientationCommand.
-  CommandScheduler.getInstance().schedule(
-      new ResetFieldOrientationCommand(m_robotContainer.getDriveSubsystem(), 
-                                       m_robotContainer.getVisionSubsystem(), 
-                                       m_robotContainer.getLedSubsystem())
-  );
   }
 
   @Override
   public void disabledPeriodic() {
-    // m_robotContainer.getLedSubsystem().setLEDMode(LedSubsystem.LEDMode.MATCH_END_FLASH);
+    // // Set the Limelight IMU mode to 1 for seeding
+    LimelightHelpers.SetIMUMode("limelight", 3);
+
+    LimelightHelpers.PoseEstimate visionEstimate = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight");
+    if (visionEstimate != null && visionEstimate.tagCount > 0) {
+
+      Pose2d currentPose = m_robotContainer.getDriveSubsystem().getPose();
+      Pose2d visionPose = visionEstimate.pose;
+
+      // Compute the distance between current and vision-derived poses.
+      double deltaX = currentPose.getTranslation().getX() - visionPose.getTranslation().getX();
+      double deltaY = currentPose.getTranslation().getY() - visionPose.getTranslation().getY();
+      double distanceDifference = Math.hypot(deltaX, deltaY);
+
+      // Only reset odometry if the difference is greater than 0.5 meters.
+      if (distanceDifference > 0.5) {
+        m_robotContainer.getDriveSubsystem().resetOdometry(visionPose);
+      }
+
+      // Also add the vision measurement to fuse with odometry.
+      m_robotContainer.getLocalizationSubsystem().poseEstimator.addVisionMeasurement(visionPose,
+          visionEstimate.timestampSeconds);
+      m_robotContainer.getLedSubsystem().setLEDMode(LedSubsystem.LEDMode.IDLE);
+
+    }
+
   }
 
   /**
@@ -96,17 +113,13 @@ public class Robot extends TimedRobot {
   public void autonomousInit() {
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
-    /*
-     * String autoSelected = SmartDashboard.getString("Auto Selector",
-     * "Default"); switch(autoSelected) { case "My Auto": autonomousCommand
-     * = new MyAutoCommand(); break; case "Default Auto": default:
-     * autonomousCommand = new ExampleCommand(); break; }
-     */
-
     // schedule the autonomous command (example)
     if (m_autonomousCommand != null) {
       m_autonomousCommand.schedule();
     }
+
+    LimelightHelpers.SetIMUMode("limelight", 3);
+
   }
 
   /** This function is called periodically during autonomous. */
@@ -116,13 +129,14 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopInit() {
-    // This makes sure that the autonomous stops running when
-    // teleop starts running. If you want the autonomous to
-    // continue until interrupted by another command, remove
-    // this line or comment it out.
+    // Stops autonomous when teleop begins; remove to let it run until interrupted.
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
+    m_robotContainer.getDriveSubsystem().initFieldOrientationForAlliance();
+
+    // LL is seeded with robot orientation, imu inputs are now from LL4 (mode 2)
+    LimelightHelpers.SetIMUMode("limelight", 3);
   }
 
   /** This function is called periodically during operator control. */

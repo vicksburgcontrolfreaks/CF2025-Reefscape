@@ -1,6 +1,4 @@
-//  Control Freaks 2025
-// https://chatgpt.com/share/67bd090f-4c08-8005-9e26-2a43e1b26ac6
-
+// File: RobotContainer.java
 package frc.robot;
 
 import edu.wpi.first.wpilibj.XboxController;
@@ -8,13 +6,13 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.PS4Controller.Button;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.OIConstants;
-import frc.robot.commands.AutoDriveAndTurn;
-import frc.robot.commands.AutonScoreAndPickup_Blue0;
-import frc.robot.commands.AutonScoreAndPickup_Blue1;
-import frc.robot.commands.AutonScoreAndPickup_Red0;
-import frc.robot.commands.AutonScoreAndPickup_Red1;
-import frc.robot.commands.AutonScore_BlueCenter;
-import frc.robot.commands.AutonScore_RedCenter;
+import frc.robot.autonomous.AutonSelector;
+import frc.robot.autonomous.AutonScoreAndPickup_Blue0;
+import frc.robot.autonomous.AutonScoreAndPickup_Blue1;
+import frc.robot.autonomous.AutonScoreAndPickup_Red0;
+import frc.robot.autonomous.AutonScoreAndPickup_Red1;
+import frc.robot.autonomous.AutonScore_BlueCenter;
+import frc.robot.autonomous.AutonScore_RedCenter;
 import frc.robot.commands.CollectBallCommand;
 import frc.robot.commands.ReleaseBallCommand;
 import frc.robot.commands.RunAlgaeCollectorWheelsCommand;
@@ -61,7 +59,22 @@ public class RobotContainer {
    private final LocalizationSubsystem m_localizationSubsystem = new LocalizationSubsystem(m_robotDrive,
          m_visionSubsystem);
    private final CoralCollectorSubsystem m_CoralCollectorSubsystem = new CoralCollectorSubsystem();
-   public final LedSubsystem m_LedSubsystem = new LedSubsystem();
+   private final LedSubsystem m_LedSubsystem = new LedSubsystem();
+   private final AutonSelector autoSelector = new AutonSelector(
+         m_robotDrive,
+         m_localizationSubsystem,
+         m_visionSubsystem,
+         m_coralArmSubsystem,
+         m_algaeArmSubsystem);
+
+   // Arm position enum.
+   public enum ArmPosition {
+      INIT, LOW, MID, HIGH;
+   }
+
+   // You can still use global variables if needed…
+   private ArmPosition currentArmPosition = ArmPosition.INIT;
+   private ArmPosition targetArmPosition = ArmPosition.INIT;
 
    // Controllers.
    private final XboxController m_driverController = new XboxController(OIConstants.kDriverControllerPort);
@@ -87,45 +100,59 @@ public class RobotContainer {
    private Command m_autoDriveCommand = null;
 
    public RobotContainer() {
+      // Optionally add field display here.
       // SmartDashboard.putData("Field", m_localizationSubsystem.getField());
 
       // Schedule the algae collector initialization command.
       CommandScheduler.getInstance().schedule(
             new InitAlgaeCollectorPositionCommand(m_algaeArmSubsystem, Constants.AlgaeConstants.ready));
 
-      // Set up autonomous chooser options.
-      autoChooser.setDefaultOption("Red 0",
-            new AutonScoreAndPickup_Red0(m_robotDrive, m_localizationSubsystem, m_visionSubsystem,
-                  m_coralArmSubsystem, m_algaeArmSubsystem));
-      autoChooser.addOption("Red 1",
-            new AutonScoreAndPickup_Red1(m_robotDrive, m_localizationSubsystem, m_visionSubsystem,
-                  m_coralArmSubsystem, m_algaeArmSubsystem));
-      autoChooser.addOption("Red Center",
-            new AutonScore_RedCenter(m_robotDrive, m_localizationSubsystem, m_visionSubsystem,
-                        m_coralArmSubsystem, m_algaeArmSubsystem));
-      autoChooser.addOption("Blue 0",
-            new AutonScoreAndPickup_Blue0(m_robotDrive, m_localizationSubsystem, m_visionSubsystem,
-                  m_coralArmSubsystem, m_algaeArmSubsystem));
-      autoChooser.addOption("Blue 1",
-            new AutonScoreAndPickup_Blue1(m_robotDrive, m_localizationSubsystem, m_visionSubsystem,
-                  m_coralArmSubsystem, m_algaeArmSubsystem));
-      autoChooser.addOption("Blue Center",
-                  new AutonScore_BlueCenter(m_robotDrive, m_localizationSubsystem, m_visionSubsystem,
-                              m_coralArmSubsystem, m_algaeArmSubsystem));
-      autoChooser.addOption("No Auto",
-            new RunCommand(() -> m_robotDrive.drive(0, 0, 0, false), m_robotDrive));
+      // // Set up autonomous chooser options.
+      // autoChooser.setDefaultOption("Red 0",
+      // new AutonScoreAndPickup_Red0(m_robotDrive, m_localizationSubsystem,
+      // m_visionSubsystem,
+      // m_coralArmSubsystem, m_algaeArmSubsystem));
+      // autoChooser.addOption("Red 1",
+      // new AutonScoreAndPickup_Red1(m_robotDrive, m_localizationSubsystem,
+      // m_visionSubsystem,
+      // m_coralArmSubsystem, m_algaeArmSubsystem));
+      // autoChooser.addOption("Red Center",
+      // new AutonScore_RedCenter(m_robotDrive, m_localizationSubsystem,
+      // m_visionSubsystem,
+      // m_coralArmSubsystem, m_algaeArmSubsystem));
+      // autoChooser.addOption("Blue 0",
+      // new AutonScoreAndPickup_Blue0(m_robotDrive, m_localizationSubsystem,
+      // m_visionSubsystem,
+      // m_coralArmSubsystem, m_algaeArmSubsystem));
+      // autoChooser.addOption("Blue 1",
+      // new AutonScoreAndPickup_Blue1(m_robotDrive, m_localizationSubsystem,
+      // m_visionSubsystem,
+      // m_coralArmSubsystem, m_algaeArmSubsystem));
+      // autoChooser.addOption("Blue Center",
+      // new AutonScore_BlueCenter(m_robotDrive, m_localizationSubsystem,
+      // m_visionSubsystem,
+      // m_coralArmSubsystem, m_algaeArmSubsystem));
+      // autoChooser.addOption("No Auto",
+      // new RunCommand(() -> m_robotDrive.drive(0, 0, 0, false), m_robotDrive));
 
       // Configure button bindings.
       configureButtonBindings();
 
       // Set default driver command with exponential scaling.
       m_robotDrive.setDefaultCommand(new RunCommand(() -> {
-         double forward = expoScale(-m_driverController.getLeftY()*0.75, 2);
-         double strafe = expoScale(-m_driverController.getLeftX()*0.75 , 2);
+         double forward = expoScale(-m_driverController.getLeftY() * 0.75, 2);
+         double strafe = expoScale(-m_driverController.getLeftX() * 0.75, 2);
          double rotation = expoScale(-m_driverController.getRightX(), 2);
          m_robotDrive.drive(forward, strafe, rotation, true);
       }, m_robotDrive));
 
+      // Set default driver command with two factor linear scaling.
+      m_robotDrive.setDefaultCommand(new RunCommand(() -> {
+         double forward = scaleDriveInput(-m_driverController.getLeftY());
+         double strafe = scaleDriveInput(-m_driverController.getLeftX());
+         double rotation = scaleDriveInput(-m_driverController.getRightX());
+         m_robotDrive.drive(forward, strafe, rotation, true);
+      }, m_robotDrive));
 
       // Set default mechanism command.
       m_coralArmSubsystem.setDefaultCommand(
@@ -134,16 +161,16 @@ public class RobotContainer {
 
    private void configureButtonBindings() {
       // --- Driver Controller Bindings ---
-      // Left bumper reduces drive speed.
       new JoystickButton(m_driverController, Button.kL1.value)
             .whileTrue(new InstantCommand(() -> m_robotDrive.setSpeedMultiplier(0.1), m_robotDrive))
             .whileFalse(new InstantCommand(() -> m_robotDrive.setSpeedMultiplier(1.0), m_robotDrive));
 
-      // Right bumper resets field orientation.
+      //Right bumper resets field orientation and sets wheel in x position
       new JoystickButton(m_driverController, Button.kR1.value)
-            .onTrue(new InstantCommand(() -> m_robotDrive.resetFieldOrientation(), m_robotDrive));
+            .onTrue(new InstantCommand(() -> m_robotDrive.resetFieldOrientation(), m_robotDrive))
+            .whileTrue(new RunCommand(() -> m_robotDrive.setX(), m_robotDrive));
 
-      // Trigger: cancel drive commands when joystick inputs exceed deadband.
+      //Cancels any auto driving command when there is input from the joysticks
       new Trigger(() -> Math.abs(m_driverController.getLeftY()) > 0.2 ||
             Math.abs(m_driverController.getLeftX()) > 0.2 ||
             Math.abs(m_driverController.getRightX()) > 0.2)
@@ -153,65 +180,46 @@ public class RobotContainer {
                }
             }, m_robotDrive));
 
-      // Right bumper also sets defensive X-formation.
-      new JoystickButton(m_driverController, Button.kR1.value)
-            .whileTrue(new RunCommand(() -> m_robotDrive.setX(), m_robotDrive));
+      // new JoystickButton(m_driverController, Button.kR1.value)
+      //       .whileTrue(new RunCommand(() -> m_robotDrive.setX(), m_robotDrive));
 
-      // DPad Down toggles field-oriented drive.
       dpadDownButton.onTrue(new InstantCommand(m_robotDrive::toggleFieldOriented, m_robotDrive));
 
-      // B button: Teleop Auto Score RIGHT.
+      // Teleop auto scoring commands: Drive to coral branch and deploy arm
+      // Right
       new JoystickButton(m_driverController, XboxController.Button.kB.value)
             .onTrue(new InstantCommand(() -> {
                m_autoDriveCommand = new TeleopAutoScoreCommand(m_robotDrive, m_localizationSubsystem, m_visionSubsystem,
                      m_coralArmSubsystem, false);
                m_autoDriveCommand.schedule();
-
-               SmartDashboard.putString("Target Arm Position", ArmConstants.targetArmPosition.toString());
-               SmartDashboard.putString("Current Arm Position", ArmConstants.currentArmPosition.toString());
             }));
-      // X button: Teleop Auto Score LEFT.
+      // Left
       new JoystickButton(m_driverController, XboxController.Button.kX.value)
             .onTrue(new InstantCommand(() -> {
                m_autoDriveCommand = new TeleopAutoScoreCommand(m_robotDrive, m_localizationSubsystem, m_visionSubsystem,
                      m_coralArmSubsystem, true);
                m_autoDriveCommand.schedule();
-
-               SmartDashboard.putString("Target Arm Position", ArmConstants.targetArmPosition.toString());
-               SmartDashboard.putString("Current Arm Position", ArmConstants.currentArmPosition.toString());
-            }
-            ));
-
-      // Right Trigger starts ball collection.
+            }));
+      //Right trigger collects algae ball
       new Trigger(() -> m_driverController.getRightTriggerAxis() > 0.2)
             .onTrue(new CollectBallCommand(m_algaeArmSubsystem));
-
-      // Left Trigger shoots ball and retracts ball collector.
+      //Left trigger releases ball and stows the algae arm
       new Trigger(() -> m_driverController.getLeftTriggerAxis() > 0.2)
             .onTrue(new ReleaseBallCommand(m_algaeArmSubsystem));
 
       // --- Mechanism Controller Bindings ---
-      SmartDashboard.putString("Target Arm Position", ArmConstants.targetArmPosition.toString());
-      SmartDashboard.putString("Current Arm Position", ArmConstants.currentArmPosition.toString());
-
-      // Right bumper on mechanism controller zeros arm encoders.
+      //Right bumper zeros arm encoders
       new JoystickButton(m_mechanismController, XboxController.Button.kRightBumper.value)
             .onTrue(new RunCommand(() -> {
                m_coralArmSubsystem.zeroEncoders();
-               // m_algaeArmSubsystem.zeroArmEncoder();
+               m_algaeArmSubsystem.zeroEncoders();
             }, m_coralArmSubsystem, m_algaeArmSubsystem));
 
-      // Harpoon control: DPad Right for forward, DPad Left for reverse.
-      // mech_dpadRightButton.whileTrue(new RunCommand(() -> m_harpoon.setMotor(0.5), m_harpoon))
-      //       .whileFalse(new InstantCommand(() -> m_harpoon.stop(), m_harpoon));
-      // mech_dpadLeftButton.whileTrue(new RunCommand(() -> m_harpoon.setMotor(-0.5), m_harpoon))
-      //       .whileFalse(new InstantCommand(() -> m_harpoon.stop(), m_harpoon));
+      mech_dpadRightButton.whileTrue(new RunCommand(() -> m_harpoon.setMotor(0.5), m_harpoon))
+            .whileFalse(new InstantCommand(() -> m_harpoon.stop(), m_harpoon));
+      mech_dpadLeftButton.whileTrue(new RunCommand(() -> m_harpoon.setMotor(-0.5), m_harpoon))
+            .whileFalse(new InstantCommand(() -> m_harpoon.stop(), m_harpoon));
 
-      mech_dpadRightButton.onTrue(new SetupHangCommand(m_harpoon, m_coralArmSubsystem, m_algaeArmSubsystem));
-      mech_dpadLeftButton.whileTrue(new RunCommand(() -> m_harpoon.setMotor(0.5), m_harpoon))
-         .whileFalse(new InstantCommand(() -> m_harpoon.stop(), m_harpoon));
-
-      // Cancel arm commands if mechanism controller joysticks move beyond deadband.
       new Trigger(() -> Math.abs(m_mechanismController.getLeftY()) > 0.2 ||
             Math.abs(m_mechanismController.getRightY()) > 0.2)
             .onTrue(new InstantCommand(() -> {
@@ -221,52 +229,45 @@ public class RobotContainer {
                }
             }, m_coralArmSubsystem));
 
-      // DPad Up on mechanism controller: increment arm position.
       mech_dpadUpButton.onTrue(new InstantCommand(() -> {
          switch (ArmConstants.targetArmPosition) {
             case INIT:
-            ArmConstants.targetArmPosition = ArmConstants.ArmPosition.LOW;
+               ArmConstants.targetArmPosition = ArmConstants.ArmPosition.LOW;
                m_LedSubsystem.setLEDMode(LedSubsystem.LEDMode.ARM_LOW);
                break;
             case LOW:
-            ArmConstants.targetArmPosition = ArmConstants.ArmPosition.MID;
+               ArmConstants.targetArmPosition = ArmConstants.ArmPosition.MID;
                m_LedSubsystem.setLEDMode(LedSubsystem.LEDMode.ARM_MID);
                break;
             case MID:
-            ArmConstants.targetArmPosition = ArmConstants.ArmPosition.HIGH;
+               ArmConstants.targetArmPosition = ArmConstants.ArmPosition.HIGH;
                m_LedSubsystem.setLEDMode(LedSubsystem.LEDMode.ARM_HIGH);
                break;
             case HIGH:
                // do nothing
                break;
          }
-         SmartDashboard.putString("Target Arm Position", ArmConstants.targetArmPosition.toString());
-         SmartDashboard.putString("Current Arm Position", ArmConstants.currentArmPosition.toString());
       }, m_coralArmSubsystem));
 
-      // DPad Down on mechanism controller: decrement arm position.
       mech_dpadDownButton.onTrue(new InstantCommand(() -> {
          switch (ArmConstants.targetArmPosition) {
             case HIGH:
-            ArmConstants.targetArmPosition = ArmConstants.ArmPosition.MID;
+               ArmConstants.targetArmPosition = ArmConstants.ArmPosition.MID;
                m_LedSubsystem.setLEDMode(LedSubsystem.LEDMode.ARM_MID);
                break;
             case MID:
-            ArmConstants.targetArmPosition = ArmConstants.ArmPosition.LOW;
+               ArmConstants.targetArmPosition = ArmConstants.ArmPosition.LOW;
                m_LedSubsystem.setLEDMode(LedSubsystem.LEDMode.ARM_LOW);
                break;
             case LOW:
-            ArmConstants.targetArmPosition = ArmConstants.ArmPosition.INIT;
+               ArmConstants.targetArmPosition = ArmConstants.ArmPosition.INIT;
                break;
             case INIT:
                // do nothing
                break;
          }
-         SmartDashboard.putString("Target Arm Position", ArmConstants.targetArmPosition.toString());
-         SmartDashboard.putString("Current Arm Position", ArmConstants.currentArmPosition.toString());
       }, m_coralArmSubsystem));
 
-      // X Button on mechanism controller: execute the selected arm command.
       new JoystickButton(m_mechanismController, XboxController.Button.kX.value)
             .onTrue(new InstantCommand(() -> {
                if (ArmConstants.currentArmPosition != ArmConstants.targetArmPosition) {
@@ -283,7 +284,6 @@ public class RobotContainer {
                m_currentArmCommand.schedule();
             }));
 
-      // B Button on mechanism controller: execute the coral scoring sequence.
       new JoystickButton(m_mechanismController, XboxController.Button.kB.value)
             .onTrue(new InstantCommand(() -> {
                switch (ArmConstants.currentArmPosition) {
@@ -303,16 +303,30 @@ public class RobotContainer {
                      ArmConstants.currentArmPosition = ArmConstants.ArmPosition.INIT;
                      break;
                   default:
-                     // do nothing for INIT or unspecified state.
                      break;
                }
-
-               SmartDashboard.putString("Target Arm Position", ArmConstants.targetArmPosition.toString());
-               SmartDashboard.putString("Current Arm Position", ArmConstants.currentArmPosition.toString());
             }, m_coralArmSubsystem));
    }
 
-   // Scales input exponentially.
+   public double scaleDriveInput(double input) {
+      // Get absolute value and the sign.
+      double sign = Math.signum(input);
+      double absInput = Math.abs(input);
+      double output;
+      
+      if (absInput <= 0.5) {
+          // Fine control: scale by 0.5
+          output = 0.5 * absInput;
+      } else {
+          // Above 0.5: add additional multiplier (here, 1.5)
+          output = 0.25 + 1.5 * (absInput - 0.5);
+      }
+      
+      // Return with the original sign.
+      return sign * output;
+  }
+  
+
    public double expoScale(double input, double exponent) {
       return Math.copySign(Math.pow(Math.abs(input), exponent), input);
    }
@@ -347,27 +361,35 @@ public class RobotContainer {
       }
    }
 
-   /**
-    * Returns the autonomous command selected from the chooser.
-    */
    public Command getAutonomousCommand() {
-      return autoChooser.getSelected();
+      return autoSelector.selectAutoCommand();
    }
 
    public DriveSubsystem getDriveSubsystem() {
       return m_robotDrive;
-  }
-  
-  public VisionSubsystem getVisionSubsystem() {
+   }
+
+   public VisionSubsystem getVisionSubsystem() {
       return m_visionSubsystem;
-  }
-  
+   }
+
+   public LocalizationSubsystem getLocalizationSubsystem() {
+      return m_localizationSubsystem;
+   }
+
    public LedSubsystem getLedSubsystem() {
       return m_LedSubsystem;
-  }  
+   }
 
+   // Centralize SmartDashboard updates here.
    public void periodic() {
-      SmartDashboard.putData("Auto Tuning Mode", autoChooser);
+      if (Constants.COMP_CODE) {
+         SmartDashboard.putData("Auto Tuning Mode", autoChooser);
+         SmartDashboard.putString("Target Arm Position", ArmConstants.targetArmPosition.toString());
+         SmartDashboard.putString("Current Arm Position", ArmConstants.currentArmPosition.toString());
+      } else {
+         // put additional debugging calls here
+      }
 
       // LED control based on robot state.
       if (!DriverStation.isEnabled()) {
@@ -377,23 +399,10 @@ public class RobotContainer {
             m_LedSubsystem.setLEDMode(LedSubsystem.LEDMode.IDLE);
          }
       } else {
-         // switch (currentArmPosition) {
-         //    case HIGH:
-         //       m_LedSubsystem.setLEDMode(LedSubsystem.LEDMode.ARM_HIGH);
-         //       break;
-         //    case MID:
-         //       m_LedSubsystem.setLEDMode(LedSubsystem.LEDMode.ARM_MID);
-         //       break;
-         //    case LOW:
-         //       m_LedSubsystem.setLEDMode(LedSubsystem.LEDMode.ARM_LOW);
-         //       break;
-         //    default:
-         //       m_LedSubsystem.setLEDMode(LedSubsystem.LEDMode.IDLE);
-         //       break;
-         }
+         // You can update LED mode here if needed.
          if (DriverStation.getMatchTime() < 15) {
             m_LedSubsystem.setLEDMode(LedSubsystem.LEDMode.MATCH_END_FLASH);
          }
       }
    }
-
+}
