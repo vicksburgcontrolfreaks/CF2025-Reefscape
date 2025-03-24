@@ -16,6 +16,7 @@ import frc.robot.commands.LowScoringSequenceCommand;
 import frc.robot.commands.ManualCoralArmAdjustCommand;
 import frc.robot.commands.MidScoringSequenceCommand;
 import frc.robot.commands.SetArmPositionCommand;
+import frc.robot.commands.SetupHangCommand;
 import frc.robot.commands.TeleopAutoScoreCommand;
 import frc.robot.subsystems.NewCoralArmSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
@@ -29,6 +30,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -250,15 +252,18 @@ public class RobotContainer {
                switch (ArmConstants.currentArmPosition) {
                   case LOW:
                      new LowScoringSequenceCommand(m_coralArmSubsystem).schedule();
+                     new WaitCommand(0.1);
                      ArmConstants.currentArmPosition = ArmConstants.ArmPosition.INIT;
                      break;
                   case MID:
-                     ArmConstants.currentArmPosition = ArmConstants.ArmPosition.INIT;
                      new MidScoringSequenceCommand(m_coralArmSubsystem).schedule();
+                     new WaitCommand(0.1);
+                     ArmConstants.currentArmPosition = ArmConstants.ArmPosition.INIT;
                      break;
                   case HIGH:
-                     ArmConstants.currentArmPosition = ArmConstants.ArmPosition.INIT;
                      new HighScoringSequenceCommand(m_coralArmSubsystem).schedule();
+                     new WaitCommand(0.1);
+                     ArmConstants.currentArmPosition = ArmConstants.ArmPosition.INIT;
                      break;
                   default:
                      break;
