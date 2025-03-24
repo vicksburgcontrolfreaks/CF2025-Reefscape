@@ -18,11 +18,6 @@ public class AutonJustDrive extends SequentialCommandGroup {
             new InstantCommand(() -> driveSubsystem.drive(-0.5, 0.0, 0.0, true), driveSubsystem),
             new WaitCommand(0.5), // Adjust timing if necessary
             new InstantCommand(() -> driveSubsystem.drive(0.0, 0.0, 0.0, true), driveSubsystem)
-            // new WaitCommand(0.25),
-            // // Rotate 180 degrees
-            // new InstantCommand(() -> driveSubsystem.drive(0.0, 0.0, 1.0, true), driveSubsystem),
-            // new WaitCommand(1), // Adjust timing for a full 180-degree turn
-            // new InstantCommand(() -> driveSubsystem.drive(0.0, 0.0, 0.0, true), driveSubsystem)
         );
     }
 }

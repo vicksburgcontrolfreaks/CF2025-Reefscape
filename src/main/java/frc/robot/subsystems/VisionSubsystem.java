@@ -50,14 +50,14 @@ public class VisionSubsystem extends SubsystemBase {
         double ta = limelightTable.getEntry("ta").getDouble(0.0);
 
         if (Constants.COMP_CODE) {
-            if (tv == 1.0) { // Target detected
+            if (tv > 0.99) { // Target detected
                 SmartDashboard.putNumber("Detected Tag ID", getDetectedTagIDFromNT());
             } else {
                 SmartDashboard.putNumber("Detected Tag ID", 0);
             }
         } else {
             //additional debugging calls here
-            if (tv == 1.0) { // Target detected
+            if (tv > 0.99) { // Target detected
                 SmartDashboard.putNumber("Detected Tag ID", getDetectedTagIDFromNT());
             } else {
                 SmartDashboard.putNumber("Detected Tag ID", 0);

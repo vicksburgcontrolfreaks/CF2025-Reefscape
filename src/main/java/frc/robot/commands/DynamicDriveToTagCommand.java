@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.ReefscapeTargetPoses;
+import frc.robot.Constants;
 import frc.robot.LimelightHelpers;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.LocalizationSubsystem;
@@ -31,8 +32,8 @@ public class DynamicDriveToTagCommand extends Command {
     private Pose2d targetPose;
     private final boolean m_isLeft; // true for left target; false for right target
 
-
-    public DynamicDriveToTagCommand(DriveSubsystem driveSubsystem, LocalizationSubsystem localizationSubsystem, boolean isLeft) {
+    public DynamicDriveToTagCommand(DriveSubsystem driveSubsystem, LocalizationSubsystem localizationSubsystem,
+            boolean isLeft) {
         this.driveSubsystem = driveSubsystem;
         this.localizationSubsystem = localizationSubsystem;
         m_isLeft = isLeft;
@@ -46,28 +47,58 @@ public class DynamicDriveToTagCommand extends Command {
         if (DriverStation.getAlliance().orElse(DriverStation.Alliance.Red) == DriverStation.Alliance.Blue) {
             // Blue Alliance
             switch (tagId) {
-                case 17: targetPose = m_isLeft ? ReefscapeTargetPoses.BLUE_TAG17_LEFT : ReefscapeTargetPoses.BLUE_TAG17_RIGHT; break;
-                case 18: targetPose = m_isLeft ? ReefscapeTargetPoses.BLUE_TAG18_LEFT : ReefscapeTargetPoses.BLUE_TAG18_RIGHT; break;
-                case 19: targetPose = m_isLeft ? ReefscapeTargetPoses.BLUE_TAG19_LEFT : ReefscapeTargetPoses.BLUE_TAG19_RIGHT; break;
-                case 20: targetPose = m_isLeft ? ReefscapeTargetPoses.BLUE_TAG20_LEFT : ReefscapeTargetPoses.BLUE_TAG20_RIGHT; break;
-                case 21: targetPose = m_isLeft ? ReefscapeTargetPoses.BLUE_TAG21_LEFT : ReefscapeTargetPoses.BLUE_TAG21_RIGHT; break;
-                case 22: targetPose = m_isLeft ? ReefscapeTargetPoses.BLUE_TAG22_LEFT : ReefscapeTargetPoses.BLUE_TAG22_RIGHT; break;
+                case 17:
+                    targetPose = m_isLeft ? ReefscapeTargetPoses.BLUE_TAG17_LEFT
+                            : ReefscapeTargetPoses.BLUE_TAG17_RIGHT;
+                    break;
+                case 18:
+                    targetPose = m_isLeft ? ReefscapeTargetPoses.BLUE_TAG18_LEFT
+                            : ReefscapeTargetPoses.BLUE_TAG18_RIGHT;
+                    break;
+                case 19:
+                    targetPose = m_isLeft ? ReefscapeTargetPoses.BLUE_TAG19_LEFT
+                            : ReefscapeTargetPoses.BLUE_TAG19_RIGHT;
+                    break;
+                case 20:
+                    targetPose = m_isLeft ? ReefscapeTargetPoses.BLUE_TAG20_LEFT
+                            : ReefscapeTargetPoses.BLUE_TAG20_RIGHT;
+                    break;
+                case 21:
+                    targetPose = m_isLeft ? ReefscapeTargetPoses.BLUE_TAG21_LEFT
+                            : ReefscapeTargetPoses.BLUE_TAG21_RIGHT;
+                    break;
+                case 22:
+                    targetPose = m_isLeft ? ReefscapeTargetPoses.BLUE_TAG22_LEFT
+                            : ReefscapeTargetPoses.BLUE_TAG22_RIGHT;
+                    break;
                 default:
                     // targetPose = driveSubsystem.getPose().plus(
-                    //         new Transform2d(new Translation2d(-1.0, 0.0), new Rotation2d(0)));
+                    // new Transform2d(new Translation2d(-1.0, 0.0), new Rotation2d(0)));
                     break;
             }
         } else { // Red Alliance
             switch (tagId) {
-                case 6:  targetPose = m_isLeft ? ReefscapeTargetPoses.RED_TAG6_LEFT  : ReefscapeTargetPoses.RED_TAG6_RIGHT;  break;
-                case 7:  targetPose = m_isLeft ? ReefscapeTargetPoses.RED_TAG7_LEFT  : ReefscapeTargetPoses.RED_TAG7_RIGHT;  break;
-                case 8:  targetPose = m_isLeft ? ReefscapeTargetPoses.RED_TAG8_LEFT  : ReefscapeTargetPoses.RED_TAG8_RIGHT;  break;
-                case 9:  targetPose = m_isLeft ? ReefscapeTargetPoses.RED_TAG9_LEFT  : ReefscapeTargetPoses.RED_TAG9_RIGHT;  break;
-                case 10: targetPose = m_isLeft ? ReefscapeTargetPoses.RED_TAG10_LEFT : ReefscapeTargetPoses.RED_TAG10_RIGHT; break;
-                case 11: targetPose = m_isLeft ? ReefscapeTargetPoses.RED_TAG11_LEFT : ReefscapeTargetPoses.RED_TAG11_RIGHT; break;
+                case 6:
+                    targetPose = m_isLeft ? ReefscapeTargetPoses.RED_TAG6_LEFT : ReefscapeTargetPoses.RED_TAG6_RIGHT;
+                    break;
+                case 7:
+                    targetPose = m_isLeft ? ReefscapeTargetPoses.RED_TAG7_LEFT : ReefscapeTargetPoses.RED_TAG7_RIGHT;
+                    break;
+                case 8:
+                    targetPose = m_isLeft ? ReefscapeTargetPoses.RED_TAG8_LEFT : ReefscapeTargetPoses.RED_TAG8_RIGHT;
+                    break;
+                case 9:
+                    targetPose = m_isLeft ? ReefscapeTargetPoses.RED_TAG9_LEFT : ReefscapeTargetPoses.RED_TAG9_RIGHT;
+                    break;
+                case 10:
+                    targetPose = m_isLeft ? ReefscapeTargetPoses.RED_TAG10_LEFT : ReefscapeTargetPoses.RED_TAG10_RIGHT;
+                    break;
+                case 11:
+                    targetPose = m_isLeft ? ReefscapeTargetPoses.RED_TAG11_LEFT : ReefscapeTargetPoses.RED_TAG11_RIGHT;
+                    break;
                 default:
                     // targetPose = driveSubsystem.getPose().plus(
-                    //         new Transform2d(new Translation2d(1.0, 0.0), new Rotation2d(0)));
+                    // new Transform2d(new Translation2d(1.0, 0.0), new Rotation2d(0)));
                     break;
             }
         }
@@ -105,8 +136,13 @@ public class DynamicDriveToTagCommand extends Command {
         // Reset odometry to the starting pose.
         driveSubsystem.resetOdometry(startPose);
         internalCommand.initialize();
-        // SmartDashboard.putString("Trajectory Start Pose", startPose.toString());
-        // SmartDashboard.putString("Trajectory Target Pose", targetPose.toString());
+        if (Constants.COMP_CODE) {
+
+        } else {
+            SmartDashboard.putString("Trajectory Start Pose", startPose.toString());
+            SmartDashboard.putString("Trajectory Target Pose", targetPose.toString());
+        }
+
     }
 
     @Override

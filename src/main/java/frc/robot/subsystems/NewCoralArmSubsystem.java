@@ -288,9 +288,6 @@ public class NewCoralArmSubsystem extends SubsystemBase {
 
    @Override
    public void periodic() {
-      // double currentAngle = e_armAngle.getPosition();
-      // if (currentAngle > 0.9) currentAngle = 0.0;
-      // SmartDashboard.putNumber("Arm error", ca_error);
       if (Constants.COMP_CODE) {
          SmartDashboard.putNumber("Arm Extension", e_armExtend.getPosition());
          SmartDashboard.putNumber("Arm Angle", e_armAngle.getPosition());
@@ -300,8 +297,5 @@ public class NewCoralArmSubsystem extends SubsystemBase {
          SmartDashboard.putNumber("Ex Cmd", ce_cmd);
          SmartDashboard.putNumber("Ex Pos", e_armExtend.getPosition());
       }
-
-      // private double ;
-      // private double ce_cmd;
    }
 }

@@ -42,10 +42,6 @@ public class Robot extends TimedRobot {
     // and put our autonomous chooser on the dashboard.
     m_robotContainer = new RobotContainer();
 
-    // for (int port = 5800; port <= 5809; port++) {
-    // PortForwarder.add(port, "limelight.local", port);
-    // }
-
     // camera1 = CameraServer.startAutomaticCapture(0);
   }
 
@@ -91,7 +87,7 @@ public class Robot extends TimedRobot {
       double deltaY = currentPose.getTranslation().getY() - visionPose.getTranslation().getY();
       double distanceDifference = Math.hypot(deltaX, deltaY);
 
-      // Only reset odometry if the difference is greater than 0.5 meters.
+      // Only reset odometry if the difference is greater than 0.5 meters. Prevents jitter while sitting still.
       if (distanceDifference > 0.5) {
         m_robotContainer.getDriveSubsystem().resetOdometry(visionPose);
       }
@@ -133,6 +129,7 @@ public class Robot extends TimedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
+    //TODO FIGURE THIS OUT
     m_robotContainer.getDriveSubsystem().initFieldOrientationForAlliance();
 
     // LL is seeded with robot orientation, imu inputs are now from LL4 (mode 2)
